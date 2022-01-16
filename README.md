@@ -35,7 +35,7 @@ If not, the app will prompt you for downloading .Net 5 and open the link in your
 ## Acknowledgments
 - [mkb79](https://github.com/mkb79/Audible) for his Python library which served as the reference implementation of the Audible API to me, straightforward and easy to follow. 
 - [Mbucari](https://github.com/Mbucari/AAXClean) for his Audible decryption library in C#. While recent FFmpeg releases can also do it, it is much more convenient to have an in-process solution.
-- [rmcrackan](https://github.com/rmcrackan/AudibleApi) for _the other_ C# implemenation of an Audible client library, absolutely worth the occcasional side glance.
+- [rmcrackan](https://github.com/rmcrackan/AudibleApi) for _the other_ C# implementation of an Audible client library, absolutely worth the occcasional side glance.
 
 
 ## Anti-Piracy Notice
