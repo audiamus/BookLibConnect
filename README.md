@@ -24,7 +24,7 @@ Windows setup package version 0.1, English, with manual:
 
 ## Feedback
 Use the [Discussions](https://github.com/audiamus/BookLibConnect/discussions) and [Issues](https://github.com/audiamus/BookLibConnect/issues) sections. 
-Be cautious with uploading log files to these sections as they may contain senstitive data.   
+Be cautious with uploading log files to these sections as they may contain sensitive data.   
 
 ## Dependencies
 AAX Audio Converter will run on Windows 64bit. Minimum Windows version is 7.
