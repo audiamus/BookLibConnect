@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+    <RootNamespace>core.core.audiamus.aux.diagn</RootNamespace>
+    <AssemblyName>audiamus.aux.treedecomp.core</AssemblyName>
+    <Authors>audiamus</Authors>
+    <AssemblyVersion>2.0.0.0</AssemblyVersion>
+    <FileVersion>2.0.0.0</FileVersion>
+    <Copyright>Copyright © 2019 - $([System.DateTime]::UtcNow.Year) audiamus ($([System.DateTime]::UtcNow.ToString("s")))</Copyright>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AuxLib.core\AuxLib.core.csproj" />
+  </ItemGroup>
+
+</Project>

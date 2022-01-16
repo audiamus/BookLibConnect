@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+    <RootNamespace>core.audiamus.adb.json</RootNamespace>
+    <AssemblyName>audiamus.audiible.json.core</AssemblyName>
+    <Authors>audiamus</Authors>
+    <Copyright>Copyright © 2021 - $([System.DateTime]::UtcNow.Year) audiamus ($([System.DateTime]::UtcNow.ToString("s")))</Copyright>
+    <AssemblyVersion>0.1.0.0</AssemblyVersion>
+    <FileVersion>0.1.0.0</FileVersion>    
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AuxLib.core\AuxLib.core.csproj" />
+  </ItemGroup>
+
+</Project>

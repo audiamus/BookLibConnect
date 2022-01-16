@@ -1,0 +1,384 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=5.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=5.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="AdultProduct" xml:space="preserve">
+    <value>Adult product</value>
+  </data>
+  <data name="au" xml:space="preserve">
+    <value>Australia</value>
+  </data>
+  <data name="AverageRating" xml:space="preserve">
+    <value>Average rating</value>
+  </data>
+  <data name="BitRate" xml:space="preserve">
+    <value>Bit rate</value>
+  </data>
+  <data name="Book" xml:space="preserve">
+    <value>Book</value>
+  </data>
+  <data name="Books" xml:space="preserve">
+    <value>Books</value>
+  </data>
+  <data name="bookseries" xml:space="preserve">
+    <value>Book series</value>
+  </data>
+  <data name="ca" xml:space="preserve">
+    <value>Canada</value>
+  </data>
+  <data name="conversion_error" xml:space="preserve">
+    <value>conversion error</value>
+  </data>
+  <data name="converted_unknown" xml:space="preserve">
+    <value>converted, not found</value>
+  </data>
+  <data name="CptDeregisterDevice" xml:space="preserve">
+    <value>Deregister devive</value>
+  </data>
+  <data name="CptExistingProfiles" xml:space="preserve">
+    <value>Existing profiles</value>
+  </data>
+  <data name="CptRemProfile" xml:space="preserve">
+    <value>Remove Profile</value>
+  </data>
+  <data name="de" xml:space="preserve">
+    <value>Germany</value>
+  </data>
+  <data name="DeliveryType" xml:space="preserve">
+    <value>Delivery type</value>
+  </data>
+  <data name="download_error" xml:space="preserve">
+    <value>download error</value>
+  </data>
+  <data name="es" xml:space="preserve">
+    <value>Spain</value>
+  </data>
+  <data name="FileSize" xml:space="preserve">
+    <value>File size</value>
+  </data>
+  <data name="fr" xml:space="preserve">
+    <value>France</value>
+  </data>
+  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=5.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+  <data name="ImgBlank" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\blank.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ImgCheck" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\check.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ImgCheckGrey" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\checkGrey.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ImgCheckMauve" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\checkMauve.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ImgDown" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\down.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ImgDownBroken" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\downBroken.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ImgGlobe" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\globe.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ImgGlobeDown" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\globeDown.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ImgKey" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\license.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ImgKeyDenied" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\licenseDenied.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ImgLocked" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\locked.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ImgPlus" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\plus.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ImgQuestion" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\question.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ImgRedX" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\redx.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ImgRight" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\right.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ImgRightFailed" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\rightFailed.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ImgUnlocked" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\unlocked.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ImgUnlocking" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\unlocking.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ImgUnlockingFailed" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\unlockingFailed.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="in_" xml:space="preserve">
+    <value>India</value>
+  </data>
+  <data name="it" xml:space="preserve">
+    <value>Italy</value>
+  </data>
+  <data name="jp" xml:space="preserve">
+    <value>Japan</value>
+  </data>
+  <data name="Library" xml:space="preserve">
+    <value>Library</value>
+  </data>
+  <data name="license_denied" xml:space="preserve">
+    <value>License denied</value>
+  </data>
+  <data name="license_granted" xml:space="preserve">
+    <value>License obtained</value>
+  </data>
+  <data name="local_locked" xml:space="preserve">
+    <value>local, locked</value>
+  </data>
+  <data name="local_unlocked" xml:space="preserve">
+    <value>local, unlocked</value>
+  </data>
+  <data name="MsgDeregisterDevice" xml:space="preserve">
+    <value>Deregister device "{0}"
+for region/domain "{1}" 
+and account "{2}"?
+
+The corresponding profile has been overwritten.
+The device can also be deregistered via Amazon account management.</value>
+  </data>
+  <data name="MsgExistingAccount" xml:space="preserve">
+    <value>A previous profile exists for region/domain "{0}"
+and account "{1}".
+Signing in with the same account will overwrite that profile.</value>
+  </data>
+  <data name="MsgExistingAccounts" xml:space="preserve">
+    <value>Previous profiles exist for region/domain "{0}"
+and accounts "{1}".
+Signing in with one of the same accounts will overwrite that profile.</value>
+  </data>
+  <data name="MsgNewProfileAuthorizationFailed" xml:space="preserve">
+    <value>Authorization failed.
+Please try again.</value>
+  </data>
+  <data name="MsgNewProfileDeregistrationFailed" xml:space="preserve">
+    <value>New profile created.
+Region / domain: "{0}"
+Account: "{1}"
+Device: "{2}"
+
+Previous deviice "{3}"
+should be deregistered via Amazon account management.</value>
+  </data>
+  <data name="MsgNewProfileDeregistrationFailedOrig" xml:space="preserve">
+    <value>New profile created.
+Region / domain: "{0}"
+Account: "{1}"
+Device: "{2}"
+
+Warning: Deregistration failed for previous device: 
+"{3}"
+The device can still be deregistered via Amazon account management.</value>
+  </data>
+  <data name="MsgNewProfileInvalidUrl" xml:space="preserve">
+    <value>Invalid URL.
+Please try again.</value>
+  </data>
+  <data name="MsgNewProfileRegistrationFailed" xml:space="preserve">
+    <value>Device registration failed.</value>
+  </data>
+  <data name="MsgNewProfileSucc" xml:space="preserve">
+    <value>Success. New profile created.
+Region / domain: "{0}"
+Account: {1}
+Device: "{2}"</value>
+  </data>
+  <data name="MsgRemProfileError" xml:space="preserve">
+    <value>Remove profile failed.</value>
+  </data>
+  <data name="MsgRemProfileOk" xml:space="preserve">
+    <value>Profile removed.
+
+Associated device "{0}"
+should be deregistered via Amazon account management.</value>
+  </data>
+  <data name="MsgRemProfileOkOrig" xml:space="preserve">
+    <value>Profile removed and device deregistered.</value>
+  </data>
+  <data name="MsgRemProfileQuestion" xml:space="preserve">
+    <value>Remove profile for
+region/domain "{0}", 
+account "{1}"?
+
+Associated device: "{2}"
+should be deregistered via Amazon account management.</value>
+  </data>
+  <data name="MsgRemProfileQuestionOrig" xml:space="preserve">
+    <value>Remove profile for
+region/domain "{0}", 
+account "{1}"?
+
+Associated device: "{2}"
+will be deregistered as well.</value>
+  </data>
+  <data name="MsgRemProfileWarn" xml:space="preserve">
+    <value>Profile removed, 
+but device "{0}"
+could not be deregistered.
+
+The device can also be deregistered via Amazon account management.</value>
+  </data>
+  <data name="multipartbook" xml:space="preserve">
+    <value>Multi part book</value>
+  </data>
+  <data name="Part" xml:space="preserve">
+    <value>Part</value>
+  </data>
+  <data name="Parts" xml:space="preserve">
+    <value>Parts</value>
+  </data>
+  <data name="PurchaseDate" xml:space="preserve">
+    <value>Purchase date</value>
+  </data>
+  <data name="ReleaseDate" xml:space="preserve">
+    <value>Release date</value>
+  </data>
+  <data name="remote" xml:space="preserve">
+    <value>not downloaded</value>
+  </data>
+  <data name="SampleRate" xml:space="preserve">
+    <value>Sample rate</value>
+  </data>
+  <data name="singlepartbook" xml:space="preserve">
+    <value>Single part book</value>
+  </data>
+  <data name="uk" xml:space="preserve">
+    <value>United Kingdom</value>
+  </data>
+  <data name="unlocking" xml:space="preserve">
+    <value>unlocking</value>
+  </data>
+  <data name="unlockingFailed" xml:space="preserve">
+    <value>unlocking error</value>
+  </data>
+  <data name="us" xml:space="preserve">
+    <value>United States</value>
+  </data>
+</root>

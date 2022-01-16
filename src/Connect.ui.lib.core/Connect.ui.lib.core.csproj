@@ -1,0 +1,48 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0-windows</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <RootNamespace>core.audiamus.connect.ui</RootNamespace>
+    <AssemblyName>audiamus.connect.ui.core</AssemblyName>
+    <Authors>audiamus</Authors>
+    <Copyright>Copyright © 2021 - $([System.DateTime]::UtcNow.Year) audiamus ($([System.DateTime]::UtcNow.ToString("s")))</Copyright>
+    <AssemblyVersion>0.1.0.0</AssemblyVersion>
+    <FileVersion>0.1.0.0</FileVersion>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <PlatformTarget>x64</PlatformTarget>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <PlatformTarget>x64</PlatformTarget>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AuxLib.core\AuxLib.core.csproj" />
+    <ProjectReference Include="..\AuxWin.lib.core\AuxWin.lib.core.csproj" />
+    <ProjectReference Include="..\BooksDatabase.core\BooksDatabase.core.csproj" />
+    <ProjectReference Include="..\Connect.lib.core\Connect.lib.core.csproj" />
+    <ProjectReference Include="..\PropGridLib.core\PropGridLib.core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="AccountAliasForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Properties\Resources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+
+</Project>

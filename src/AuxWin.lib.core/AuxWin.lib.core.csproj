@@ -1,0 +1,35 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0-windows</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <RootNamespace>core.audiamus.aux.win</RootNamespace>
+    <AssemblyName>audiamus.aux.win.core</AssemblyName>
+    <Authors>audiamus</Authors>
+    <AssemblyVersion>2.0.0.0</AssemblyVersion>
+    <FileVersion>2.0.0.0</FileVersion>
+    <Copyright>Copyright © 2019 - $([System.DateTime]::UtcNow.Year) audiamus ($([System.DateTime]::UtcNow.ToString("s")))</Copyright>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AuxLib.core\AuxLib.core.csproj" />
+    <ProjectReference Include="..\AuxWin.DialogBox.core\AuxWin.DialogBox.core.csproj" />
+    <ProjectReference Include="..\AuxWin32Lib.core\AuxWin32Lib.core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Properties\Resources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+
+</Project>
