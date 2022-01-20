@@ -228,40 +228,47 @@ namespace core.audiamus.connect {
 
 		public void UpdateLicenseAndChapters (adb.json.ContentLicense license, Conversion conversion) {
 			using var _ = new LogGuard (3, this, () => conversion.ToString ());
-			using var dbContext = new BookDbContext (_dbDir);
-      dbContext.Conversions.Attach (conversion);
+			try {
+				using var dbContext = new BookDbContext (_dbDir);
+				dbContext.Conversions.Attach (conversion);
 
-			conversion.DownloadUrl = license.content_metadata.content_url.offline_url;
+				conversion.DownloadUrl = license.content_metadata.content_url.offline_url;
 
-      var product = conversion.BookCommon;
+				var product = conversion.BookCommon;
 
-			if (product is Component comp)
-				dbContext.Components.Attach (comp);
-			else if (product is Book book)
-				dbContext.Books.Attach (book);
+				if (product is Component comp)
+					dbContext.Components.Attach (comp);
+				else if (product is Book book)
+					dbContext.Books.Attach (book);
 
-      var decryptedLic = license.decrypted_license_response;
+				var decryptedLic = license.decrypted_license_response;
 
-      // Key and IV
-      product.LicenseKey = decryptedLic?.key;
-      product.LicenseIv = decryptedLic?.iv;
+				// Key and IV
+				product.LicenseKey = decryptedLic?.key;
+				product.LicenseIv = decryptedLic?.iv;
 
-      setDownloadFilenameAndCodec (license, conversion);
+				setDownloadFilenameAndCodec (license, conversion);
 
-			// file size
-  		product.FileSizeBytes = license.content_metadata?.content_reference?.content_size_in_bytes;
+				// file size
+				product.FileSizeBytes = license.content_metadata?.content_reference?.content_size_in_bytes;
 
-			// duration
-			int? runtime = license.content_metadata?.chapter_info?.runtime_length_sec;
-			if (runtime.HasValue)
-  			product.RunTimeLengthSeconds = runtime;
+				// duration
+				int? runtime = license.content_metadata?.chapter_info?.runtime_length_sec;
+				if (runtime.HasValue)
+					product.RunTimeLengthSeconds = runtime;
 
-			// chapters
-			addChapters (dbContext, license, conversion);
+				// chapters
+				addChapters (dbContext, license, conversion);
 
-			updateState (conversion, EConversionState.license_granted);
+				updateState (conversion, EConversionState.license_granted);
 
-      dbContext.SaveChanges ();
+				dbContext.SaveChanges ();
+			} catch (Exception exc) {
+				Log (1, this, () =>
+					$"{conversion}, throwing{Environment.NewLine}" +
+					$"{exc.Summary ()})");
+				throw;
+      }
     }
 
 		public void CheckUpdateFilesAndState (
@@ -453,46 +460,45 @@ namespace core.audiamus.connect {
       conversion.DownloadFileName = path;
     }
 
-		private static void addChapters (BookDbContext dbContext, adb.json.ContentLicense license, Conversion conversion) {
+    private static void addChapters (BookDbContext dbContext, adb.json.ContentLicense license, Conversion conversion) {
+      var source = license?.content_metadata?.chapter_info;
+      if (source is null)
+        return;
 
-			var source = license?.content_metadata?.chapter_info; 
-			if (source is null)
-				return;
-      
-			var product = conversion.BookCommon;
+      var product = conversion.BookCommon;
 
-			ChapterInfo chapterInfo = new ChapterInfo ();
-			dbContext.ChapterInfos.Add (chapterInfo);
-			if (product is Book book) {
-				dbContext.Entry (book).Reference (b => b.ChapterInfo).Load ();
-				if (book.ChapterInfo is not null)
-					dbContext.Remove (book.ChapterInfo);
-				book.ChapterInfo = chapterInfo;
-			} else if (product is Component comp) {
-				dbContext.Entry (comp).Reference (b => b.ChapterInfo).Load ();
-				if (comp.ChapterInfo is not null)
-					dbContext.Remove (comp.ChapterInfo);
-				comp.ChapterInfo = chapterInfo;
-			}
-
-			chapterInfo.BrandIntroDurationMs = source.brandIntroDurationMs;
-			chapterInfo.BrandOutroDurationMs = source.brandOutroDurationMs;
-			chapterInfo.IsAccurate = source.is_accurate;
-			chapterInfo.RuntimeLengthMs = source.runtime_length_ms;
-
-			if (source.chapters.IsNullOrEmpty ())
-				return;
-
-			foreach (var ch in source.chapters) {
-				Chapter chapter = new Chapter ();
-				dbContext.Chapters.Add (chapter);
-				chapterInfo.Chapters.Add (chapter);
-
-				chapter.LengthMs = ch.length_ms;
-				chapter.StartOffsetMs = ch.start_offset_ms;
-				chapter.Title = ch.title;
+      ChapterInfo chapterInfo = new ChapterInfo ();
+      dbContext.ChapterInfos.Add (chapterInfo);
+      if (product is Book book) {
+        dbContext.Entry (book).Reference (b => b.ChapterInfo).Load ();
+        if (book.ChapterInfo is not null)
+          dbContext.Remove (book.ChapterInfo);
+        book.ChapterInfo = chapterInfo;
+      } else if (product is Component comp) {
+        dbContext.Entry (comp).Reference (b => b.ChapterInfo).Load ();
+        if (comp.ChapterInfo is not null)
+          dbContext.Remove (comp.ChapterInfo);
+        comp.ChapterInfo = chapterInfo;
       }
-		}
+
+      chapterInfo.BrandIntroDurationMs = source.brandIntroDurationMs;
+      chapterInfo.BrandOutroDurationMs = source.brandOutroDurationMs;
+      chapterInfo.IsAccurate = source.is_accurate;
+      chapterInfo.RuntimeLengthMs = source.runtime_length_ms;
+
+      if (source.chapters.IsNullOrEmpty ())
+        return;
+
+      foreach (var ch in source.chapters) {
+        Chapter chapter = new Chapter ();
+        dbContext.Chapters.Add (chapter);
+        chapterInfo.Chapters.Add (chapter);
+
+        chapter.LengthMs = ch.length_ms;
+        chapter.StartOffsetMs = ch.start_offset_ms;
+        chapter.Title = ch.title;
+      }
+    }
 
     private void addBooks (List<adb.json.Product> libProducts, ProfileId profileId) {
 			lock (_bookCache)
@@ -557,46 +563,56 @@ namespace core.audiamus.connect {
 		}
 
 		private void addPageBooks (IEnumerable<adb.json.Product> products, ProfileId profileId) {
-			using var _ = new LogGuard (3, this, () => $"#items={products.Count()}");
+			try {
+				using var _ = new LogGuard (3, this, () => $"#items={products.Count ()}");
 
-			using var dbContext = new BookDbContextLazyLoad (_dbDir);
+				using var dbContext = new BookDbContextLazyLoad (_dbDir);
 
-			var bookAsins = dbContext.Books.Select (b => b.Asin).ToList ();
-			var conversions = dbContext.Conversions.ToList ();
-			var components = dbContext.Components.ToList ();
-			var series = dbContext.Series.ToList ();
-			var seriesBooks = dbContext.SeriesBooks.ToList ();
-			var authors = dbContext.Authors.ToList ();
-			var narrators = dbContext.Narrators.ToList ();
-			var genres = dbContext.Genres.ToList ();
-			var ladders = dbContext.Ladders.ToList ();
-			var rungs = dbContext.Rungs.ToList ();
-			var codecs = dbContext.Codecs.ToList ();
+				var bookAsins = dbContext.Books.Select (b => b.Asin).ToList ();
+				var conversions = dbContext.Conversions.ToList ();
+				var components = dbContext.Components.ToList ();
+				var series = dbContext.Series.ToList ();
+				var seriesBooks = dbContext.SeriesBooks.ToList ();
+				var authors = dbContext.Authors.ToList ();
+				var narrators = dbContext.Narrators.ToList ();
+				var genres = dbContext.Genres.ToList ();
+				var ladders = dbContext.Ladders.ToList ();
+				var rungs = dbContext.Rungs.ToList ();
+				var codecs = dbContext.Codecs.ToList ();
 
-			foreach (var product in products) {
-				if (bookAsins.Contains (product.asin))
-					continue;
+				foreach (var product in products) {
+					try {
+						if (bookAsins.Contains (product.asin))
+							continue;
 
-				Book book = addBook (dbContext, product);
-				
+						Book book = addBook (dbContext, product);
 
-				addComponents (book, components, product.relationships);
-				
-				addConversions (book, conversions, profileId);
-				
-				addSeries (book, series, seriesBooks, product.relationships);
 
-				addPersons (dbContext, book, authors, product.authors, b => b.Authors);
-				addPersons (dbContext, book, narrators, product.narrators, b => b.Narrators);
+						addComponents (book, components, product.relationships);
 
-				addGenres (book, genres, ladders, rungs, product.category_ladders);
+						addConversions (book, conversions, profileId);
 
-				addCodecs (book, codecs, product.available_codecs);
+						addSeries (book, series, seriesBooks, product.relationships);
 
+						addPersons (dbContext, book, authors, product.authors, b => b.Authors);
+						addPersons (dbContext, book, narrators, product.narrators, b => b.Narrators);
+
+						addGenres (book, genres, ladders, rungs, product.category_ladders);
+
+						addCodecs (book, codecs, product.available_codecs);
+					} catch (Exception exc) {
+						Log (1, this, () =>
+							$"asin={product.asin}, \"{product.title}\", throwing{Environment.NewLine}" +
+							$"{exc.Summary ()})");
+						throw;
+					}
+				}
+
+				dbContext.SaveChanges ();
+			} catch (Exception exc) {
+				Log (1, this, () => exc.Summary ());
+				throw;
 			}
-
-			dbContext.SaveChanges ();
-
 		}
 
 		private static Book addBook (BookDbContextLazyLoad dbContext, adb.json.Product product) {
@@ -652,7 +668,7 @@ namespace core.audiamus.connect {
 			}
     }
 
-    const string REGEX_SERIES = @"((\d*)(\.(\d+))?)";
+    const string REGEX_SERIES = @"(\d+)(\.(\d+))?";
 		static readonly Regex _regexSeries = new Regex (REGEX_SERIES, RegexOptions.Compiled);
 
 		private static void addSeries (Book book, ICollection<Series> series, ICollection<SeriesBook> seriesBooks, IEnumerable<adb.json.Relationship> itmRelations) {
@@ -673,27 +689,35 @@ namespace core.audiamus.connect {
 					series.Add (serie);
 				}
 
-				Match match = _regexSeries.Match (itmSerie.sequence);
-				if (!match.Success)
-					return;
-
-				int n = match.Groups.Count;
-				if (n < 3)
-					return;
-
 				var seriesBook = new SeriesBook {
 					Book = book,
-					Series = serie
+					Series = serie,
+					Sequence = itmSerie.sequence
 				};
 
-				string major = match.Groups[2].Value;
-				seriesBook.BookNumber = int.Parse (major);
+				bool succ = int.TryParse (itmSerie.sort, out int sort);
+				if (succ)
+					seriesBook.Sort = sort;
 
-				if (n >= 4) {
-					string minor = match.Groups[4].Value;
-					bool succ = int.TryParse (minor, out int subnum);
-					if (succ)
-						seriesBook.SubNumber = int.Parse (minor);
+				Match match = _regexSeries.Match (itmSerie.sequence);
+				if (match.Success) {
+
+					int n = match.Groups.Count;
+					if (n >= 2) {
+
+						string major = match.Groups[1].Value;
+						succ = int.TryParse (major, out int num);
+						if (succ) {
+							seriesBook.BookNumber = num;
+
+							if (n >= 3) {
+								string minor = match.Groups[3].Value;
+								succ = int.TryParse (minor, out int subnum);
+								if (succ)
+									seriesBook.SubNumber = int.Parse (minor);
+							}
+						}
+					}
 				}
 
 				seriesBooks.Add (seriesBook);

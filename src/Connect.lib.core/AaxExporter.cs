@@ -184,7 +184,14 @@ namespace core.audiamus.connect {
 
         var products = new List<adb.json.Product> ();
 
-        var sbks = series.Books.OrderBy (b => b.BookNumber).ThenBy (b => b.SubNumber);
+        // sort by sort/num+sub/sequence
+        IOrderedEnumerable<SeriesBook> sbks;
+        if (!series.Books.Where (b => b.Sort is null).Any())
+          sbks = series.Books.OrderBy (b => b.Sort);
+        else if (!series.Books.Where (b => b.BookNumber == 0).Any())
+          sbks = series.Books.OrderBy (b => b.BookNumber).ThenBy (b => b.SubNumber);
+        else
+          sbks = series.Books.OrderBy (b => b.Sequence);
 
         foreach (var sbk in sbks) {
           var p = makeProduct (sbk.Book);
@@ -246,7 +253,7 @@ namespace core.audiamus.connect {
           var s = new adb.json.Series {
             asin = serbook.Series.Asin,
             title = serbook.Series.Title,
-            sequence = serbook.Sequence
+            sequence = serbook.SeqString
           };
           series.Add (s);
         }

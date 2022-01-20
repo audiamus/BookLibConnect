@@ -40,7 +40,6 @@ namespace core.audiamus.connect.app.gui {
       this.progressBar1.Size = new System.Drawing.Size(383, 15);
       this.progressBar1.Style = System.Windows.Forms.ProgressBarStyle.Marquee;
       this.progressBar1.TabIndex = 0;
-      this.progressBar1.UseWaitCursor = true;
       // 
       // label1
       // 
@@ -53,7 +52,6 @@ namespace core.audiamus.connect.app.gui {
       this.label1.TabIndex = 1;
       this.label1.Text = "Starting up, please wait";
       this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-      this.label1.UseWaitCursor = true;
       // 
       // LabelTask
       // 
@@ -64,7 +62,6 @@ namespace core.audiamus.connect.app.gui {
       this.LabelTask.TabIndex = 2;
       this.LabelTask.Text = "Initializing database ...";
       this.LabelTask.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-      this.LabelTask.UseWaitCursor = true;
       // 
       // panel1
       // 
@@ -76,7 +73,6 @@ namespace core.audiamus.connect.app.gui {
       this.panel1.Name = "panel1";
       this.panel1.Size = new System.Drawing.Size(446, 141);
       this.panel1.TabIndex = 3;
-      this.panel1.UseWaitCursor = true;
       // 
       // WaitForm
       // 
@@ -87,9 +83,7 @@ namespace core.audiamus.connect.app.gui {
       this.Controls.Add(this.panel1);
       this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
       this.Name = "WaitForm";
-      this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
       this.Text = "Book Lib Connect";
-      this.UseWaitCursor = true;
       this.panel1.ResumeLayout(false);
       this.ResumeLayout(false);
 

@@ -15,7 +15,16 @@ namespace core.audiamus.connect.app.gui {
       base.OnLoad (e);
       lblProduct.Text = AssemblyProduct;
       lblVersion.Text += AssemblyVersion;
-      lblCopyright.Text += AssemblyCopyright;
+      lblCopyright.Text += assemblyCopyright();
+
+      static string assemblyCopyright () {
+        int pos = AssemblyCopyright.IndexOf ('(');
+        if (pos < 0)
+          return AssemblyCopyright;
+        else
+          return AssemblyCopyright.Substring (0, pos).Trim();
+
+      }
     }
 
     private void linkLabelHomepage_LinkClicked (object sender, LinkLabelLinkClickedEventArgs e) {

@@ -1,11 +1,11 @@
-# BookLibConnect
+# Book Lib Connect
 A standalone Audible downloader and decrypter
 
 ![](res/mainwnd.png?raw=true)
 
 ![](res/libwnd.png?raw=true)
 
-Book Lib Connect is an Audible downloader app. It should be seen as temporary/preview project, because its features will become an integrated component in future AAX Audible Converter 2.
+Book Lib Connect is an Audible downloader app. It should be seen as temporary/preview project, because its features will become an integrated component in future AAX Audio Converter 2.
 
 ## Features
 - **Free** and **Open Source** software. 
@@ -13,14 +13,15 @@ Book Lib Connect is an Audible downloader app. It should be seen as temporary/pr
 - Sign-in via standard web browser to register a _device_, app will not see user’s credentials.
 - List your book library and select titles for download.
 - Download your books and convert to plain .m4b files.
-- Optionally export as .aax files for AAX Audio Converter 1 compatibility.
+- Detailed progress monitoring.
+- Optionally export as .aax files for [AAX Audio Converter 1](https://github.com/audiamus/AaxAudioConverter) compatibility.
 - User guide included.
 
 
 ## Download
-Windows setup package version 0.1, English, with manual:
+Windows setup package version 0.1.1, English, with manual:
 
-**[BookLibConnect-0.1-Setup.exe](https://github.com/audiamus/BookLibConnect/releases/download/v0.1/BookLibConnect-0.1-Setup.exe)**
+**[BookLibConnect-0.1.1-Setup.exe](https://github.com/audiamus/BookLibConnect/releases/download/v0.1.1/BookLibConnect-0.1.1-Setup.exe)**
 
 ## Feedback
 Use the [Discussions](https://github.com/audiamus/BookLibConnect/discussions) and [Issues](https://github.com/audiamus/BookLibConnect/issues) sections. 

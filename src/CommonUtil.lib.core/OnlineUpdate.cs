@@ -22,6 +22,7 @@ namespace core.audiamus.util {
     //private readonly Regex _rgxVersion;
     private readonly string _setupRefUrl;
     private readonly string _defaultAppName;
+    private readonly bool _dbg;
 
     //private string _downloadUri;
     //private string _setupFile;
@@ -43,8 +44,9 @@ namespace core.audiamus.util {
       DownloadDir = downloads;
     }
 
-    public OnlineUpdate(IUpdateSettings settings, string defaultAppName, string setupRefUrl) {
+    public OnlineUpdate(IUpdateSettings settings, string defaultAppName, string setupRefUrl, bool dbg) {
       Settings = settings;
+      _dbg = dbg;
       _defaultAppName = defaultAppName;
       if (setupRefUrl is null)
         _setupRefUrl = string.Format (SETUP_REF_URL, defaultAppName);
@@ -75,6 +77,8 @@ namespace core.audiamus.util {
     
       // do we have a new version?
       bool newVersion = pi.Version > ApplEnv.AssemblyVersion;
+      if (_dbg)
+        newVersion = true;
       if (!newVersion)
         return;
           
@@ -112,35 +116,39 @@ namespace core.audiamus.util {
         finalCallback?.Invoke ();
     }
 
-    public async Task InstallAsync (
+    public async Task<bool> InstallAsync (
       IInteractionCallback<InteractMessage, bool?> interactCallback, 
       Action finalCallback
     ) {
       if (Settings.OnlineUpdate == EOnlineUpdate.no)
-        return;
+        return false;
 
       await getSetupRefAsync ();
 
       var pi = _defaultPackageInfo;
       if (pi is null) {
         Log (1, this, () => "no package info");
-        return;
+        return false;
       }
 
       // do we have a new version?
       bool newVersion = pi.Version > ApplEnv.AssemblyVersion;
+      if (_dbg)
+        newVersion = true;
       if (!newVersion)
-        return;
+        return false;
 
       // do we have it downloaded already?
       bool exists = await checkDownloadAsync (pi);
       if (!exists)
-        return;
+        return false;
 
       install (pi, interactCallback, EUpdateInteract.installLater);
 
       if (pi.DefaultApp)
         finalCallback?.Invoke ();
+
+      return true;
     }
 
     private bool install (

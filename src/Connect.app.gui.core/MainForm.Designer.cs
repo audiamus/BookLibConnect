@@ -380,7 +380,6 @@ namespace core.audiamus.connect.app.gui {
       this.KeyPreview = true;
       this.MinimumSize = new System.Drawing.Size(710, 320);
       this.Name = "MainForm";
-      this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
       this.Text = "Audible Connect";
       this.UseWaitCursor = true;
       this.panelTop.ResumeLayout(false);

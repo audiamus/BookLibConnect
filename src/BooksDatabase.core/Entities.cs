@@ -144,15 +144,24 @@ namespace core.audiamus.booksdb {
     internal int BookId { get; set; }
     public int BookNumber { get; set; }
     public int? SubNumber { get; set; }
+    public string Sequence { get; set; }
+    public int? Sort { get; set; }
 
     public virtual Series Series { get; set; }
     public virtual Book Book { get; set; }
 
     [NotMapped]
-    public string Sequence => $"{BookNumber}{(SubNumber.HasValue ? $".{SubNumber.Value}" : string.Empty)}";
+    public string SeqString {
+      get {
+        if (Sequence is null)
+          return $"{BookNumber}{(SubNumber.HasValue ? $".{SubNumber.Value}" : string.Empty)}";
+        else
+          return Sequence;
+      }
+    }
 
     public override string ToString () => 
-      $"{Series.Title} [{Sequence}]";
+      $"{Series.Title} [{SeqString}]";
   }
 
 

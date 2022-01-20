@@ -10,9 +10,11 @@ using core.audiamus.aux;
 using core.audiamus.aux.diagn;
 using core.audiamus.aux.ex;
 using core.audiamus.aux.win;
+using core.audiamus.aux.win.ex;
 using core.audiamus.booksdb;
 using core.audiamus.connect.ui;
 using core.audiamus.util;
+using static core.audiamus.aux.ApplEnv;
 using static core.audiamus.aux.Logging;
 using R = core.audiamus.connect.app.gui.Properties.Resources;
 
@@ -25,6 +27,7 @@ namespace core.audiamus.connect.app.gui {
     private IProfileAliasKey CurrentProfile { get; set; }
     private AudibleClient AudibleClient { get; set; }
     private IAudibleApi Api { get; set; }
+    private AppSettings AppSettings { get; } 
     private UserSettings UserSettings { get; } 
     private AffineSynchronizationContext SynchronizationContext { get; }
     private ProgressProcessor1 ProgressProcessor1 { get; }
@@ -40,13 +43,19 @@ namespace core.audiamus.connect.app.gui {
     public MainForm () {
       InitializeComponent ();
 
+      Log (1, this, () => 
+        $"{ApplName} {AssemblyVersion} as {(Is64BitProcess ? "64" : "32")}bit process" +
+        $" on Windows {OSVersion} {(Is64BitOperatingSystem ? "64" : "32")}bit");
+
       this.Text = ApplEnv.AssemblyTitle;
 
       _systemMenu = new SystemMenu (this);
       _systemMenu.AddCommand (R.SysMenuItemAbout, onSysMenuAbout, true);
       _systemMenu.AddCommand ($"{R.SysMenuItemHelp}\tF1", onSysMenuHelp, false);
-
+      
       _interactionHandler = new InteractionCallbackHandler<UpdateInteractionMessage> (this, updateInteractMessage);
+
+      AppSettings = SettingsManager.GetAppSettings<AppSettings> ();
 
       UserSettings = SettingsManager.GetUserSettings<UserSettings> ();
       if (UserSettings?.ExportSettings is not null)
@@ -87,13 +96,6 @@ namespace core.audiamus.connect.app.gui {
       _exporter = new AaxExporter (UserSettings.ExportSettings, UserSettings.DownloadSettings);
 
       Cursor.Current = Cursors.WaitCursor;
-
-      _waitForm = new WaitForm () {
-        Owner = this,
-        TopMost = true
-      };
-      _waitForm.Show ();
-
     }
 
     protected override void WndProc (ref Message m) {
@@ -142,6 +144,13 @@ namespace core.audiamus.connect.app.gui {
       base.OnLoad (e);
       //Cursor.Current = Cursors.WaitCursor;
       Enabled = false;
+
+
+      _waitForm = new WaitForm () {
+        Owner = this
+      };
+      _waitForm.SetStartPositionCentered ();
+      _waitForm.Show ();
 
     }
 
@@ -309,11 +318,8 @@ namespace core.audiamus.connect.app.gui {
 
     }
 
-
-    //const string testUrl = @"https://transdem.de/test/Setup.json";
-    //const string testAppName = "AaxAudioConverter";
-
-    private OnlineUpdate newOnlineUpdate () => new OnlineUpdate (UserSettings.UpdateSettings, ApplEnv.ApplName, null);
+    private OnlineUpdate newOnlineUpdate () => 
+      new OnlineUpdate (UserSettings.UpdateSettings, ApplEnv.ApplName, null, AppSettings.DbgOnlineUpdate);
 
     private async void checkOnlineUpdate () {
       var update = newOnlineUpdate ();

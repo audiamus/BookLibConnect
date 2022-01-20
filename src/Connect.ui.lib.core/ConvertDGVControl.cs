@@ -358,7 +358,7 @@ namespace core.audiamus.connect.ui {
         _initConnectionDone = true;
       }
 
-      BookLibForm = new BookLibForm (AudibleApi, DownloadSettings, ExportSettings);
+      BookLibForm = new BookLibForm (AudibleApi, DownloadSettings, ExportSettings) { Owner = this.ParentForm };
       BookLibForm.FormClosed += bookLibForm_FormClosed;
       BookLibForm.BookDownloadSelectionChanged += bookLibForm_BookDownloadSelectionChanged;
       BookLibForm.ConversionUpdated += bookLibForm_ConversionUpdated;
