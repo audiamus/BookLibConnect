@@ -126,6 +126,7 @@ namespace core.audiamus.connect.app.gui {
       UserSettings?.Save ();
 
       if (_updateAvailableFlag) {
+        _updateAvailableFlag = false;
         e.Cancel = true;
         handleDeferredUpdateAsync ();
       }

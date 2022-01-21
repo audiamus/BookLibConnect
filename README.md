@@ -19,9 +19,9 @@ Book Lib Connect is an Audible downloader app. It should be seen as temporary/pr
 
 
 ## Download
-Windows setup package version 0.1.1, English, with manual:
+Windows setup package version 0.1.2, English, with manual:
 
-**[BookLibConnect-0.1.1-Setup.exe](https://github.com/audiamus/BookLibConnect/releases/download/v0.1.1/BookLibConnect-0.1.1-Setup.exe)**
+**[BookLibConnect-0.1.2-Setup.exe](https://github.com/audiamus/BookLibConnect/releases/download/v0.1.2/BookLibConnect-0.1.2-Setup.exe)**
 
 ## Feedback
 Use the [Discussions](https://github.com/audiamus/BookLibConnect/discussions) and [Issues](https://github.com/audiamus/BookLibConnect/issues) sections. 
