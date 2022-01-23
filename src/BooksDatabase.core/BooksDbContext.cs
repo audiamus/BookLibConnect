@@ -110,12 +110,22 @@ namespace core.audiamus.booksdb {
       modelBuilder.Entity<Book> ()
         .HasOne (e => e.Conversion)
         .WithOne (e => e.Book)
-        .HasForeignKey<Conversion> (e => e.BookId);
+        .HasForeignKey<Conversion> (e => e.BookId)
+        .IsRequired (false)
+        .OnDelete (DeleteBehavior.Cascade);
 
       modelBuilder.Entity<Component> ()
         .HasOne (e => e.Book)
         .WithMany (e => e.Components)
-        .HasForeignKey (e => e.BookId);
+        .HasForeignKey (e => e.BookId)
+        .OnDelete (DeleteBehavior.Cascade);
+
+      modelBuilder.Entity<Component> ()
+        .HasOne (e => e.Conversion)
+        .WithOne (e => e.Component)
+        .HasForeignKey<Conversion> (e => e.ComponentId)
+        .IsRequired (false)
+        .OnDelete (DeleteBehavior.Cascade);
 
       modelBuilder.Entity<SeriesBook> ()
         .HasOne (e => e.Book)
@@ -147,17 +157,28 @@ namespace core.audiamus.booksdb {
       modelBuilder.Entity<Component> ()
         .HasOne (e => e.ChapterInfo)
         .WithOne (e => e.Component)
-        .HasForeignKey<ChapterInfo> (e => e.ComponentId);
+        .HasForeignKey<ChapterInfo> (e => e.ComponentId)
+        .OnDelete (DeleteBehavior.Cascade);
       
       modelBuilder.Entity<Book> ()
         .HasOne (e => e.ChapterInfo)
         .WithOne (e => e.Book)
-        .HasForeignKey<ChapterInfo> (e => e.BookId);
+        .HasForeignKey<ChapterInfo> (e => e.BookId)
+        .OnDelete (DeleteBehavior.Cascade);
 
       modelBuilder.Entity<Chapter> ()
         .HasOne (e => e.ChapterInfo)
         .WithMany (e => e.Chapters)
-        .HasForeignKey (e => e.ChapterInfoId);
+        .HasForeignKey (e => e.ChapterInfoId)
+        .IsRequired (false)
+        .OnDelete (DeleteBehavior.Cascade);
+      
+      modelBuilder.Entity<Chapter> ()
+        .HasOne (e => e.ParentChapter)
+        .WithMany (e => e.Chapters)
+        .HasForeignKey (e => e.ParentChapterId)
+        .IsRequired (false)
+        .OnDelete (DeleteBehavior.Cascade);
 
     }
   }

@@ -46,6 +46,7 @@
     public int start_offset_ms { get; set; }
     public int start_offset_sec { get; set; }
     public string title { get; set; }
+    public Chapter[] chapters { get; set; }
   }
 
   public class ContentReference {

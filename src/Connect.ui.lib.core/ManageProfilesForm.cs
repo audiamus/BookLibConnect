@@ -16,6 +16,7 @@ namespace core.audiamus.connect.ui {
 
     private readonly AffineSynchronizationContext _sync;
     private List<ProfileDesc> _profiles;
+    private bool _ignoreFlag;
 
     private AudibleClient Client { get; }
 
@@ -33,10 +34,12 @@ namespace core.audiamus.connect.ui {
 
     private async Task loadProfilesAsync () {
       using var _ = new LogGuard (3, this);
-      ckBoxEncrypt.Checked = Client.ConfigSettings?.EncryptConfiguration ?? false;
+      using (new ResourceGuard (x => _ignoreFlag = x)) {
+        ckBoxEncrypt.Checked = Client.ConfigSettings?.EncryptConfiguration ?? false;
 
-      comBoxProfiles.SelectedIndex = -1;
-      comBoxProfiles.Items.Clear ();
+        comBoxProfiles.SelectedIndex = -1;
+        comBoxProfiles.Items.Clear ();
+      }
 
       var accountAliases = Client.GetAccountAliases ();
       var profileKeys = await Client.GetProfilesAsync ();
@@ -151,6 +154,22 @@ namespace core.audiamus.connect.ui {
       }
 
       Close ();
+    }
+
+    private void ckBoxEncrypt_CheckedChanged (object sender, EventArgs e) {
+      if (_ignoreFlag)
+        return;
+      if (ckBoxEncrypt.Checked)
+        return;
+
+      DialogResult result = MsgBox.Show (this, R.MsgConfigUnencrypted, this.Text, 
+        MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button2);
+
+      if (result != DialogResult.Yes) {
+        using (new ResourceGuard ( x => _ignoreFlag = x))
+          ckBoxEncrypt.Checked = true;
+      }
+
     }
 
     private bool getAccountAlias (AccountAliasContext ctxt) {

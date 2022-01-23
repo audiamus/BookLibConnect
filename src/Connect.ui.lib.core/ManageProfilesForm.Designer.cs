@@ -105,6 +105,7 @@ namespace core.audiamus.connect.ui {
       this.ckBoxEncrypt.TabIndex = 6;
       this.ckBoxEncrypt.Text = "Encrypt configuration";
       this.ckBoxEncrypt.UseVisualStyleBackColor = true;
+      this.ckBoxEncrypt.CheckedChanged += new System.EventHandler(this.ckBoxEncrypt_CheckedChanged);
       // 
       // label1
       // 

@@ -494,6 +494,19 @@ namespace core.audiamus.connect.ui.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Unencrypted configuration data is a security risk!
+        ///
+        ///Leave the configuration encrypted unless you know exactly what you are doing. 
+        ///
+        ///Saving as unencrypted, plain text, are you sure?.
+        /// </summary>
+        internal static string MsgConfigUnencrypted {
+            get {
+                return ResourceManager.GetString("MsgConfigUnencrypted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Deregister device &quot;{0}&quot;
         ///for region/domain &quot;{1}&quot; 
         ///and account &quot;{2}&quot;?

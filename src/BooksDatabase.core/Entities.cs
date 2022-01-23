@@ -325,7 +325,7 @@ namespace core.audiamus.booksdb {
     public IBookMeta BookMeta => Book is null ? Component : Book;
 
     public override string ToString () => 
-      $"{Component.Title}: {Chapters.Count} chapters, accurate={IsAccurate}";
+      $"{Component.Title}: #chapters={Chapters.Count}, accurate={IsAccurate}";
   }
 
   public class Chapter {
@@ -335,11 +335,24 @@ namespace core.audiamus.booksdb {
     public int StartOffsetMs { get; set; }
     public string Title { get; set; }
 
-    internal int ChapterInfoId { get; set; }
+    internal int? ChapterInfoId { get; set; }
     public virtual ChapterInfo ChapterInfo { get; set; }
     
+    public virtual ICollection<Chapter> Chapters { get; } = new List<Chapter> ();
+    
+    internal int? ParentChapterId { get; set; }
+    public virtual Chapter ParentChapter { get; set; }
+
+    public Chapter () { }
+    
+    public Chapter (Chapter other) {
+      LengthMs = other.LengthMs;
+      StartOffsetMs = other.StartOffsetMs;
+      Title = other.Title;
+    }
+
     public override string ToString () => 
-      $"{Title}: offs={TimeSpan.FromMilliseconds(StartOffsetMs)}, len={TimeSpan.FromMilliseconds(LengthMs)}";
+      $"{Title}: offs={TimeSpan.FromMilliseconds(StartOffsetMs)}, len={TimeSpan.FromMilliseconds(LengthMs)}, #children={Chapters?.Count}";
   }
 
   public class Account {

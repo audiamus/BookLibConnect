@@ -98,12 +98,13 @@ namespace core.audiamus.connect {
       }
     }
 
-    private void exportChapters (IBookCommon book) {
+    // internal instead of private for testing only
+    internal string exportChapters (IBookCommon book) {
       if (book.ChapterInfo is null)
         BookLibrary?.GetChapters (book);
 
       if (book.ChapterInfo is null)
-        return;
+        return null;
 
       Log (3, this, () => book.ToString ());
 
@@ -131,9 +132,11 @@ namespace core.audiamus.connect {
       ci.runtime_length_ms = chapterInfo.RuntimeLengthMs;
       ci.runtime_length_sec = chapterInfo.RuntimeLengthMs / 1000;
 
-      if (!chapterInfo.Chapters.IsNullOrEmpty()) {
+      var flattenedChapters = BookLibrary?.GetChaptersFlattened (book);
+
+      if (!flattenedChapters.IsNullOrEmpty()) {
         var chapters = new List<adb.json.Chapter> ();
-        foreach (var chapter in chapterInfo.Chapters) {
+        foreach (var chapter in flattenedChapters) {
           var ch = new adb.json.Chapter {
             length_ms = chapter.LengthMs,
             start_offset_ms = chapter.StartOffsetMs,
@@ -152,6 +155,8 @@ namespace core.audiamus.connect {
       string outpath = Path.Combine (ExportSettings.ExportDirectory, filename).AsUncIfLong();
 
       File.WriteAllText (outpath, json);
+
+      return outpath;
     }
 
     private void exportProduct (IBookCommon book) {

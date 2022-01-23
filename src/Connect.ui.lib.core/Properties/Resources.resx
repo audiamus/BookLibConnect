@@ -256,6 +256,13 @@
   <data name="local_unlocked" xml:space="preserve">
     <value>local, unlocked</value>
   </data>
+  <data name="MsgConfigUnencrypted" xml:space="preserve">
+    <value>Unencrypted configuration data is a security risk!
+
+Leave the configuration encrypted unless you know exactly what you are doing. 
+
+Saving as unencrypted, plain text, are you sure?</value>
+  </data>
   <data name="MsgDeregisterDevice" xml:space="preserve">
     <value>Deregister device "{0}"
 for region/domain "{1}" 
