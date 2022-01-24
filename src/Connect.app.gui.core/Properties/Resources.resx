@@ -131,10 +131,10 @@
     <value>Download cover images ...</value>
   </data>
   <data name="MsgInitDB" xml:space="preserve">
-    <value>Initialiizing database ...</value>
+    <value>Initializing database ...</value>
   </data>
   <data name="MsgInitLib" xml:space="preserve">
-    <value>Initialiizing library ...</value>
+    <value>Initializing library ...</value>
   </data>
   <data name="MsgOnlineUpdateDownload" xml:space="preserve">
     <value>New version {0}{1} of {2} is available.{3}
