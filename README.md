@@ -13,17 +13,17 @@ _**Note:** Books downloaded with Book Lib Connect and exported for [AAX Audio Co
 - **Free** and **Open Source** software. 
 - Direct download from the Audible server.
 - Sign-in via standard web browser to register a _device_, app will not see user’s credentials.
-- List your book library and select titles for download.
-- Download your books and convert to plain .m4b files.
+- Lists your book library and lets you select titles for download.
+- Downloads your books and converts to plain .m4b files.
 - Detailed progress monitoring.
-- Optionally export as .aax files for [AAX Audio Converter 1](https://github.com/audiamus/AaxAudioConverter) compatibility.
-- User guide included.
+- Optionally exports as .aax files for [AAX Audio Converter 1](https://github.com/audiamus/AaxAudioConverter) compatibility.
+- PDF user guide included.
 
 
 ## Download
-Windows setup package version 0.2, English, with manual:
+Windows setup package version 0.3, English, with manual:
 
-**[BookLibConnect-0.2-Setup.exe](https://github.com/audiamus/BookLibConnect/releases/download/v0.2/BookLibConnect-0.2-Setup.exe)**
+**[BookLibConnect-0.3-Setup.exe](https://github.com/audiamus/BookLibConnect/releases/download/v0.3/BookLibConnect-0.3-Setup.exe)**
 
 ## Feedback
 Use the [Discussions](https://github.com/audiamus/BookLibConnect/discussions) and [Issues](https://github.com/audiamus/BookLibConnect/issues) sections. 

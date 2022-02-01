@@ -40,6 +40,8 @@ namespace core.audiamus.connect {
     CancellationToken CancellationToken
   );
 
+  public record BookLibInteract (EBookLibInteract Kind);
+
   record ProductComponentPair (adb.json.Product Product, Component Component);
 
   record ProfileBundle (IProfile Profile, IProfileKey Key, IProfileAliasKey AliasKey);

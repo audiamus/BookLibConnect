@@ -24,38 +24,38 @@ namespace core.audiamus.connect.ui {
     /// the contents of this method with the code editor.
     /// </summary>
     private void InitializeComponent () {
-      this.lblCaption = new System.Windows.Forms.Label();
-      this.comboBox1 = new System.Windows.Forms.ComboBox();
       this.btnOk = new System.Windows.Forms.Button();
+      this.comboBox1 = new System.Windows.Forms.ComboBox();
+      this.lblCaption = new System.Windows.Forms.Label();
       this.SuspendLayout();
       // 
-      // lblCaption
+      // btnOk
       // 
-      this.lblCaption.AutoSize = true;
-      this.lblCaption.Location = new System.Drawing.Point(23, 40);
-      this.lblCaption.Name = "lblCaption";
-      this.lblCaption.Size = new System.Drawing.Size(112, 13);
-      this.lblCaption.TabIndex = 0;
-      this.lblCaption.Text = "Set display name for: ";
+      this.btnOk.Location = new System.Drawing.Point(12, 83);
+      this.btnOk.Name = "btnOk";
+      this.btnOk.Size = new System.Drawing.Size(75, 23);
+      this.btnOk.TabIndex = 5;
+      this.btnOk.Text = "OK";
+      this.btnOk.UseVisualStyleBackColor = true;
+      this.btnOk.Click += new System.EventHandler(this.btnOk_Click);
       // 
       // comboBox1
       // 
       this.comboBox1.FormattingEnabled = true;
-      this.comboBox1.Location = new System.Drawing.Point(23, 66);
+      this.comboBox1.Location = new System.Drawing.Point(12, 35);
       this.comboBox1.Name = "comboBox1";
       this.comboBox1.Size = new System.Drawing.Size(283, 21);
-      this.comboBox1.TabIndex = 1;
+      this.comboBox1.TabIndex = 4;
       this.comboBox1.TextUpdate += new System.EventHandler(this.comboBox1_TextUpdate);
       // 
-      // btnOk
+      // lblCaption
       // 
-      this.btnOk.Location = new System.Drawing.Point(124, 122);
-      this.btnOk.Name = "btnOk";
-      this.btnOk.Size = new System.Drawing.Size(75, 23);
-      this.btnOk.TabIndex = 2;
-      this.btnOk.Text = "OK";
-      this.btnOk.UseVisualStyleBackColor = true;
-      this.btnOk.Click += new System.EventHandler(this.btnOk_Click);
+      this.lblCaption.AutoSize = true;
+      this.lblCaption.Location = new System.Drawing.Point(12, 9);
+      this.lblCaption.Name = "lblCaption";
+      this.lblCaption.Size = new System.Drawing.Size(112, 13);
+      this.lblCaption.TabIndex = 3;
+      this.lblCaption.Text = "Set display name for: ";
       // 
       // AccountAliasForm
       // 
@@ -70,7 +70,6 @@ namespace core.audiamus.connect.ui {
       this.Name = "AccountAliasForm";
       this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
       this.Text = "Account Display Name";
-      this.TopMost = true;
       this.ResumeLayout(false);
       this.PerformLayout();
 
@@ -78,8 +77,8 @@ namespace core.audiamus.connect.ui {
 
     #endregion
 
-    private System.Windows.Forms.Label lblCaption;
-    private System.Windows.Forms.ComboBox comboBox1;
     private System.Windows.Forms.Button btnOk;
+    private System.Windows.Forms.ComboBox comboBox1;
+    private System.Windows.Forms.Label lblCaption;
   }
 }

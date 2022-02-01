@@ -5,6 +5,9 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.Encodings.Web;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Web;
 using System.Xml;
 using static System.Math;
@@ -210,6 +213,47 @@ namespace core.audiamus.aux.ex {
     // TODO implement encoding param
     public static byte[] GetBytes (this string s, Encoding enc = null) => Encoding.ASCII.GetBytes (s);
     public static string GetString (this byte[] bytes, Encoding enc = null) => Encoding.ASCII.GetString (bytes);
+  }
+
+  public static class JsonExtensions {
+    public static JsonSerializerOptions Options { get; } = new JsonSerializerOptions {
+      WriteIndented = true,
+      ReadCommentHandling = JsonCommentHandling.Skip,
+      AllowTrailingCommas = true,
+      Converters ={
+        new JsonStringEnumConverter()
+      },
+      Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+      DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+    };
+
+    public static string SerializeToJsonAny (this object any) {
+      try {
+        string result = JsonSerializer.Serialize (any, any.GetType (), Options);
+        return result;
+      } catch (Exception) {
+        return null;
+      }
+    }
+
+
+    public static string SerializeToJson<T> (this T value) {
+      try {
+        string result = JsonSerializer.Serialize (value, typeof(T), Options);
+        return result;
+      } catch (Exception) {
+        return null;
+      }
+    }
+
+    public static T DeserializeJson<T> (this string json) {
+      try {
+        T result = JsonSerializer.Deserialize<T> (json, Options);
+        return result;
+      } catch (Exception) {
+        return default (T);
+      }
+    }
   }
 
   public static class ExTimeSpan {

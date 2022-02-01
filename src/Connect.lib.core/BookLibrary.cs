@@ -295,14 +295,21 @@ namespace core.audiamus.connect {
       }
     }
 
+    private static bool __checkUpdateAnswered;
+    private static bool? __checkUpdateAnswer;
+
     public void CheckUpdateFilesAndState (
       ProfileId profileId,
       IDownloadSettings downloadSettings,
       IExportSettings exportSettings,
-      Action<IConversion> callbackRefConversion
+      Action<IConversion> callbackRefConversion,
+      IInteractionCallback<InteractionMessage<BookLibInteract>, bool?> interactCallback
     ) {
+
       using var lg = new LogGuard (3, this);
       using var dbContext = new BookDbContext (_dbDir);
+
+      var collectedCallbacks = new List<IConversion> ();
 
       var conversions = dbContext.Conversions
         .ToList ();
@@ -314,27 +321,50 @@ namespace core.audiamus.connect {
       var dnlddir = downloadSettings.DownloadDirectory;
       foreach (var conv in conversions) {
         var _ = conv.State switch {
-          EConversionState.local_locked => checkLocalLocked (conv, callbackRefConversion, dnlddir),
-          EConversionState.local_unlocked => checkLocalUnlocked (conv, callbackRefConversion, dnlddir),
-          EConversionState.exported => checkExported (conv, callbackRefConversion, dnlddir, exportSettings?.ExportDirectory),
-          EConversionState.converted => checkConverted (conv, callbackRefConversion, dnlddir),
+          EConversionState.local_locked => checkLocalLocked (conv, callback, dnlddir),
+          EConversionState.local_unlocked => checkLocalUnlocked (conv, callback, dnlddir),
+          EConversionState.exported => checkExported (conv, callback, dnlddir, exportSettings?.ExportDirectory),
+          EConversionState.converted => checkConverted (conv, callback, dnlddir),
           _ => false
         };
       }
 
-      dbContext.SaveChanges ();
+      if (collectedCallbacks.Any ()) {
+        if (!__checkUpdateAnswered && interactCallback is not null) {
+          __checkUpdateAnswer = interactCallback.Interact (
+            new InteractionMessage<BookLibInteract> (
+              ECallbackType.question3,
+              null,
+              new (EBookLibInteract.checkFile)));
+          __checkUpdateAnswered = true;
+        }
+
+        Log (3, this, () => $"Interact response={__checkUpdateAnswer}");
+
+        if (!__checkUpdateAnswer.HasValue)
+          return;
+
+        collectedCallbacks.ForEach (c => callbackRefConversion (c));
+
+        if (__checkUpdateAnswer.HasValue && __checkUpdateAnswer.Value)
+          dbContext.SaveChanges ();
+      }
+
+      void callback (IConversion conv) {
+        collectedCallbacks.Add (conv);
+      }
     }
 
-    private static bool checkLocalLocked (Conversion conv, Action<IConversion> callback, string downloadDirectory) =>
+    private bool checkLocalLocked (Conversion conv, Action<IConversion> callback, string downloadDirectory) =>
       checkFile (conv, R.EncryptedFileExt, callback, downloadDirectory,
         EConversionState.remote, ECheckFile.deleteIfMissing | ECheckFile.relocatable);
 
 
-    private static bool checkLocalUnlocked (Conversion conv, Action<IConversion> callback, string downloadDirectory) {
+    private bool checkLocalUnlocked (Conversion conv, Action<IConversion> callback, string downloadDirectory) {
       return checkLocal (conv, callback, downloadDirectory);
     }
 
-    private static bool checkLocal (
+    private bool checkLocal (
       Conversion conv,
       Action<IConversion> callback,
       string downloadDirectory,
@@ -348,7 +378,7 @@ namespace core.audiamus.connect {
       return succ;
     }
 
-    private static bool checkExported (
+    private bool checkExported (
       Conversion conv, Action<IConversion> callback,
       string downloadDirectory, string exportDirectory
     ) {
@@ -361,14 +391,14 @@ namespace core.audiamus.connect {
 
     static readonly IEnumerable<string> __extensions = new string[] { ".m3u", ".mp3", ".m4a", ".m4b" };
 
-    private static bool checkConverted (Conversion conv, Action<IConversion> callback, string downloadDirectory) {
+    private bool checkConverted (Conversion conv, Action<IConversion> callback, string downloadDirectory) {
       bool succ = checkConvertedFiles (conv, callback);
       if (!succ)
         succ = checkLocal (conv, callback, downloadDirectory, EConversionState.converted_unknown);
       return succ;
     }
 
-    private static bool checkConvertedFiles (Conversion conv, Action<IConversion> callback) {
+    private bool checkConvertedFiles (Conversion conv, Action<IConversion> callback) {
       string dir = conv.DestDirectory.AsUncIfLong ();
       bool exists = false;
       if (Directory.Exists (dir)) {
@@ -382,13 +412,14 @@ namespace core.audiamus.connect {
       if (exists)
         return true;
       else {
+        Log (3, this, () => $"not found: \"{Path.GetFileNameWithoutExtension (conv.DownloadFileName)}\"");
         conv.State = EConversionState.converted_unknown;
         callback?.Invoke (conv);
         return false;
       }
     }
 
-    private static bool checkFile (
+    private bool checkFile (
       Conversion conv,
       string ext,
       Action<IConversion> callback,
@@ -422,6 +453,8 @@ namespace core.audiamus.connect {
         if (File.Exists (path))
           return true;
       }
+
+      Log (3, this, () => $"not found \"{ext}\": \"{Path.GetFileNameWithoutExtension(conv.DownloadFileName)}\"");
 
       if (flags.HasFlag (ECheckFile.deleteIfMissing))
         conv.DownloadFileName = null;

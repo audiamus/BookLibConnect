@@ -324,13 +324,21 @@ namespace core.audiamus.connect.app.gui {
 
     private async void checkOnlineUpdate () {
       var update = newOnlineUpdate ();
-      await update.UpdateAsync (_interactionHandler, () => Application.Exit (), isBusyForUpdate);
+      
+      var interact =
+        new InteractionCallback<InteractionMessage<UpdateInteractionMessage>, bool?> (_interactionHandler.Interact);
+      
+      await update.UpdateAsync (interact, () => Application.Exit (), isBusyForUpdate);
     }
 
 
     private async void handleDeferredUpdateAsync () {
       var update = newOnlineUpdate ();
-      await update.InstallAsync (_interactionHandler, () => Application.Exit ());
+
+      var interact =
+        new InteractionCallback<InteractionMessage<UpdateInteractionMessage>, bool?> (_interactionHandler.Interact);
+
+      await update.InstallAsync (interact, () => Application.Exit ());
     }
 
     private bool isBusyForUpdate () {

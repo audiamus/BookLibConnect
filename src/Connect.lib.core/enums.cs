@@ -24,6 +24,11 @@ namespace core.audiamus.connect {
     relocatable = 2
   }
 
+  public enum EBookLibInteract { 
+    none,
+    checkFile 
+  }
+
   public enum EAuthorizeResult {
     none,
     invalidUrl,

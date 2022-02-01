@@ -174,13 +174,12 @@ namespace core.audiamus.connect.ui {
     }
 
     #endregion
-
-    private System.Windows.Forms.SplitContainer splitContainerOuter;
-    private System.Windows.Forms.SplitContainer splitContainerBottom;
-    private System.Windows.Forms.SplitContainer splitContainerInner;
     private System.Windows.Forms.PictureBox pictureBox1;
-    private BookLibDGVControl bookLibdgvControl1;
     private System.Windows.Forms.PropertyGrid propertyGrid1;
     private System.Windows.Forms.TextBox textBox1;
+    internal System.Windows.Forms.SplitContainer splitContainerOuter;
+    internal System.Windows.Forms.SplitContainer splitContainerBottom;
+    internal System.Windows.Forms.SplitContainer splitContainerInner;
+    internal BookLibDGVControl bookLibdgvControl1;
   }
 }

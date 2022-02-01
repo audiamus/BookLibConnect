@@ -27,33 +27,6 @@ namespace core.audiamus.connect.ex {
   }
 
   public static class JsonExtensions {
-    private static JsonSerializerOptions Options { get; } = new JsonSerializerOptions {
-      WriteIndented = true,
-      ReadCommentHandling = JsonCommentHandling.Skip,
-      AllowTrailingCommas = true,
-      Converters ={
-        new JsonStringEnumConverter()
-      },
-      Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
-    };
-
-    public static string SerializeToJsonAny (this object any) {
-      try {
-        string result = JsonSerializer.Serialize (any, any.GetType (), Options);
-        return result;
-      } catch (Exception) {
-        return null;
-      }
-    }
-
-    public static T DeserializeJson<T> (this string json) {
-      try {
-        T result = JsonSerializer.Deserialize<T> (json, Options);
-        return result;
-      } catch (Exception) {
-        return default(T);
-      }
-    }
 
     public static string CompactJson (this string json) =>
       Regex.Replace (json, "(\"(?:[^\"\\\\]|\\\\.)*\")|\\s+", "$1");

@@ -256,6 +256,14 @@
   <data name="local_unlocked" xml:space="preserve">
     <value>local, unlocked</value>
   </data>
+  <data name="MsgBookLibMissingFiles" xml:space="preserve">
+    <value>Some previously downloaded and converted books could not be found at the expected location. 
+Reset the associated conversion state?
+ 
+[ Yes ] :  Reset state permanently, in the local database
+[ No ] :  Reset state temporarily, for this session only 
+[ Cancel ] :  Do not reset state</value>
+  </data>
   <data name="MsgConfigUnencrypted" xml:space="preserve">
     <value>Unencrypted configuration data is a security risk!
 

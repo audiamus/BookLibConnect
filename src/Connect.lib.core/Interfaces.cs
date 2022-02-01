@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using core.audiamus.aux;
 using core.audiamus.booksdb;
 using core.audiamus.common;
 
@@ -78,9 +79,15 @@ namespace core.audiamus.connect {
     Task<string> GetAccountInfoAsync ();
     Task<string> GetUserProfileAsync ();
     Task<bool> GetActivationBytesAsync ();
-    Task<adb.json.LicenseResponse> GetDownloadLicenseAsync (string asin, EDownloadQuality quality = EDownloadQuality.Extreme);
-    Task<bool> DownloadAsync (Conversion conversion, Action<Conversion, long> progressAction, CancellationToken cancToken);
-    Task<bool> DecryptAsync (Conversion conversion, Action<Conversion, TimeSpan> progressAction, CancellationToken cancToken);
+    Task<adb.json.LicenseResponse> GetDownloadLicenseAsync (
+      string asin, EDownloadQuality quality = EDownloadQuality.Extreme
+    );
+    Task<bool> DownloadAsync (
+      Conversion conversion, Action<Conversion, long> progressAction, CancellationToken cancToken
+    );
+    Task<bool> DecryptAsync (
+      Conversion conversion, Action<Conversion, TimeSpan> progressAction, CancellationToken cancToken
+    );
     Task DownloadCoverImagesAsync ();
     Task UpdateMetaInfo (IEnumerable<Component> components, Action<IEnumerable<Component>> onDone);
     Task<bool> GetDownloadLicenseAndSaveAsync (Conversion conversion);
@@ -88,7 +95,12 @@ namespace core.audiamus.connect {
     void SavePersistentState (Conversion conversion, EConversionState state);
     void RestorePersistentState (Conversion conversion);
     EConversionState GetPersistentState (Conversion conversion);
-    void CheckUpdateFilesAndState (IDownloadSettings downloadSettings, IExportSettings exportSettings, Action<IConversion> callbackRefConversion);
+    void CheckUpdateFilesAndState (
+      IDownloadSettings downloadSettings, 
+      IExportSettings exportSettings, 
+      Action<IConversion> callbackRefConversion,
+      IInteractionCallback<InteractionMessage<BookLibInteract>, bool?> interactCallback
+    );
 
   }
 }

@@ -494,6 +494,20 @@ namespace core.audiamus.connect.ui.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Some previously downloaded and converted books could not be found at the expected location. 
+        ///Reset the associated conversion state?
+        /// 
+        ///[ Yes ] :  Reset state permanently, in the local database
+        ///[ No ] :  Reset state temporarily, for this session only 
+        ///[ Cancel ] :  Do not reset state.
+        /// </summary>
+        internal static string MsgBookLibMissingFiles {
+            get {
+                return ResourceManager.GetString("MsgBookLibMissingFiles", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Unencrypted configuration data is a security risk!
         ///
         ///Leave the configuration encrypted unless you know exactly what you are doing. 

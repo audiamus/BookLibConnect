@@ -152,8 +152,12 @@ namespace core.audiamus.aux.win {
     }
 
     protected override void OnListChanged (System.ComponentModel.ListChangedEventArgs e) {
-      base.OnListChanged (e);
-
+      try {
+        base.OnListChanged (e);
+      } catch (Exception exc) {
+        Logging.Log (1, this, () => exc.Summary ());
+        return; 
+      }
       if (e.ListChangedType == ListChangedType.Reset) {
         return;
       }

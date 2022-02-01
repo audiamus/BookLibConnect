@@ -124,6 +124,9 @@ namespace core.audiamus.connect.ui {
     }
 
     private void setDataSource (IEnumerable<Book> allBooks) {
+      if (allBooks is null)
+        return;
+
       allBooks = allBooks
         .Where (b => b.DeliveryType == EDeliveryType.SinglePartBook || b.DeliveryType == EDeliveryType.MultiPartBook)
         .ToList ();

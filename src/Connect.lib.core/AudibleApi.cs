@@ -383,9 +383,20 @@ namespace core.audiamus.connect {
       return BookLibrary.GetPersistentState (conversion);
     }
 
-    public void CheckUpdateFilesAndState (IDownloadSettings downloadSettings, IExportSettings exportSettings, Action<IConversion> callbackRefConversion) {
+    public void CheckUpdateFilesAndState (
+      IDownloadSettings downloadSettings, 
+      IExportSettings exportSettings, 
+      Action<IConversion> callbackRefConversion,
+      IInteractionCallback<InteractionMessage<BookLibInteract>, bool?> interactCallback
+    ) {
       ensureAccountId ();
-      BookLibrary.CheckUpdateFilesAndState (new ProfileId (AccountId, Region), downloadSettings, exportSettings, callbackRefConversion);
+      BookLibrary.CheckUpdateFilesAndState (
+        new ProfileId (AccountId, Region), 
+        downloadSettings, 
+        exportSettings, 
+        callbackRefConversion,
+        interactCallback
+      );
     }
 
 

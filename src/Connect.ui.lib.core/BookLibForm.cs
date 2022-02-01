@@ -11,12 +11,14 @@ using core.audiamus.booksdb;
 using core.audiamus.connect.ex;
 using R = core.audiamus.connect.ui.Properties.Resources;
 using static core.audiamus.aux.Logging;
+using core.audiamus.aux.win;
 
 namespace core.audiamus.connect.ui {
   public partial class BookLibForm : Form {
     private readonly AffineSynchronizationContext _sync;
+    private readonly InteractionCallbackHandler<BookLibInteract> _interactionHandler;
     private IDownloadSettings _downloadSettings;
-    
+
     private IAudibleApi Api { get; }
     
     private IDownloadSettings DownloadSettings {
@@ -41,9 +43,14 @@ namespace core.audiamus.connect.ui {
     public BookLibForm (IAudibleApi api, IDownloadSettings downloadSettings, IExportSettings exportSettings) {
       InitializeComponent ();
 
+      if (api is null || downloadSettings is null || exportSettings is null)
+        return;
+
       Log (3, this, () => $"{api.AccountAlias}, {api.Region}");
 
       _sync = new ();
+
+      _interactionHandler = new InteractionCallbackHandler<BookLibInteract> (this, bookLibMessage);
 
       Api = api;
       DownloadSettings = downloadSettings;
@@ -55,6 +62,13 @@ namespace core.audiamus.connect.ui {
       bookLibdgvControl1.ConversionUpdated += bookLibdgvControl1_ConversionUpdated;
 
       this.Text = $"{R.Library} for \"{Api.AccountAlias}\" and region \"{Api.Region}\"";
+    }
+
+    private string bookLibMessage (BookLibInteract arg) {
+      return arg.Kind switch {
+        EBookLibInteract.checkFile => R.MsgBookLibMissingFiles,
+        _ => string.Empty
+      };
     }
 
     private void settings_ChangedSettings (object sender, EventArgs e) {
@@ -80,11 +94,16 @@ namespace core.audiamus.connect.ui {
       }
     
       Action<IConversion> callback = conv => _sync.Post (bookLibdgvControl1.UpdateConversionStateFromOther, conv);
-      await Task.Run (() => Api.CheckUpdateFilesAndState (DownloadSettings, ExportSettings, callback));
+
+      var interact = 
+        new InteractionCallback<InteractionMessage<BookLibInteract>, bool?> (_interactionHandler.Interact);
+
+      await Task.Run (() => 
+        Api?.CheckUpdateFilesAndState (DownloadSettings, ExportSettings, callback, interact));
     }
 
     private IEnumerable<Book> loadBooks () {
-      var books = Api.GetBooks ();
+      var books = Api?.GetBooks ();
       return books;
     }
 

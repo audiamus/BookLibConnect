@@ -1,10 +1,10 @@
 [
   {
-    "Url": "https://github.com/audiamus/BookLibConnect/releases/download/v0.2/BookLibConnect-0.2-Setup.exe",
+    "Url": "https://github.com/audiamus/BookLibConnect/releases/download/v0.3/BookLibConnect-0.3-Setup.exe",
     "AppName": "BookLibConnect",
-    "Version": "0.2",
+    "Version": "0.3",
     "Preview": true,
     "Desc": null,
-    "Md5": "39d11eec1e74b63145c823872e78499a"
+    "Md5": "8ee917d0f7a754564e14aa971e113d45"
   }
 ]
