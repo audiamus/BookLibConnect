@@ -14,7 +14,7 @@ namespace core.audiamus.connect.ui {
   {
     protected static readonly Dictionary<EConversionState, Image> __icons =
       new Dictionary<EConversionState, Image> {
-        { EConversionState.unknown, R.ImgQuestion },
+        { EConversionState.unknown, R.ImgGlobeFailed },
         { EConversionState.remote, R.ImgGlobe },
         { EConversionState.download, R.ImgGlobeDown },
         { EConversionState.license_granted, R.ImgKey },

@@ -90,9 +90,11 @@ namespace core.audiamus.connect.ui {
       this.splitContainerBottom.Size = new System.Drawing.Size(802, 189);
       this.splitContainerBottom.SplitterDistance = 634;
       this.splitContainerBottom.TabIndex = 0;
+      this.splitContainerBottom.SplitterMoved += new System.Windows.Forms.SplitterEventHandler(this.splitContainerBottom_SplitterMoved);
       // 
       // splitContainerInner
       // 
+      this.splitContainerInner.Cursor = System.Windows.Forms.Cursors.VSplit;
       this.splitContainerInner.Dock = System.Windows.Forms.DockStyle.Fill;
       this.splitContainerInner.Location = new System.Drawing.Point(0, 0);
       this.splitContainerInner.Name = "splitContainerInner";
@@ -107,6 +109,7 @@ namespace core.audiamus.connect.ui {
       this.splitContainerInner.Size = new System.Drawing.Size(634, 189);
       this.splitContainerInner.SplitterDistance = 403;
       this.splitContainerInner.TabIndex = 0;
+      this.splitContainerInner.SplitterMoved += new System.Windows.Forms.SplitterEventHandler(this.splitContainerInner_SplitterMoved);
       // 
       // propertyGrid1
       // 
@@ -151,7 +154,7 @@ namespace core.audiamus.connect.ui {
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
       this.ClientSize = new System.Drawing.Size(802, 453);
       this.Controls.Add(this.splitContainerOuter);
-      this.MinimumSize = new System.Drawing.Size(570, 270);
+      this.MinimumSize = new System.Drawing.Size(640, 270);
       this.Name = "BookLibForm";
       this.ShowIcon = false;
       this.Text = "BookLibForm";

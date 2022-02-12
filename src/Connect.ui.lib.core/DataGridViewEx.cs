@@ -14,6 +14,7 @@ namespace core.audiamus.connect.ui {
     private bool _isSorting;
     private bool _sortEndedVertPosSet;
     private int? _sortColumnRelX;
+    private bool _clientAreaEnabled = true;
 
     public event EventHandler BeginSorting;
     public event EventHandler EndSorting;
@@ -28,6 +29,17 @@ namespace core.audiamus.connect.ui {
       }
     }
 
+    public bool ClientAreaEnabled {
+      get => _clientAreaEnabled;
+      set {
+        _clientAreaEnabled = value;
+        var color = value ? SystemColors.ControlText : SystemColors.GrayText;
+        DefaultCellStyle.ForeColor = color;
+        DefaultCellStyle.SelectionForeColor = color;
+        ColumnHeadersDefaultCellStyle.ForeColor = color;
+      }
+    }
+
     public DataGridViewEx () {
       _timer1.Interval = 100;
       _timer1.Tick += timer1_Tick;
@@ -35,12 +47,20 @@ namespace core.audiamus.connect.ui {
       _timer2.Tick += timer2_Tick;
     }
 
-    public void AddSelectedRowsSortedByIndex<T, S> (List<T> selected, Func<S, T> getProp, IReadOnlyList<S> dataSource) {
+    public void AddSelectedRowsSortedByIndex<T, S> (
+      List<T> selected, 
+      Func<S, T> getProp, 
+      IReadOnlyList<S> dataSource, 
+      Func<int,bool> approveCallback = null
+    ) {
       var selectedRows = new DataGridViewRow[this.SelectedRows.Count];
       this.SelectedRows.CopyTo (selectedRows, 0);
       Array.Sort (selectedRows, (x, y) => x.Index.CompareTo (y.Index));
       foreach (DataGridViewRow row in selectedRows) {
         int idx = row.Index;
+        bool approved = approveCallback?.Invoke (idx) ?? true;
+        if (!approved)
+          continue;
         S item = dataSource[idx];
         selected.Add (getProp (item));
       }
@@ -75,6 +95,11 @@ namespace core.audiamus.connect.ui {
       base.OnSelectionChanged (e);
     }
 
+    protected override void OnMouseDown (MouseEventArgs e) {
+      if (ClientAreaEnabled)
+        base.OnMouseDown (e);
+    }
+
     private void timer1_Tick (object sender, EventArgs e) {
       _timer1.Enabled = false;
       base.AutoResizeColumns (DataGridViewAutoSizeColumnsMode.DisplayedCells);
@@ -89,7 +114,7 @@ namespace core.audiamus.connect.ui {
         setHorizontalPos ();
       } else {
         _timer2.Interval = 50;
-      
+
         SortingCompleteToSetVerticalPosition?.Invoke (sender, e);
 
         _sortEndedVertPosSet = true;

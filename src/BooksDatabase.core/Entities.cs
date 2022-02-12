@@ -34,7 +34,7 @@ namespace core.audiamus.booksdb {
     public string SkuLite { get; set; }
     public string LicenseKey { get; set; }
     public string LicenseIv { get; set; }
-    public bool Removed { get; set; }
+    public bool? Deleted { get; set; }
 
     [NotMapped]
     public string Author => Authors?.Select(a => a.Name).FirstEtAl ();

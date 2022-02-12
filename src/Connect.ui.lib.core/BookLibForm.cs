@@ -15,9 +15,17 @@ using core.audiamus.aux.win;
 
 namespace core.audiamus.connect.ui {
   public partial class BookLibForm : Form {
+    const double REL_SPLITTER_DIST_BOTTOM = 0.75;
+    const double REL_SPLITTER_DIST_INNER = 0.40;
+
+    private static double? __relSplitterDistBottom;
+    private static double? __relSplitterDistInner;
+
     private readonly AffineSynchronizationContext _sync;
     private readonly InteractionCallbackHandler<BookLibInteract> _interactionHandler;
     private IDownloadSettings _downloadSettings;
+    private bool _shownFlag;
+    private bool _ignoreFlag;
 
     private IAudibleApi Api { get; }
     
@@ -42,6 +50,9 @@ namespace core.audiamus.connect.ui {
 
     public BookLibForm (IAudibleApi api, IDownloadSettings downloadSettings, IExportSettings exportSettings) {
       InitializeComponent ();
+      _ignoreFlag = true;
+
+      DownloadSelectEnabled = false;
 
       if (api is null || downloadSettings is null || exportSettings is null)
         return;
@@ -60,8 +71,31 @@ namespace core.audiamus.connect.ui {
       bookLibdgvControl1.BookSelectionChanged += bookLibdgvControl1_BookSelectionChanged;
       bookLibdgvControl1.BookDownloadSelectionChanged += bookLibdgvControl1_BookDownloadSelectionChanged;
       bookLibdgvControl1.ConversionUpdated += bookLibdgvControl1_ConversionUpdated;
+      bookLibdgvControl1.Resync += bookLibdgvControl1_Resync;
 
       this.Text = $"{R.Library} for \"{Api.AccountAlias}\" and region \"{Api.Region}\"";
+    }
+
+    private async void bookLibdgvControl1_Resync (object sender, EventArgs e) {
+      this.Cursor = Cursors.AppStarting;
+      using var rgc = new ResourceGuard (() => Cursor = Cursors.Default);
+      using var rge = new ResourceGuard (x => bookLibdgvControl1.DownloadSelectEnabled = !x);
+
+      bool resync = true;
+      if (DownloadSettings.AutoUpdateLibrary) {
+        var result = MsgBox.Show (this, R.MsgFullResync, this.Text, 
+          MessageBoxButtons.OKCancel, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2);
+      } else { 
+        var result = MsgBox.Show (this, R.MsgFullResyncOrElse, this.Text, 
+          MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2);
+        resync = result == DialogResult.Yes;
+      }
+
+      await Api.GetLibraryAsync (resync);
+      await Api.DownloadCoverImagesAsync ();
+
+      var books = await Task.Run (() => loadBooks ());
+      bookLibdgvControl1.Books = books;
     }
 
     private string bookLibMessage (BookLibInteract arg) {
@@ -95,12 +129,35 @@ namespace core.audiamus.connect.ui {
     
       Action<IConversion> callback = conv => _sync.Post (bookLibdgvControl1.UpdateConversionStateFromOther, conv);
 
+      if (_interactionHandler is null)
+        return;
+
       var interact = 
         new InteractionCallback<InteractionMessage<BookLibInteract>, bool?> (_interactionHandler.Interact);
 
-      await Task.Run (() => 
+      await Task.Run (() =>
         Api?.CheckUpdateFilesAndState (DownloadSettings, ExportSettings, callback, interact));
+
+      DownloadSelectEnabled = true;
     }
+
+    protected override void OnShown (EventArgs e) {
+      using var rg = new ResourceGuard (() => _ignoreFlag = false);
+      base.OnShown (e);
+      if (_shownFlag)
+        return;
+      _shownFlag = true;
+
+      var scb = splitContainerBottom;
+      var sci = splitContainerInner;
+
+      double relSplitterDistBottom = __relSplitterDistBottom ?? REL_SPLITTER_DIST_BOTTOM; 
+      double relSplitterDistInner = __relSplitterDistInner ?? REL_SPLITTER_DIST_INNER; 
+
+      scb.SplitterDistance = (int)(relSplitterDistBottom * scb.Width);
+      sci.SplitterDistance = (int)(relSplitterDistInner * scb.Width);
+    }
+
 
     private IEnumerable<Book> loadBooks () {
       var books = Api?.GetBooks ();
@@ -149,6 +206,21 @@ namespace core.audiamus.connect.ui {
 
     private void bookLibdgvControl1_Close (object sender, EventArgs e) {
       Close ();
+    }
+
+    private void splitContainerInner_SplitterMoved (object sender, SplitterEventArgs e) {
+      if (_ignoreFlag)
+        return;
+      var scb = splitContainerBottom;
+      var sci = splitContainerInner;
+      //__relSplitterDistInner = (double)sci.SplitterDistance / scb.Width;
+    }
+
+    private void splitContainerBottom_SplitterMoved (object sender, SplitterEventArgs e) {
+      if (_ignoreFlag)
+        return;
+      var scb = splitContainerBottom;
+      //__relSplitterDistInner = (double)scb.SplitterDistance / scb.Width;
     }
   }
 

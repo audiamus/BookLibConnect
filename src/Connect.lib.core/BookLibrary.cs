@@ -21,17 +21,18 @@ namespace core.audiamus.connect {
     public readonly string _dbDir = null;
     public readonly string IMG_DIR = Path.Combine (ApplEnv.LocalApplDirectory, "img");
 
-    public readonly Dictionary<ProfileId, IEnumerable<Book>> _bookCache = new Dictionary<ProfileId, IEnumerable<Book>> ();
+    public readonly Dictionary<ProfileId, IEnumerable<Book>> _bookCache = 
+      new Dictionary<ProfileId, IEnumerable<Book>> ();
 
     public BookLibrary (string dbDir = null) => _dbDir = dbDir;
 
-    public async Task<DateTime> SinceLatestPurchaseDateAsync () {
-      return await Task.Run (() => sinceLatestPurchaseDate ());
+    public async Task<DateTime> SinceLatestPurchaseDateAsync (ProfileId profileId, bool resync) {
+      return await Task.Run (() => sinceLatestPurchaseDate (profileId, resync));
     }
 
-    public async Task AddBooksAsync (List<adb.json.Product> libProducts, ProfileId profileId) {
+    public async Task AddRemBooksAsync (List<adb.json.Product> libProducts, ProfileId profileId, bool resync) {
       using var _ = new LogGuard (3, this, () => $"#items={libProducts.Count}");
-      await Task.Run (() => addBooks (libProducts, profileId));
+      await Task.Run (() => addRemBooks (libProducts, profileId, resync));
       await Task.Run (() => cleanupDuplicateAuthors ());
     }
 
@@ -265,11 +266,11 @@ namespace core.audiamus.connect {
         else if (product is Book book)
           dbContext.Books.Attach (book);
 
-        var decryptedLic = license.decrypted_license_response;
+        var voucher = license.voucher;
 
         // Key and IV
-        product.LicenseKey = decryptedLic?.key;
-        product.LicenseIv = decryptedLic?.iv;
+        product.LicenseKey = voucher?.key;
+        product.LicenseIv = voucher?.iv;
 
         setDownloadFilenameAndCodec (license, conversion);
 
@@ -307,7 +308,7 @@ namespace core.audiamus.connect {
     ) {
 
       using var lg = new LogGuard (3, this);
-      using var dbContext = new BookDbContext (_dbDir);
+      using var dbContext = new BookDbContextLazyLoad (_dbDir);
 
       var collectedCallbacks = new List<IConversion> ();
 
@@ -327,6 +328,7 @@ namespace core.audiamus.connect {
           EConversionState.converted => checkConverted (conv, callback, dnlddir),
           _ => false
         };
+        checkRemoved (conv, callback);
       }
 
       if (collectedCallbacks.Any ()) {
@@ -353,6 +355,42 @@ namespace core.audiamus.connect {
       void callback (IConversion conv) {
         collectedCallbacks.Add (conv);
       }
+    }
+
+    private void checkRemoved (Conversion conv, Action<IConversion> callback) {
+      var book = conv.Book;
+      if (book?.Deleted is null)
+        return;
+      bool removed = book.Deleted.Value;
+      if (removed) {
+        if (conv.State > EConversionState.unknown && conv.State < EConversionState.local_locked) {
+          updateState (conv, EConversionState.unknown);
+          callback (conv);
+          Log (3, this, () => $"removed: {conv}");
+        }
+        foreach (var comp in book.Components) {
+          var cconv = comp.Conversion;
+          if (cconv.State > EConversionState.unknown && cconv.State < EConversionState.local_locked) {
+            updateState (cconv, EConversionState.unknown);
+            callback (cconv);
+            Log (3, this, () => $"removed: {cconv}");
+          }
+        }
+      } else {
+        if (conv.State == EConversionState.unknown) {
+          updateState (conv, EConversionState.remote);
+          callback (conv);
+          Log (3, this, () => $"re-added: {conv}");
+        }
+        foreach (var comp in book.Components) {
+          var cconv = comp.Conversion;
+          if (cconv.State == EConversionState.unknown) {
+            updateState (cconv, EConversionState.remote);
+            callback (cconv);
+            Log (3, this, () => $"re-added: {cconv}");
+          }
+        }
+      } 
     }
 
     private bool checkLocalLocked (Conversion conv, Action<IConversion> callback, string downloadDirectory) =>
@@ -579,9 +617,27 @@ namespace core.audiamus.connect {
       }
     }
 
-    private void addBooks (List<adb.json.Product> libProducts, ProfileId profileId) {
+    private void addRemBooks (List<adb.json.Product> libProducts, ProfileId profileId, bool resync) {
       lock (_bookCache)
         _bookCache.Remove (profileId);
+
+      using var dbContext = new BookDbContextLazyLoad (_dbDir);
+
+      var bcl = new BookCompositeLists (
+        dbContext.Books.Select (b => b.Asin).ToList (),
+        dbContext.Conversions.ToList (),
+        dbContext.Components.ToList (),
+        dbContext.Series.ToList (),
+        dbContext.SeriesBooks.ToList (),
+        dbContext.Authors.ToList (),
+        dbContext.Narrators.ToList (),
+        dbContext.Genres.ToList (),
+        dbContext.Ladders.ToList (),
+        dbContext.Rungs.ToList (),
+        dbContext.Codecs.ToList ()
+      );
+
+
       int page = 0;
       int remaining = libProducts.Count;
       while (remaining > 0) {
@@ -590,16 +646,25 @@ namespace core.audiamus.connect {
         page++;
         remaining -= count;
         var subrange = libProducts.GetRange (start, count);
-        addPageBooks (subrange, profileId);
+        addPageBooks (dbContext, bcl, subrange, profileId, resync);
       }
+
+      if (resync)
+        removeBooks (dbContext, bcl, libProducts, profileId);
     }
 
-    private DateTime sinceLatestPurchaseDate () {
+
+    private DateTime sinceLatestPurchaseDate (ProfileId profileId, bool resync) {
       DateTime dt = new DateTime (1970, 1, 1);
+      if (resync)
+        return dt;
+
       using var dbContext = new BookDbContextLazyLoad (_dbDir);
 
       var latest = dbContext.Books
-          .Where (b => b.PurchaseDate.HasValue)
+          .Where (b => b.PurchaseDate.HasValue && 
+            b.Conversion.AccountId == profileId.AccountId &&
+            b.Conversion.Region == profileId.Region)
           .Select (b => b.PurchaseDate.Value)
           .OrderBy (b => b)
           .LastOrDefault ();
@@ -641,44 +706,30 @@ namespace core.audiamus.connect {
       dbContext.SaveChanges ();
     }
 
-    private void addPageBooks (IEnumerable<adb.json.Product> products, ProfileId profileId) {
+    private void addPageBooks (BookDbContextLazyLoad dbContext, BookCompositeLists bcl, IEnumerable<adb.json.Product> products, ProfileId profileId, bool resync) {
       try {
         using var _ = new LogGuard (3, this, () => $"#items={products.Count ()}");
 
-        using var dbContext = new BookDbContextLazyLoad (_dbDir);
-
-        var bookAsins = dbContext.Books.Select (b => b.Asin).ToList ();
-        var conversions = dbContext.Conversions.ToList ();
-        var components = dbContext.Components.ToList ();
-        var series = dbContext.Series.ToList ();
-        var seriesBooks = dbContext.SeriesBooks.ToList ();
-        var authors = dbContext.Authors.ToList ();
-        var narrators = dbContext.Narrators.ToList ();
-        var genres = dbContext.Genres.ToList ();
-        var ladders = dbContext.Ladders.ToList ();
-        var rungs = dbContext.Rungs.ToList ();
-        var codecs = dbContext.Codecs.ToList ();
-
         foreach (var product in products) {
           try {
-            if (bookAsins.Contains (product.asin))
+
+            if (readded (bcl, product, resync))
               continue;
 
             Book book = addBook (dbContext, product);
 
+            addComponents (book, bcl.Components, product.relationships);
 
-            addComponents (book, components, product.relationships);
+            addConversions (book, bcl.Conversions, profileId);
 
-            addConversions (book, conversions, profileId);
+            addSeries (book, bcl.Series, bcl.SeriesBooks, product.relationships);
 
-            addSeries (book, series, seriesBooks, product.relationships);
+            addPersons (dbContext, book, bcl.Authors, product.authors, b => b.Authors);
+            addPersons (dbContext, book, bcl.Narrators, product.narrators, b => b.Narrators);
 
-            addPersons (dbContext, book, authors, product.authors, b => b.Authors);
-            addPersons (dbContext, book, narrators, product.narrators, b => b.Narrators);
+            addGenres (book, bcl.Genres, bcl.Ladders, bcl.Rungs, product.category_ladders);
 
-            addGenres (book, genres, ladders, rungs, product.category_ladders);
-
-            addCodecs (book, codecs, product.available_codecs);
+            addCodecs (book, bcl.Codecs, product.available_codecs);
           } catch (Exception exc) {
             Log (1, this, () =>
               $"asin={product.asin}, \"{product.title}\", throwing{Environment.NewLine}" +
@@ -692,6 +743,30 @@ namespace core.audiamus.connect {
         Log (1, this, () => exc.Summary ());
         throw;
       }
+    }
+
+    private static bool readded (BookCompositeLists bcl, adb.json.Product product, bool resync) {
+      if (bcl.BookAsins.Contains (product.asin)) {
+        if (!resync)
+          return true;
+
+        var bk = bcl.Conversions
+          .FirstOrDefault (conv => string.Equals (conv.Book?.Asin, product.asin))?.Book;
+        if (!(bk?.Deleted ?? false))
+          return true;
+
+        bk.Deleted = false;
+        if (bk.Conversion.State < EConversionState.local_locked)
+          updateState (bk.Conversion, EConversionState.remote);
+
+        foreach (var comp in bk.Components) {
+          if (comp.Conversion.State < EConversionState.local_locked)
+            updateState (comp.Conversion, EConversionState.remote);
+        }
+
+        return true;
+      } else
+        return false;
     }
 
     private static Book addBook (BookDbContextLazyLoad dbContext, adb.json.Product product) {
@@ -956,6 +1031,45 @@ namespace core.audiamus.connect {
         };
         component.Conversion = conversion;
         conversions.Add (conversion);
+      }
+
+    }
+
+    private void removeBooks (
+      BookDbContextLazyLoad dbContext, 
+      BookCompositeLists bcl, 
+      IEnumerable<adb.json.Product> products, 
+      ProfileId profileId
+    ) {
+      try {
+        using var _ = new LogGuard (3, this, () => $"#items={products.Count ()}");
+
+        var currentAsins = products.Select ( p=> p.asin).ToList ();
+        var removeAsins = bcl.BookAsins.Except (currentAsins).ToList ();
+        if (!removeAsins.Any ())
+          return;
+
+        Log (3, this, () => $"#remove={removeAsins.Count}");
+
+        foreach (string asin in removeAsins) {
+
+          var book = bcl.Conversions.FirstOrDefault (conv => string.Equals (conv.Book?.Asin, asin))?.Book;
+          if (book is null)
+            continue;
+
+          book.Deleted = true;
+          if (book.Conversion.State < EConversionState.local_locked)
+            updateState (book.Conversion, EConversionState.unknown);
+          foreach (var comp in book.Components) {
+            if (comp.Conversion.State < EConversionState.local_locked)
+              updateState (comp.Conversion, EConversionState.unknown);
+          }
+        }
+
+        dbContext.SaveChanges ();
+      } catch (Exception exc) {
+        Log (1, this, () => exc.Summary ());
+        throw;
       }
 
     }

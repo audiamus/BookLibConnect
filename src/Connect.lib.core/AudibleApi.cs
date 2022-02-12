@@ -22,6 +22,8 @@ namespace core.audiamus.connect {
 
     const string HTTP_AUTHORITY_AUDIBLE = @"https://api.audible.";
     const string CONTENT_PATH = "/1.0/content";
+    private int _accountId;
+    private string _accountAlias;
 
     private string BaseUrlAudible { get; }
     private Uri BaseUriAudible => HttpClientAudible?.BaseAddress;
@@ -31,9 +33,21 @@ namespace core.audiamus.connect {
     private HttpClientEx HttpClientAudible { get; }
     private HttpClientEx HttpClientAmazon { get; }
     private BookLibrary BookLibrary { get; }
-    private int AccountId { get; set; }
+    
+    private int AccountId {
+      get {
+        ensureAccountId ();
+        return _accountId;
+      }
+    }
 
-    public string AccountAlias { get; private set; }
+    public string AccountAlias {
+      get {
+        ensureAccountId ();
+        return _accountAlias;
+      }
+    }
+
     public ERegion Region => Profile.Region;
 
     public Func<AccountAliasContext, bool> GetAccountAliasFunc { private get; set; }
@@ -59,17 +73,25 @@ namespace core.audiamus.connect {
       HttpClientAudible = HttpClientEx.Create (baseUriAudible);
     }
 
+    internal AudibleApi (
+      BookLibrary bookLibrary,
+      int accountId,
+      ERegion region
+    ) {
+      BookLibrary = bookLibrary;
+      _accountId = accountId;
+      Profile = new Profile (region, null, null);
+    }
+
     public void Dispose () {
       HttpClientAudible?.Dispose ();
     }
 
-    public async Task<adb.json.LibraryResponse> GetLibraryAsync () => await GetLibraryAsync (null);
+    public async Task<adb.json.LibraryResponse> GetLibraryAsync (bool resync) => await GetLibraryAsync (null, resync);
 
 
-    internal async Task<adb.json.LibraryResponse> GetLibraryAsync (string json) {
+    internal async Task<adb.json.LibraryResponse> GetLibraryAsync (string json, bool resync) {
       using var _ = new LogGuard (3, this);
-
-      ensureAccountId ();
 
       const int PAGE_SIZE = 100;
       int page = 0;
@@ -82,7 +104,7 @@ namespace core.audiamus.connect {
           + "origin_asin,pdf_url,percent_complete,price,product_attrs,product_desc,product_extended_attrs,product_plan_details,"
           + "product_plans,provided_review,rating,relationships,review_attrs,reviews,sample,series,sku";
 
-        DateTime dt = await BookLibrary.SinceLatestPurchaseDateAsync ();
+        DateTime dt = await BookLibrary.SinceLatestPurchaseDateAsync (new ProfileId (AccountId, Region), resync);
 
         while (true) {
           page++;
@@ -117,7 +139,7 @@ namespace core.audiamus.connect {
 
       libProducts.Sort ((x, y) => DateTime.Compare (x.purchase_date, y.purchase_date));
 
-      await BookLibrary.AddBooksAsync (libProducts, new ProfileId (AccountId, Region));
+      await BookLibrary.AddRemBooksAsync (libProducts, new ProfileId (AccountId, Region), resync);
 
       var allPagesResponse = new adb.json.LibraryResponse ();
       allPagesResponse.items = libProducts.ToArray ();
@@ -125,13 +147,13 @@ namespace core.audiamus.connect {
     }
 
     private void ensureAccountId () {
-      if (AccountId > 0)
+      if (_accountId > 0)
         return;
 
       var ctxt = Profile.GetAccountAliasContext (BookLibrary, GetAccountAliasFunc);
 
-      AccountId = ctxt.LocalId;
-      AccountAlias = ctxt.Alias;
+      _accountId = ctxt.LocalId;
+      _accountAlias = ctxt.Alias;
 
     }
 
@@ -194,7 +216,7 @@ namespace core.audiamus.connect {
       }
 
       var lic = licresp.content_license;
-      if (lic?.decrypted_license_response is null) {
+      if (lic?.voucher is null) {
         conversion.State = EConversionState.license_denied;
         Log (3, this, () => $"{conversion}; license decryption failed.");
         return false;
@@ -340,7 +362,6 @@ namespace core.audiamus.connect {
     }
 
     public async Task<adb.json.Product> GetProductInfoAsync (string asin) {
-      ensureAccountId ();
 
       const string GROUPS
         = "response_groups=contributors,media,product_attrs,product_desc,product_extended_attrs," +
@@ -364,36 +385,31 @@ namespace core.audiamus.connect {
     }
 
     public IEnumerable<Book> GetBooks () {
-      ensureAccountId ();
       return BookLibrary.GetBooks (new ProfileId (AccountId, Region));
     }
 
     public void SavePersistentState (Conversion conversion, EConversionState state) {
-      ensureAccountId ();
       BookLibrary.SavePersistentState (conversion, state);
     }
 
     public void RestorePersistentState (Conversion conversion) {
-      ensureAccountId ();
       BookLibrary.RestorePersistentState (conversion);
     }
 
     public EConversionState GetPersistentState (Conversion conversion) {
-      ensureAccountId ();
       return BookLibrary.GetPersistentState (conversion);
     }
 
     public void CheckUpdateFilesAndState (
-      IDownloadSettings downloadSettings, 
-      IExportSettings exportSettings, 
+      IDownloadSettings downloadSettings,
+      IExportSettings exportSettings,
       Action<IConversion> callbackRefConversion,
       IInteractionCallback<InteractionMessage<BookLibInteract>, bool?> interactCallback
     ) {
-      ensureAccountId ();
       BookLibrary.CheckUpdateFilesAndState (
-        new ProfileId (AccountId, Region), 
-        downloadSettings, 
-        exportSettings, 
+        new ProfileId (AccountId, Region),
+        downloadSettings,
+        exportSettings,
         callbackRefConversion,
         interactCallback
       );
@@ -455,9 +471,9 @@ namespace core.audiamus.connect {
 
       string plainText = Encoding.ASCII.GetString (encryptedText.TakeWhile (b => b != 0).ToArray ());
 
-      adb.json.DecryptedLicense decryptedLicense = adb.json.DecryptedLicense.Deserialize (plainText);
+      adb.json.Voucher voucher = adb.json.Voucher.Deserialize (plainText);
 
-      license.decrypted_license_response = decryptedLicense;
+      license.voucher = voucher;
     }
 
     private async Task<string> callAudibleApiSignedForStringAsync (string relUrl, string jsonBody = null) {
@@ -488,25 +504,27 @@ namespace core.audiamus.connect {
     }
 
     private async Task<string> sendForStringAsync (HttpRequestMessage request, HttpClientEx httpClient) {
+      string content = null;
       try {
         await request.LogAsync (4, this, httpClient.DefaultRequestHeaders, httpClient.CookieContainer, httpClient.BaseAddress);
         var response = await httpClient.SendAsync (request);
         await response.LogAsync (4, this, httpClient.CookieContainer, httpClient.BaseAddress);
 
+        content = await response.Content.ReadAsStringAsync ();
         response.EnsureSuccessStatusCode ();
-        string content = await response.Content.ReadAsStringAsync ();
 
         return content;
       } catch (Exception exc) {
-        Log (1, this, () => exc.Summary ());
+        Log (1, this, () => $"{exc.Summary ()}{Environment.NewLine}{content}");
         return null;
       }
     }
 
     private async Task<byte[]> sendForBytesAsync (HttpRequestMessage request, HttpClientEx httpClient) {
+      HttpResponseMessage response = null;
       try {
         await request.LogAsync (4, this, httpClient.DefaultRequestHeaders, httpClient.CookieContainer, httpClient.BaseAddress);
-        var response = await httpClient.SendAsync (request);
+        response = await httpClient.SendAsync (request);
         await response.LogAsync (4, this, httpClient.CookieContainer, httpClient.BaseAddress);
 
         response.EnsureSuccessStatusCode ();
@@ -514,7 +532,8 @@ namespace core.audiamus.connect {
 
         return content;
       } catch (Exception exc) {
-        Log (1, this, () => exc.Summary ());
+        string content = await response.Content.ReadAsStringAsync ();
+        Log (1, this, () => $"{exc.Summary ()}{Environment.NewLine}{content}");
         return null;
       }
 

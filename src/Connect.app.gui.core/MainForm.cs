@@ -171,7 +171,7 @@ namespace core.audiamus.connect.app.gui {
       Enabled = true;
       UseWaitCursor = false;
       //Cursor.Current = Cursors.Default;
-      enable (false);
+      enable (null);
 
       _waitForm?.Close ();
       _waitForm = null;
@@ -280,7 +280,7 @@ namespace core.audiamus.connect.app.gui {
           }
         })) {
 
-          await Api.GetLibraryAsync ();
+          await Api.GetLibraryAsync (false);
 
           if (_waitForm is not null)
             _waitForm.LabelTask.Text = R.MsgDnldCoverImg;
@@ -518,9 +518,10 @@ namespace core.audiamus.connect.app.gui {
       enable (false);
     }
 
-    private void enable (bool running) {
-      convertdgvControl1.Enabled = !running;
-      btnConvert.Enabled = !running;
+    private void enable (bool? isRunning) {
+      bool running = isRunning ?? false;
+      convertdgvControl1.PartiallyDisabled = running;
+      btnConvert.Enabled = !(isRunning ?? true);
       btnAbort.Enabled = running;
       panelTop.Enabled = !running;
     }

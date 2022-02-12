@@ -9,6 +9,7 @@ using core.audiamus.booksdb;
 using core.audiamus.booksdb.ex;
 using R = core.audiamus.connect.ui.Properties.Resources;
 using static core.audiamus.aux.Logging;
+using core.audiamus.aux.ex;
 
 namespace core.audiamus.connect.ui {
 
@@ -20,7 +21,7 @@ namespace core.audiamus.connect.ui {
     private bool _ignoreFlag;
     private IEnumerable<Book> _allBooks;
     private IEnumerable<Conversion> _allConversions;
-    private IEnumerable<Book> SelectedBooks => CurrentlySelectedBooks.Select (b => b.Book).ToList();
+    private IEnumerable<Book> SelectedBooks => CurrentlySelectedBooks.Select (b => b.Book).ToList ();
     private List<Book> SelectedBooksForDownload { get; } = new List<Book> ();
     private bool _isSortingAftermath;
     private BookDataSource _firstDisplayedBook;
@@ -31,13 +32,14 @@ namespace core.audiamus.connect.ui {
 
     private static readonly Color __downloadSelectCellBackColor = Color.LightCyan;
 
-    public event BookSelectionChangedEventHandler BookSelectionChanged; 
-    public event BookSelectionChangedEventHandler BookDownloadSelectionChanged; 
-    public event ConversionUpdatedEventHandler ConversionUpdated; 
-    public event EventHandler Close; 
+    public event BookSelectionChangedEventHandler BookSelectionChanged;
+    public event BookSelectionChangedEventHandler BookDownloadSelectionChanged;
+    public event ConversionUpdatedEventHandler ConversionUpdated;
+    public event EventHandler Close;
+    public event EventHandler Resync;
 
     public IEnumerable<Book> Books { set => setDataSource (value); }
-    
+
     public IDownloadSettings Settings {
       private get => _settings;
       set {
@@ -61,10 +63,10 @@ namespace core.audiamus.connect.ui {
     }
 
     public void UpdateDownloads (IEnumerable<Book> books) {
-      using var lg = new LogGuard (1, this, () => $"#books={books.Count()}");
+      using var lg = new LogGuard (1, this, () => $"#books={books.Count ()}");
       using var rg = new ResourceGuard (x => _ignoreFlag = x);
 
-      var booksToBeRemoved = SelectedBooksForDownload.Except (books).ToList();
+      var booksToBeRemoved = SelectedBooksForDownload.Except (books).ToList ();
 
       revertDownloadSelection (booksToBeRemoved, true);
     }
@@ -127,6 +129,7 @@ namespace core.audiamus.connect.ui {
       if (allBooks is null)
         return;
 
+      // HACK currently exclude podcasts
       allBooks = allBooks
         .Where (b => b.DeliveryType == EDeliveryType.SinglePartBook || b.DeliveryType == EDeliveryType.MultiPartBook)
         .ToList ();
@@ -137,7 +140,7 @@ namespace core.audiamus.connect.ui {
       resetDataSource (allBooks);
 
       var allConversions = _allBooks.Select (b => b.Conversion).ToList ();
-      var allCompConversions = _allBooks.SelectMany (b => b.Components).Select (c => c.Conversion).ToList();
+      var allCompConversions = _allBooks.SelectMany (b => b.Components).Select (c => c.Conversion).ToList ();
       allConversions.AddRange (allCompConversions);
       allConversions.Sort ((x, y) => x.Id.CompareTo (y.Id));
       _allConversions = allConversions;
@@ -235,7 +238,18 @@ namespace core.audiamus.connect.ui {
 
     private void renewCurrentylSelectBooksSorted () {
       CurrentlySelectedBooks.Clear ();
-      dataGridView1.AddSelectedRowsSortedByIndex (CurrentlySelectedBooks, book => book, DataSource);
+      dataGridView1.AddSelectedRowsSortedByIndex (CurrentlySelectedBooks, book => book, DataSource, selectable);
+
+      bool selectable (int idx) {
+        try {
+          var item = DataSource[idx];
+          var state = item.Book.ApplicableState (Settings.MultiPartDownload);
+          return state > EConversionState.unknown;
+        } catch (Exception exc) {
+          Log (1, this, exc.Summary ());
+        }
+        return true;
+      }
     }
 
     private void enableDownloadButtons () {
@@ -257,7 +271,7 @@ namespace core.audiamus.connect.ui {
     private void btnAddSel_Click (object sender, EventArgs e) {
       var addBooks = SelectedBooks
         .Except (SelectedBooksForDownload)
-        .ToList();
+        .ToList ();
 
       SelectedBooksForDownload.AddRange (addBooks);
 
@@ -306,7 +320,7 @@ namespace core.audiamus.connect.ui {
       }
 
       afterDownloadSelectionChanged ();
-    } 
+    }
 
     private void afterDownloadSelectionChanged () {
       int nBooks = SelectedBooksForDownload.Count;
@@ -318,7 +332,7 @@ namespace core.audiamus.connect.ui {
 
         lblDnloadList.Text = info;
         Log (3, this, () => $"download selected: #books={nBooks}, #parts={nParts}");
-      } else {       
+      } else {
         lblDnloadList.Text = null;
         Log (3, this, () => "download selected: none");
       }
@@ -345,6 +359,10 @@ namespace core.audiamus.connect.ui {
         comp.Conversion.State = comp.Conversion.PersistState ?? EConversionState.remote;
       }
 
+    }
+
+    private void btnResync_Click (object sender, EventArgs e) {
+      Resync?.Invoke (this, EventArgs.Empty);
     }
   }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using core.audiamus.booksdb;
 using core.audiamus.common;
@@ -45,6 +46,21 @@ namespace core.audiamus.connect {
   record ProductComponentPair (adb.json.Product Product, Component Component);
 
   record ProfileBundle (IProfile Profile, IProfileKey Key, IProfileAliasKey AliasKey);
+
+  record BookCompositeLists (
+    List<string> BookAsins,  
+    List<Conversion> Conversions,  
+    List<Component> Components,  
+    List<Series> Series,  
+    List<SeriesBook> SeriesBooks,  
+    List<Author> Authors,  
+    List<Narrator> Narrators,  
+    List<Genre> Genres,  
+    List<Ladder> Ladders,  
+    List<Rung> Rungs,  
+    List<Codec> Codecs  
+  );
+
 
 }
 

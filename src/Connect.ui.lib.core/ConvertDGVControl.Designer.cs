@@ -41,6 +41,7 @@ namespace core.audiamus.connect.ui {
       // 
       this.dataGridView1.AllowUserToResizeRows = false;
       this.dataGridView1.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.DisplayedCells;
+      this.dataGridView1.ClientAreaEnabled = true;
       dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
       dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Control;
       dataGridViewCellStyle1.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
@@ -94,6 +95,7 @@ namespace core.audiamus.connect.ui {
       // 
       // btnRem
       // 
+      this.btnRem.ForeColor = System.Drawing.SystemColors.ControlText;
       this.btnRem.Location = new System.Drawing.Point(95, 8);
       this.btnRem.Name = "btnRem";
       this.btnRem.Size = new System.Drawing.Size(80, 23);

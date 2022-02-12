@@ -22,7 +22,7 @@
     public string status_code { get; set; }
     public string voucher_id { get; set; }
 
-    public DecryptedLicense decrypted_license_response { get; set; }
+    public Voucher voucher { get; set; }
   }
 
   public class ContentMetadata {

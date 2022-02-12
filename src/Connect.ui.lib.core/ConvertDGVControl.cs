@@ -34,6 +34,18 @@ namespace core.audiamus.connect.ui {
     public event EventHandler SelectionChanged;
     public event BoolEventHandler IdleChanged;
 
+    public bool PartiallyDisabled {
+      get => !panel1.Enabled;
+      set {
+        panel1.Enabled = !value;
+        dataGridView1.ClientAreaEnabled = !value;
+        if (BookLibForm is not null)
+          BookLibForm.DownloadSelectEnabled = !value;
+        if (value)
+          snapshotSelection (true);
+      }
+    }
+
     public IAudibleApi AudibleApi {
       private get => _audibleApi;
       set {
@@ -56,16 +68,16 @@ namespace core.audiamus.connect.ui {
 
     public IEnumerable<Conversion> SelectedConversions => _selectedConversions;
 
-    public new bool Enabled {
-      get => base.Enabled;
-      set {
-        if (BookLibForm is not null)
-          BookLibForm.DownloadSelectEnabled = value;
-        base.Enabled = value;
-        if (!value)
-          snapshotSelection (true);
-      }
-    }
+    //public new bool Enabled {
+    //  get => base.Enabled;
+    //  set {
+    //    if (BookLibForm is not null)
+    //      BookLibForm.DownloadSelectEnabled = value;
+    //    base.Enabled = value;
+    //    if (!value)
+    //      snapshotSelection (true);
+    //  }
+    //}
 
     public bool DownloadOnlyMode {
       get => !btnAdd.Visible;
@@ -350,11 +362,6 @@ namespace core.audiamus.connect.ui {
           await AudibleApi.RefreshTokenAsyncFunc ();
         }
 
-        if (!s.AutoUpdateLibrary) {
-          await AudibleApi.GetLibraryAsync ();
-          await AudibleApi.DownloadCoverImagesAsync ();
-        }
-
         _initConnectionDone = true;
       }
 
@@ -362,7 +369,7 @@ namespace core.audiamus.connect.ui {
       BookLibForm.FormClosed += bookLibForm_FormClosed;
       BookLibForm.BookDownloadSelectionChanged += bookLibForm_BookDownloadSelectionChanged;
       BookLibForm.ConversionUpdated += bookLibForm_ConversionUpdated;
-      BookLibForm.DownloadSelectEnabled = dataGridView1.Enabled;
+      //BookLibForm.DownloadSelectEnabled = dataGridView1.Enabled;
       BookLibForm.SetStartPosition (EFormStartPosition.AtParentTopLeft, this);
       BookLibForm.Show ();
 

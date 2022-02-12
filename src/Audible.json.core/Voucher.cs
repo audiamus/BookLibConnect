@@ -2,7 +2,7 @@
 
 namespace core.audiamus.adb.json {
 
-  public class DecryptedLicense : Serialization<DecryptedLicense> {
+  public class Voucher : Serialization<Voucher> {
     public string key { get; set; }
     public string iv { get; set; }
     public Rule[] rules { get; set; }

@@ -9,7 +9,7 @@ namespace core.audiamus.connect.app.gui {
     /// </summary>
     [STAThread]
     static void Main (string[] args) {
-      Application.SetHighDpiMode (HighDpiMode.SystemAware);
+      Application.SetHighDpiMode (HighDpiMode.PerMonitorV2);
       Application.EnableVisualStyles ();
       Application.SetCompatibleTextRenderingDefault (false);
 

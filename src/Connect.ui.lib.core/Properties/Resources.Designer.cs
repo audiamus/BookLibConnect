@@ -314,6 +314,16 @@ namespace core.audiamus.connect.ui.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap ImgGlobeFailed {
+            get {
+                object obj = ResourceManager.GetObject("ImgGlobeFailed", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap ImgKey {
             get {
                 object obj = ResourceManager.GetObject("ImgKey", resourceCulture);
@@ -553,6 +563,28 @@ namespace core.audiamus.connect.ui.Properties {
         internal static string MsgExistingAccounts {
             get {
                 return ResourceManager.GetString("MsgExistingAccounts", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Full library resynchronization,
+        ///add and remove books?.
+        /// </summary>
+        internal static string MsgFullResync {
+            get {
+                return ResourceManager.GetString("MsgFullResync", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Full library resynchronization:
+        ///
+        ///[ Yes ] : Add and remove books
+        ///[ No ] : Only add new books since last purchase.
+        /// </summary>
+        internal static string MsgFullResyncOrElse {
+            get {
+                return ResourceManager.GetString("MsgFullResyncOrElse", resourceCulture);
             }
         }
         

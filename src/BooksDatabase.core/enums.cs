@@ -21,7 +21,7 @@
   }
 
   public enum EConversionState {
-    unknown,          // question mark
+    unknown,          // strikethru globe
     remote,           // globe
     download,         // globe with down arrow
     license_granted,  // key
@@ -36,7 +36,7 @@
     converting,       // right arrow
     converted,        // checkmark green
     converted_unknown,// checkmark gray
-    conversion_error  // red cross
+    conversion_error  // strikethru right arrow
   }
 
   public enum ELicenseStatusCode {
