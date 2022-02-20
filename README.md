@@ -17,13 +17,13 @@ _**Note:** Books downloaded with Book Lib Connect and exported for [AAX Audio Co
 - Downloads your books and converts to plain .m4b files.
 - Detailed progress monitoring.
 - Optionally exports as .aax files for [AAX Audio Converter 1](https://github.com/audiamus/AaxAudioConverter) compatibility.
-- PDF user guide included.
+- PDF user manual included.
 
 
 ## Download
-Windows setup package version 0.4, English, with manual:
+Windows setup package version 0.5, English, with manual:
 
-**[BookLibConnect-0.4-Setup.exe](https://github.com/audiamus/BookLibConnect/releases/download/v0.4/BookLibConnect-0.4-Setup.exe)**
+**[BookLibConnect-0.5-Setup.exe](https://github.com/audiamus/BookLibConnect/releases/download/v0.5/BookLibConnect-0.5-Setup.exe)**
 
 ## Feedback
 Use the [Discussions](https://github.com/audiamus/BookLibConnect/discussions) and [Issues](https://github.com/audiamus/BookLibConnect/issues) sections. 

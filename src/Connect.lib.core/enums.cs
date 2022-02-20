@@ -10,13 +10,6 @@ namespace core.audiamus.connect {
     title_author
   }
 
-  public enum EDownloadQuality {
-    Extreme,
-    High,
-    Normal,
-    Low
-  }
-
   [Flags]
   enum ECheckFile {
     none = 0,

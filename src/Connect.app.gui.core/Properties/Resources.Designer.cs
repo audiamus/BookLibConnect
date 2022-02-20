@@ -98,7 +98,7 @@ namespace core.audiamus.connect.app.gui.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Initialiizing database ....
+        ///   Looks up a localized string similar to Initializing database ....
         /// </summary>
         internal static string MsgInitDB {
             get {
@@ -107,7 +107,7 @@ namespace core.audiamus.connect.app.gui.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Initialiizing library ....
+        ///   Looks up a localized string similar to Initializing library ....
         /// </summary>
         internal static string MsgInitLib {
             get {
@@ -151,6 +151,17 @@ namespace core.audiamus.connect.app.gui.Properties {
         internal static string MsgOnlineUpdatePreview {
             get {
                 return ResourceManager.GetString("MsgOnlineUpdatePreview", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Not all parameters for secure encryption of configuration data were found. The data will be stored in encrypted form, nonetheless, allbeit with a weaker key.
+        ///
+        ///This could be caused by running in a virtual environment or on an older computer. .
+        /// </summary>
+        internal static string MsgWeakConfigEncryption {
+            get {
+                return ResourceManager.GetString("MsgWeakConfigEncryption", resourceCulture);
             }
         }
         

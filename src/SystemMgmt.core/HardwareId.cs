@@ -1,4 +1,5 @@
-﻿using System.Management;
+﻿using System;
+using System.Management;
 
 namespace core.audiamus.sysmgmt {
   /// <summary>
@@ -7,20 +8,28 @@ namespace core.audiamus.sysmgmt {
   public static class HardwareId {
     public static string GetCpuId () {
       //ManagementObjectCollection mbsList = null;
-      ManagementObjectSearcher mbs = new ManagementObjectSearcher ("Select * From Win32_processor");
-      ManagementObjectCollection mbsList = mbs.Get ();
-      string id = string.Empty;
-      foreach (ManagementObject mo in mbsList) {
-        id = mo["ProcessorID"].ToString ();
+      try {
+        ManagementObjectSearcher mbs = new ManagementObjectSearcher ("Select * From Win32_processor");
+        ManagementObjectCollection mbsList = mbs.Get ();
+        string id = string.Empty;
+        foreach (ManagementObject mo in mbsList) {
+          id = mo["ProcessorID"].ToString ();
+        }
+        return id;
+      } catch (Exception) {
+        return string.Empty;
       }
-      return id;
     }
 
     public static string GetDiskId () {
-      ManagementObject dsk = new ManagementObject (@"win32_logicaldisk.deviceid=""c:""");
-      dsk.Get ();
-      string id = dsk["VolumeSerialNumber"].ToString ();
-      return id;
+      try { 
+        ManagementObject dsk = new ManagementObject (@"win32_logicaldisk.deviceid=""c:""");
+        dsk.Get ();
+        string id = dsk["VolumeSerialNumber"].ToString ();
+        return id;
+      } catch (Exception) {
+        return string.Empty;
+      }
     }
 
     public static string GetMotherboardId () {

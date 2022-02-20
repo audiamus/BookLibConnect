@@ -15,7 +15,7 @@ static public class MotherboardInfo {
           return GetAvailability (int.Parse (queryObj["Availability"]?.ToString ()));
         }
         return string.Empty;
-      } catch (Exception e) {
+      } catch (Exception) {
         return string.Empty;
       }
     }
@@ -31,7 +31,7 @@ static public class MotherboardInfo {
             return false;
         }
         return false;
-      } catch (Exception e) {
+      } catch (Exception) {
         return false;
       }
     }
@@ -44,7 +44,7 @@ static public class MotherboardInfo {
           return convertToDateTime (queryObj["InstallDate"]?.ToString ());
         }
         return string.Empty;
-      } catch (Exception e) {
+      } catch (Exception) {
         return string.Empty;
       }
     }
@@ -57,7 +57,7 @@ static public class MotherboardInfo {
           return queryObj["Manufacturer"]?.ToString ();
         }
         return string.Empty;
-      } catch (Exception e) {
+      } catch (Exception) {
         return string.Empty;
       }
     }
@@ -70,7 +70,7 @@ static public class MotherboardInfo {
           return queryObj["Model"]?.ToString ();
         }
         return string.Empty;
-      } catch (Exception e) {
+      } catch (Exception) {
         return string.Empty;
       }
     }
@@ -83,7 +83,7 @@ static public class MotherboardInfo {
           return queryObj["PartNumber"]?.ToString ();
         }
         return string.Empty;
-      } catch (Exception e) {
+      } catch (Exception) {
         return string.Empty;
       }
     }
@@ -96,7 +96,7 @@ static public class MotherboardInfo {
           return queryObj["PNPDeviceID"]?.ToString ();
         }
         return string.Empty;
-      } catch (Exception e) {
+      } catch (Exception) {
         return string.Empty;
       }
     }
@@ -109,7 +109,7 @@ static public class MotherboardInfo {
           return queryObj["PrimaryBusType"]?.ToString ();
         }
         return string.Empty;
-      } catch (Exception e) {
+      } catch (Exception) {
         return string.Empty;
       }
     }
@@ -122,7 +122,7 @@ static public class MotherboardInfo {
           return queryObj["Product"]?.ToString ();
         }
         return string.Empty;
-      } catch (Exception e) {
+      } catch (Exception) {
         return string.Empty;
       }
     }
@@ -138,7 +138,7 @@ static public class MotherboardInfo {
             return false;
         }
         return false;
-      } catch (Exception e) {
+      } catch (Exception) {
         return false;
       }
     }
@@ -154,7 +154,7 @@ static public class MotherboardInfo {
             return false;
         }
         return false;
-      } catch (Exception e) {
+      } catch (Exception) {
         return false;
       }
     }
@@ -167,7 +167,7 @@ static public class MotherboardInfo {
           return queryObj["RevisionNumber"]?.ToString ();
         }
         return string.Empty;
-      } catch (Exception e) {
+      } catch (Exception) {
         return string.Empty;
       }
     }
@@ -180,7 +180,7 @@ static public class MotherboardInfo {
           return queryObj["SecondaryBusType"]?.ToString ();
         }
         return string.Empty;
-      } catch (Exception e) {
+      } catch (Exception) {
         return string.Empty;
       }
     }
@@ -193,7 +193,7 @@ static public class MotherboardInfo {
           return queryObj["SerialNumber"]?.ToString ();
         }
         return string.Empty;
-      } catch (Exception e) {
+      } catch (Exception) {
         return string.Empty;
       }
     }
@@ -206,7 +206,7 @@ static public class MotherboardInfo {
           return querObj["Status"]?.ToString ();
         }
         return string.Empty;
-      } catch (Exception e) {
+      } catch (Exception) {
         return string.Empty;
       }
     }
@@ -219,7 +219,7 @@ static public class MotherboardInfo {
           return queryObj["SystemName"]?.ToString ();
         }
         return string.Empty;
-      } catch (Exception e) {
+      } catch (Exception) {
         return string.Empty;
       }
     }
@@ -232,7 +232,7 @@ static public class MotherboardInfo {
           return queryObj["Version"]?.ToString ();
         }
         return string.Empty;
-      } catch (Exception e) {
+      } catch (Exception) {
         return string.Empty;
       }
     }

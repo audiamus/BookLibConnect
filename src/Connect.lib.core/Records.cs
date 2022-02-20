@@ -61,6 +61,7 @@ namespace core.audiamus.connect {
     List<Codec> Codecs  
   );
 
+  record ConfigurationTokenResult (string Token, bool Weak);
 
 }
 

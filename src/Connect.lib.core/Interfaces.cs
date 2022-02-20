@@ -80,7 +80,7 @@ namespace core.audiamus.connect {
     Task<string> GetUserProfileAsync ();
     Task<bool> GetActivationBytesAsync ();
     Task<adb.json.LicenseResponse> GetDownloadLicenseAsync (
-      string asin, EDownloadQuality quality = EDownloadQuality.Extreme
+      string asin, EDownloadQuality quality
     );
     Task<bool> DownloadAsync (
       Conversion conversion, Action<Conversion, long> progressAction, CancellationToken cancToken
@@ -90,7 +90,7 @@ namespace core.audiamus.connect {
     );
     Task DownloadCoverImagesAsync ();
     Task UpdateMetaInfo (IEnumerable<Component> components, Action<IEnumerable<Component>> onDone);
-    Task<bool> GetDownloadLicenseAndSaveAsync (Conversion conversion);
+    Task<bool> GetDownloadLicenseAndSaveAsync (Conversion conversion, EDownloadQuality quality);
     IEnumerable<Book> GetBooks ();
     void SavePersistentState (Conversion conversion, EConversionState state);
     void RestorePersistentState (Conversion conversion);

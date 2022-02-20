@@ -187,7 +187,7 @@ namespace core.audiamus.connect {
       return false;
     }
 
-    public async Task<adb.json.LicenseResponse> GetDownloadLicenseAsync (string asin, EDownloadQuality quality = EDownloadQuality.Extreme) {
+    public async Task<adb.json.LicenseResponse> GetDownloadLicenseAsync (string asin, EDownloadQuality quality) {
       using var _ = new LogGuard (3, this, () => $"asin={asin}");
       string response = await getDownloadLicenseAsync (asin, quality);
 
@@ -203,12 +203,13 @@ namespace core.audiamus.connect {
       return license;
     }
 
-    public async Task<bool> GetDownloadLicenseAndSaveAsync (Conversion conversion) {
-      using var _ = new LogGuard (3, this, () => conversion.ToString ());
+    public async Task<bool> GetDownloadLicenseAndSaveAsync (Conversion conversion, EDownloadQuality quality) {
+      using var _ = new LogGuard (3, this, () => $"{conversion}");
+      Log (3, this, () => $"{conversion}; desired quality: {quality}");
       adb.json.LicenseResponse licresp;
       // get license
       try {
-        licresp = await GetDownloadLicenseAsync (conversion.Asin);
+        licresp = await GetDownloadLicenseAsync (conversion.Asin, quality);
       } catch (Exception exc) {
         conversion.State = EConversionState.license_denied;
         Log (3, this, () => $"{conversion}; {exc.Summary ()}");
@@ -232,8 +233,8 @@ namespace core.audiamus.connect {
 
       // save license to DB, including chapters
       // update state
-      BookLibrary.UpdateLicenseAndChapters (lic, conversion);
-      Log (3, this, () => $"{conversion}; done.");
+      var aq = BookLibrary.UpdateLicenseAndChapters (lic, conversion, quality);
+      Log (3, this, () => $"{conversion}; done, {aq}");
 
       return true;
     }
@@ -416,7 +417,7 @@ namespace core.audiamus.connect {
     }
 
 
-    private async Task<string> getDownloadLicenseAsync (string asin, EDownloadQuality quality = EDownloadQuality.Extreme) {
+    private async Task<string> getDownloadLicenseAsync (string asin, EDownloadQuality quality) {
 
       var url = $"{CONTENT_PATH}/{asin}/licenserequest";
 

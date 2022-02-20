@@ -80,6 +80,9 @@ namespace core.audiamus.connect.app.gui {
           .ToArray();
         comBoxSort.SelectedIndex = (int)UserSettings.DownloadSettings.InitialSorting;
 
+        comBoxDnldQual.DataSource = Enum.GetValues<EDownloadQuality> ();
+        comBoxDnldQual.SelectedIndex = (int)UserSettings.DownloadSettings.DownloadQuality;
+
         ckBoxExport.Checked = UserSettings.ExportSettings.ExportToAax ?? false;
       }
 
@@ -163,6 +166,8 @@ namespace core.audiamus.connect.app.gui {
 
       using var _ = new LogGuard (3, this);
 
+      logTmpFileMaintenance ();
+
       checkOnlineUpdate ();
 
       await init ();
@@ -180,7 +185,10 @@ namespace core.audiamus.connect.app.gui {
     private async Task init () {
       using var _ = new LogGuard (3, this);
 
-      AudibleClient = new AudibleClient (UserSettings.ConfigSettings, UserSettings.DownloadSettings);
+      AudibleClient = new AudibleClient (UserSettings.ConfigSettings, UserSettings.DownloadSettings) {
+        WeakConfigEncryptionCallback = weakConfigEncryptionCallback
+      };
+
       Log (4, this, () => $"before wizard, {Cursor.Current}");
 
       await runWizardAsync ();
@@ -221,6 +229,14 @@ namespace core.audiamus.connect.app.gui {
       await initLibraryAsync ();
       Log (4, this, () => $"all done, {Cursor.Current}");
 
+    }
+
+    private void weakConfigEncryptionCallback () {
+      SynchronizationContext.Post (weakConfigEncryptionCallbackSync);
+
+      void weakConfigEncryptionCallbackSync () {
+        MsgBox.Show (this, R.MsgWeakConfigEncryption, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+      }
     }
 
     private async Task runWizardAsync () {
@@ -331,6 +347,9 @@ namespace core.audiamus.connect.app.gui {
       await update.UpdateAsync (interact, () => Application.Exit (), isBusyForUpdate);
     }
 
+    private void logTmpFileMaintenance () {
+      Task task = LogTmpFileMaintenance.Instance.CleanupAsync ();
+    } 
 
     private async void handleDeferredUpdateAsync () {
       var update = newOnlineUpdate ();
@@ -457,6 +476,12 @@ namespace core.audiamus.connect.app.gui {
       onChangedSettings ();
     }
 
+    private void comBoxDnldQual_SelectedIndexChanged (object sender, EventArgs e) {
+      if (_ignoreFlag)
+        return;
+      UserSettings.DownloadSettings.DownloadQuality = (EDownloadQuality)comBoxDnldQual.SelectedIndex;
+      onChangedSettings ();
+    }
 
     private void ckBoxExport_CheckedChanged (object sender, EventArgs e) {
       if (_ignoreFlag)
@@ -611,5 +636,6 @@ namespace core.audiamus.connect.app.gui {
     private void timer1_Tick (object sender, EventArgs e) {
       resetProgressBars ();
     }
+
   }
 }

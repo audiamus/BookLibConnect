@@ -251,7 +251,11 @@ namespace core.audiamus.connect {
     }
 
 
-    public void UpdateLicenseAndChapters (adb.json.ContentLicense license, Conversion conversion) {
+    public AudioQuality UpdateLicenseAndChapters (
+      adb.json.ContentLicense license, 
+      Conversion conversion, 
+      EDownloadQuality downloadQuality
+    ) {
       using var _ = new LogGuard (3, this, () => conversion.ToString ());
       try {
         using var dbContext = new BookDbContext (_dbDir);
@@ -272,7 +276,7 @@ namespace core.audiamus.connect {
         product.LicenseKey = voucher?.key;
         product.LicenseIv = voucher?.iv;
 
-        setDownloadFilenameAndCodec (license, conversion);
+        var aq = setDownloadFilenameAndCodec (license, conversion, downloadQuality);
 
         // file size
         product.FileSizeBytes = license.content_metadata?.content_reference?.content_size_in_bytes;
@@ -288,12 +292,14 @@ namespace core.audiamus.connect {
         updateState (conversion, EConversionState.license_granted);
 
         dbContext.SaveChanges ();
+        return aq;
       } catch (Exception exc) {
         Log (1, this, () =>
           $"{conversion}, throwing{Environment.NewLine}" +
           $"{exc.Summary ()})");
         throw;
       }
+
     }
 
     private static bool __checkUpdateAnswered;
@@ -520,8 +526,15 @@ namespace core.audiamus.connect {
       }
     }
 
-    private static void setDownloadFilenameAndCodec (adb.json.ContentLicense license, Conversion conversion) {
+    private static AudioQuality setDownloadFilenameAndCodec (
+      adb.json.ContentLicense license, 
+      Conversion conversion,
+      EDownloadQuality downloadQuality
+    ) {
       var product = conversion.BookCommon;
+
+      product.DownloadQuality = downloadQuality;
+
       // download destination
       string dir = conversion.DownloadFileName;
 
@@ -535,11 +548,12 @@ namespace core.audiamus.connect {
       string asin = product.Asin;
       sb.Append ($"_{asin}_LC");
 
+      AudioQuality aq = null;
       string format = license.content_metadata?.content_reference?.content_format?.ToLower ();
       bool succ = Enum.TryParse<ECodec> (format, out ECodec codec);
       if (succ) {
         product.FileCodec = codec;
-        AudioQuality aq = codec.ToQuality ();
+        aq = codec.ToQuality ();
         if (aq is not null) {
           product.BitRate = aq.BitRate;
           product.SampleRate = aq.SampleRate;
@@ -553,6 +567,7 @@ namespace core.audiamus.connect {
       string filename = sb.ToString ();// + ".aaxc.m4b";
       string path = Path.Combine (dir, filename);
       conversion.DownloadFileName = path;
+      return aq;
     }
 
     // internal instead of private for testing only

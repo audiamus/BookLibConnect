@@ -27,6 +27,8 @@ namespace core.audiamus.connect {
     public ConfigSettings ConfigSettings { get; }
     public IBookLibrary BookLibraryExcerpt => BookLibrary;
 
+    public Action WeakConfigEncryptionCallback { set => Authorize.WeakConfigEncryptionCallback = value; }
+
     public IAudibleApi Api {
       get {
         if (_audibleApi is null) {
@@ -216,17 +218,30 @@ namespace core.audiamus.connect {
     private async void settings_ChangedSettings (object sender, EventArgs e) => 
       await Authorize.WriteConfigurationAsync ();
 
-    private string getConfigurationToken (bool enforce) {
+    private ConfigurationTokenResult getConfigurationToken (bool enforce) {
       if (!(ConfigSettings?.EncryptConfiguration ?? false) && !enforce)
-        return null;
+        return default;
+      bool weak = false;
       var sb = new StringBuilder ();
-      sb.Append (ApplEnv.UserName.Rot13());
-      sb.Append (HardwareId.GetCpuId ());
+      
+      string uid = ApplEnv.UserName.Rot13 ();
+      sb.Append (uid);
+      
+      string cid = HardwareId.GetCpuId ();
+      if (cid.IsNullOrWhiteSpace ())
+        weak = true;
+      else
+        sb.Append (cid);
+      
       string mbId = HardwareId.GetMotherboardId ();
       if (mbId.IsNullOrWhiteSpace ())
         mbId = MotherboardInfo.PNPDeviceID;
-      sb.Append (mbId);
-      return sb.ToString ();
+      if (mbId.IsNullOrWhiteSpace ())
+        weak = true;
+      else
+        sb.Append (mbId);
+      
+      return new (sb.ToString (), weak);
     }
 
     private async Task<IProfileAliasKey> fromFileAsync (

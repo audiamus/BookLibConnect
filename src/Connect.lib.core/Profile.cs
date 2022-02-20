@@ -192,6 +192,7 @@ namespace core.audiamus.connect {
     private List<Profile> _profiles;
     public IReadOnlyList<Profile> Profiles => _profiles;
 
+    public bool Existed { get; private set; }
     public bool IsEncrypted { get; private set; }
 
     public IProfile AddOrReplace (Profile profile) {
@@ -249,6 +250,7 @@ namespace core.audiamus.connect {
       var config = await FileExtensions.ReadJsonFileAsync<SerializableConfig> (CONFIG_DIR, this.GetType().Name);
       if (config is null)
         return;
+      Existed = true;
       bool encrypted = !token.IsNullOrWhiteSpace ();
       Logging.Log (3, this, () => $"{(encrypted ? "decrypt" : string.Empty)}");
       if (!token.IsNullOrWhiteSpace ())
@@ -264,6 +266,7 @@ namespace core.audiamus.connect {
       if (encrypted)
         encrypt (config, token);
 
+      Existed = true;
       Directory.CreateDirectory (CONFIG_DIR);
       await config.WriteJsonFileAsync (CONFIG_DIR, this.GetType().Name);
     }

@@ -34,6 +34,8 @@ namespace core.audiamus.connect {
 
     public HttpClientEx HttpClientAmazon { get; private set; }
 
+    public Action WeakConfigEncryptionCallback { private get; set; }
+
     public Authorize (ConfigTokenDelegate getTokenFunc, IAuthorizeSettings settings) {
       Log (3, this);
       GetTokenFunc = getTokenFunc;
@@ -122,8 +124,14 @@ namespace core.audiamus.connect {
 
       if (Configuration is null)
         return;
-      string token = GetTokenFunc?.Invoke ();
+      (string token, bool weak) = GetTokenFunc?.Invoke ();
+
+      bool existed = Configuration.Existed;
       await Configuration.WriteAsync (token);
+
+      if (!existed && weak)
+        WeakConfigEncryptionCallback?.Invoke ();
+
     }
 
     private void ensureHttpClient (IProfile profile) {
@@ -250,8 +258,8 @@ namespace core.audiamus.connect {
         await readConfigAsync (true);
 
       async Task readConfigAsync (bool enforce) {
-        string token = GetTokenFunc?.Invoke (enforce);
-        await Configuration.ReadAsync (token);
+        var cfgToken = GetTokenFunc?.Invoke (enforce);
+        await Configuration.ReadAsync (cfgToken.Token);
       }
     }
 

@@ -49,4 +49,12 @@
     author,
     narrator
   }
+
+  public enum EDownloadQuality {
+    Low,
+    Normal,
+    High,
+    Extreme
+  }
+
 }

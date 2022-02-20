@@ -54,6 +54,8 @@ namespace core.audiamus.connect.app.gui {
       this.btnConvert = new System.Windows.Forms.Button();
       this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
       this.timer1 = new System.Windows.Forms.Timer(this.components);
+      this.comBoxDnldQual = new System.Windows.Forms.ComboBox();
+      this.label5 = new System.Windows.Forms.Label();
       this.panelTop.SuspendLayout();
       this.grpBoxDownload.SuspendLayout();
       this.grpBoxExport.SuspendLayout();
@@ -64,10 +66,10 @@ namespace core.audiamus.connect.app.gui {
       // ckBoxAdult
       // 
       this.ckBoxAdult.AutoSize = true;
-      this.ckBoxAdult.Location = new System.Drawing.Point(147, 56);
+      this.ckBoxAdult.Location = new System.Drawing.Point(147, 78);
       this.ckBoxAdult.Name = "ckBoxAdult";
       this.ckBoxAdult.Size = new System.Drawing.Size(96, 17);
-      this.ckBoxAdult.TabIndex = 5;
+      this.ckBoxAdult.TabIndex = 7;
       this.ckBoxAdult.Text = "Adult products";
       this.ckBoxAdult.UseVisualStyleBackColor = true;
       this.ckBoxAdult.UseWaitCursor = true;
@@ -76,10 +78,10 @@ namespace core.audiamus.connect.app.gui {
       // ckBoxMultiPart
       // 
       this.ckBoxMultiPart.AutoSize = true;
-      this.ckBoxMultiPart.Location = new System.Drawing.Point(147, 36);
+      this.ckBoxMultiPart.Location = new System.Drawing.Point(147, 58);
       this.ckBoxMultiPart.Name = "ckBoxMultiPart";
       this.ckBoxMultiPart.Size = new System.Drawing.Size(121, 17);
-      this.ckBoxMultiPart.TabIndex = 4;
+      this.ckBoxMultiPart.TabIndex = 6;
       this.ckBoxMultiPart.Text = "Multi-part download";
       this.ckBoxMultiPart.UseVisualStyleBackColor = true;
       this.ckBoxMultiPart.UseWaitCursor = true;
@@ -91,6 +93,7 @@ namespace core.audiamus.connect.app.gui {
       this.convertdgvControl1.DownloadOnlyMode = false;
       this.convertdgvControl1.Location = new System.Drawing.Point(0, 107);
       this.convertdgvControl1.Name = "convertdgvControl1";
+      this.convertdgvControl1.PartiallyDisabled = false;
       this.convertdgvControl1.Size = new System.Drawing.Size(822, 268);
       this.convertdgvControl1.TabIndex = 4;
       this.convertdgvControl1.UseWaitCursor = true;
@@ -109,6 +112,8 @@ namespace core.audiamus.connect.app.gui {
       // 
       // grpBoxDownload
       // 
+      this.grpBoxDownload.Controls.Add(this.comBoxDnldQual);
+      this.grpBoxDownload.Controls.Add(this.label5);
       this.grpBoxDownload.Controls.Add(this.ckBoxRefresh);
       this.grpBoxDownload.Controls.Add(this.ckBoxUpdLib);
       this.grpBoxDownload.Controls.Add(this.btnDnldDir);
@@ -129,7 +134,7 @@ namespace core.audiamus.connect.app.gui {
       // ckBoxRefresh
       // 
       this.ckBoxRefresh.AutoSize = true;
-      this.ckBoxRefresh.Location = new System.Drawing.Point(11, 16);
+      this.ckBoxRefresh.Location = new System.Drawing.Point(6, 19);
       this.ckBoxRefresh.Name = "ckBoxRefresh";
       this.ckBoxRefresh.Size = new System.Drawing.Size(90, 17);
       this.ckBoxRefresh.TabIndex = 1;
@@ -141,7 +146,7 @@ namespace core.audiamus.connect.app.gui {
       // ckBoxUpdLib
       // 
       this.ckBoxUpdLib.AutoSize = true;
-      this.ckBoxUpdLib.Location = new System.Drawing.Point(11, 36);
+      this.ckBoxUpdLib.Location = new System.Drawing.Point(6, 38);
       this.ckBoxUpdLib.Name = "ckBoxUpdLib";
       this.ckBoxUpdLib.Size = new System.Drawing.Size(125, 17);
       this.ckBoxUpdLib.TabIndex = 2;
@@ -152,10 +157,10 @@ namespace core.audiamus.connect.app.gui {
       // 
       // btnDnldDir
       // 
-      this.btnDnldDir.Location = new System.Drawing.Point(286, 72);
+      this.btnDnldDir.Location = new System.Drawing.Point(286, 74);
       this.btnDnldDir.Name = "btnDnldDir";
       this.btnDnldDir.Size = new System.Drawing.Size(110, 23);
-      this.btnDnldDir.TabIndex = 8;
+      this.btnDnldDir.TabIndex = 9;
       this.btnDnldDir.Text = "Download Folder …";
       this.btnDnldDir.UseVisualStyleBackColor = true;
       this.btnDnldDir.UseWaitCursor = true;
@@ -165,17 +170,17 @@ namespace core.audiamus.connect.app.gui {
       // 
       this.comBoxSort.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
       this.comBoxSort.FormattingEnabled = true;
-      this.comBoxSort.Location = new System.Drawing.Point(285, 34);
+      this.comBoxSort.Location = new System.Drawing.Point(285, 30);
       this.comBoxSort.Name = "comBoxSort";
       this.comBoxSort.Size = new System.Drawing.Size(111, 21);
-      this.comBoxSort.TabIndex = 7;
+      this.comBoxSort.TabIndex = 8;
       this.comBoxSort.UseWaitCursor = true;
       this.comBoxSort.SelectedIndexChanged += new System.EventHandler(this.comBoxSort_SelectedIndexChanged);
       // 
       // label1
       // 
       this.label1.AutoSize = true;
-      this.label1.Location = new System.Drawing.Point(286, 17);
+      this.label1.Location = new System.Drawing.Point(286, 13);
       this.label1.Name = "label1";
       this.label1.Size = new System.Drawing.Size(69, 13);
       this.label1.TabIndex = 5;
@@ -185,10 +190,10 @@ namespace core.audiamus.connect.app.gui {
       // ckBoxKeepEncrypted
       // 
       this.ckBoxKeepEncrypted.AutoSize = true;
-      this.ckBoxKeepEncrypted.Location = new System.Drawing.Point(147, 76);
+      this.ckBoxKeepEncrypted.Location = new System.Drawing.Point(6, 78);
       this.ckBoxKeepEncrypted.Name = "ckBoxKeepEncrypted";
       this.ckBoxKeepEncrypted.Size = new System.Drawing.Size(124, 17);
-      this.ckBoxKeepEncrypted.TabIndex = 6;
+      this.ckBoxKeepEncrypted.TabIndex = 4;
       this.ckBoxKeepEncrypted.Text = "Keep encrypted files";
       this.ckBoxKeepEncrypted.UseVisualStyleBackColor = true;
       this.ckBoxKeepEncrypted.UseWaitCursor = true;
@@ -197,7 +202,7 @@ namespace core.audiamus.connect.app.gui {
       // ckBoxOpenDlg
       // 
       this.ckBoxOpenDlg.AutoSize = true;
-      this.ckBoxOpenDlg.Location = new System.Drawing.Point(147, 16);
+      this.ckBoxOpenDlg.Location = new System.Drawing.Point(6, 58);
       this.ckBoxOpenDlg.Name = "ckBoxOpenDlg";
       this.ckBoxOpenDlg.Size = new System.Drawing.Size(125, 17);
       this.ckBoxOpenDlg.TabIndex = 3;
@@ -220,7 +225,7 @@ namespace core.audiamus.connect.app.gui {
       // 
       // btnExprtDir
       // 
-      this.btnExprtDir.Location = new System.Drawing.Point(16, 72);
+      this.btnExprtDir.Location = new System.Drawing.Point(16, 74);
       this.btnExprtDir.Name = "btnExprtDir";
       this.btnExprtDir.Size = new System.Drawing.Size(110, 23);
       this.btnExprtDir.TabIndex = 2;
@@ -232,7 +237,7 @@ namespace core.audiamus.connect.app.gui {
       // ckBoxExport
       // 
       this.ckBoxExport.AutoSize = true;
-      this.ckBoxExport.Location = new System.Drawing.Point(16, 36);
+      this.ckBoxExport.Location = new System.Drawing.Point(16, 38);
       this.ckBoxExport.Name = "ckBoxExport";
       this.ckBoxExport.Size = new System.Drawing.Size(97, 17);
       this.ckBoxExport.TabIndex = 1;
@@ -254,7 +259,7 @@ namespace core.audiamus.connect.app.gui {
       // 
       // btnProfiles
       // 
-      this.btnProfiles.Location = new System.Drawing.Point(22, 72);
+      this.btnProfiles.Location = new System.Drawing.Point(22, 74);
       this.btnProfiles.Name = "btnProfiles";
       this.btnProfiles.Size = new System.Drawing.Size(75, 23);
       this.btnProfiles.TabIndex = 1;
@@ -368,6 +373,27 @@ namespace core.audiamus.connect.app.gui {
       this.timer1.Interval = 1500;
       this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
       // 
+      // comBoxDnldQual
+      // 
+      this.comBoxDnldQual.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+      this.comBoxDnldQual.FormattingEnabled = true;
+      this.comBoxDnldQual.Location = new System.Drawing.Point(147, 29);
+      this.comBoxDnldQual.Name = "comBoxDnldQual";
+      this.comBoxDnldQual.Size = new System.Drawing.Size(111, 21);
+      this.comBoxDnldQual.TabIndex = 5;
+      this.comBoxDnldQual.UseWaitCursor = true;
+      this.comBoxDnldQual.SelectedIndexChanged += new System.EventHandler(this.comBoxDnldQual_SelectedIndexChanged);
+      // 
+      // label5
+      // 
+      this.label5.AutoSize = true;
+      this.label5.Location = new System.Drawing.Point(147, 13);
+      this.label5.Name = "label5";
+      this.label5.Size = new System.Drawing.Size(118, 13);
+      this.label5.TabIndex = 9;
+      this.label5.Text = "Audio download quality";
+      this.label5.UseWaitCursor = true;
+      // 
       // MainForm
       // 
       this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -423,6 +449,8 @@ namespace core.audiamus.connect.app.gui {
     private System.Windows.Forms.CheckBox ckBoxRefresh;
     private System.Windows.Forms.CheckBox ckBoxUpdLib;
     private System.Windows.Forms.Timer timer1;
+    private System.Windows.Forms.ComboBox comBoxDnldQual;
+    private System.Windows.Forms.Label label5;
   }
 }
 

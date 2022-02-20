@@ -151,6 +151,11 @@ Install now? (Will close current {2} window.)</value>
   <data name="MsgOnlineUpdatePreview" xml:space="preserve">
     <value>Preview</value>
   </data>
+  <data name="MsgWeakConfigEncryption" xml:space="preserve">
+    <value>Not all parameters for secure encryption of configuration data were found. The data will be stored in encrypted form, nonetheless, allbeit with a weaker key.
+
+This could be caused by running in a virtual environment or on an older computer. </value>
+  </data>
   <data name="MsgWzardWarning" xml:space="preserve">
     <value>Initial setup aborted.
 

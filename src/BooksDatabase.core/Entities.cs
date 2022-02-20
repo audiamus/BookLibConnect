@@ -21,6 +21,7 @@ namespace core.audiamus.booksdb {
     public long? FileSizeBytes { get; set; }
     public int? SampleRate { get; set; }
     public int? BitRate { get; set; }
+    public EDownloadQuality? DownloadQuality { get; set; }
     public ECodec? FileCodec { get; set; }
     public EDeliveryType? DeliveryType { get; set; }
     public bool? Unabridged { get; set; }
@@ -89,6 +90,7 @@ namespace core.audiamus.booksdb {
     public long? FileSizeBytes { get; set; }
     public int? SampleRate { get; set; }
     public int? BitRate { get; set; }
+    public EDownloadQuality? DownloadQuality { get; set; }
 
     public ECodec? FileCodec { get; set; }
 

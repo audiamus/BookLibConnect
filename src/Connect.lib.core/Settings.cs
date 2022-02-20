@@ -1,5 +1,6 @@
 ﻿using System;
 using core.audiamus.aux.diagn;
+using core.audiamus.booksdb;
 using core.audiamus.util;
 
 namespace core.audiamus.connect {
@@ -22,6 +23,7 @@ namespace core.audiamus.connect {
     bool AutoOpenDownloadDialog { get; }
     bool IncludeAdultProducts { get; }
     bool KeepEncryptedFiles { get; }
+    EDownloadQuality DownloadQuality { get; }
     string DownloadDirectory { get; }
     EInitialSorting InitialSorting { get; }
   }
@@ -57,6 +59,7 @@ namespace core.audiamus.connect {
     public bool IncludeAdultProducts { get; set; }
     public bool MultiPartDownload { get; set; }
     public bool KeepEncryptedFiles { get; set; }
+    public EDownloadQuality DownloadQuality { get; set; } = EDownloadQuality.Extreme;
     public string DownloadDirectory { get; set; }
     public EInitialSorting InitialSorting { get; set; }
     public ProfileAliasKey Profile { get; set; }

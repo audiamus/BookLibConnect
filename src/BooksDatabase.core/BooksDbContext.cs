@@ -5,7 +5,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using core.audiamus.aux;
 using Microsoft.EntityFrameworkCore;
+using core.audiamus.aux.ex;
 using static core.audiamus.aux.Logging;
+using System.Reflection;
 
 namespace core.audiamus.booksdb {
 
@@ -50,15 +52,59 @@ namespace core.audiamus.booksdb {
       var pendingMigrations = await dbContext.Database.GetPendingMigrationsAsync ();
 
       if (pendingMigrations.Any ()) {
-        Log (3, typeof (BookDbContext), () => "with migrations");
+        Log (2, typeof (BookDbContext), () => $"with migrations: {pendingMigrations.Combine()}");
+
         if (!File.Exists (dbContext.DbPath))
           Directory.CreateDirectory (Path.GetDirectoryName (dbContext.DbPath));
 
+        await backupPreviousVersionAsync (dbContext);
+
         await dbContext.Database.MigrateAsync ();
+
+        await compactAsync (dbContext);
       }
       return dbContext.Database.CanConnect ();
     }
 
+    private static async Task backupPreviousVersionAsync (BookDbContext dbContext) {
+      if (!File.Exists (dbContext.DbPath))
+        return;
+
+      await Task.Run (() => {
+        try {
+          string dir = Path.GetDirectoryName (dbContext.DbPath);
+          string filestub = Path.GetFileNameWithoutExtension (dbContext.DbPath);
+          string ext = Path.GetExtension (dbContext.DbPath);
+
+          string mig = dbContext.Database.GetAppliedMigrations ().LastOrDefault ();                   
+          if (mig.IsNullOrEmpty ())
+            mig = "(no mig)";
+          
+          string dest = Path.Combine (dir, $"{filestub} {mig}{ext}");
+          Log (2, typeof (BookDbContext), () => $"create backup: \"{dest.SubstitUser()}\"");
+
+          File.Copy (dbContext.DbPath, dest, true);
+        } catch (Exception exc) {
+          Log (1, typeof (BookDbContext), exc.Summary ());
+        }
+      });
+    }
+
+    private static async Task compactAsync (BookDbContext dbContext) {
+      var fi = new FileInfo (dbContext.DbPath);
+      long size = fi.Length / 1024;
+      Log (2, typeof (BookDbContext), () => $"before: {size} kB");
+      try {
+        int n = await dbContext.Database.ExecuteSqlRawAsync ("VACUUM");
+      } catch (Exception exc) {
+        Log (1, typeof (BookDbContext), exc.Summary ());
+        return;
+      }
+      fi.Refresh ();
+      size = fi.Length / 1024;
+      Log (2, typeof (BookDbContext), () => $"after:  {size} kB");
+    }
+    
     private static readonly Dictionary<Type, EPseudoAsinId> _pseudoAsins
       = new Dictionary<Type, EPseudoAsinId> {
         { typeof (Author), EPseudoAsinId.author },

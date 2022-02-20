@@ -13,6 +13,8 @@ namespace core.audiamus.booksdb {
     new int? RunTimeLengthSeconds { get; set; }
     new int? SampleRate { get; set; }
     new int? BitRate { get; set; }
+    
+    EDownloadQuality? DownloadQuality { get; set; }
 
     string LicenseKey { get; set; }
     string LicenseIv { get; set; }

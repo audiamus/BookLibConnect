@@ -82,23 +82,30 @@ namespace core.audiamus.connect {
 
       bool succ = true;
 
-      // Do we need to downlaod?
+      // Do we need to download?
       var savedState = AudibleApi.GetPersistentState (conversion);
-      // the locked file may alreday exist
+      // the locked file may already exist
       bool hasLockedFile = File.Exists ((conversion.DownloadFileName + R.EncryptedFileExt).AsUncIfLong());
-      // the unlocked file may alreday exist
+      // the unlocked file may already exist
       bool hasUnlockedFile = File.Exists ((conversion.DownloadFileName + R.DecryptedFileExt).AsUncIfLong());
 
       // download if neither file exists or state too low
       bool doDownload = savedState < EConversionState.local_locked || !hasLockedFile;
       bool doDecrypt = savedState < EConversionState.local_unlocked || !hasUnlockedFile;
-      
-      
+
+      var previousQuality = conversion.ParentBook.ApplicableDownloadQuality (Settings.MultiPartDownload);
+      var quality = Settings.DownloadQuality;
+      bool higherQual = quality > previousQuality;
+      if (higherQual)
+        Log (3, this, () => $"{conversion}; desired higher quality: {quality}");
+      doDownload |= higherQual;
+      doDecrypt |= higherQual;
+
       if (doDownload && doDecrypt) {
 
         conversion.DownloadFileName = Settings.DownloadDirectory;
 
-        var licTask = AudibleApi.GetDownloadLicenseAndSaveAsync (conversion);
+        var licTask = AudibleApi.GetDownloadLicenseAndSaveAsync (conversion, quality);
         OnNewStateCallback (conversion);
         succ = await licTask;
         OnNewStateCallback (conversion);
