@@ -21,9 +21,9 @@ _**Note:** Books downloaded with Book Lib Connect and exported for [AAX Audio Co
 
 
 ## Download
-Windows setup package version 0.5, English, with manual:
+Windows setup package version 0.5.1, English, with manual:
 
-**[BookLibConnect-0.5-Setup.exe](https://github.com/audiamus/BookLibConnect/releases/download/v0.5/BookLibConnect-0.5-Setup.exe)**
+**[BookLibConnect-0.5.1-Setup.exe](https://github.com/audiamus/BookLibConnect/releases/download/v0.5.1/BookLibConnect-0.5.1-Setup.exe)**
 
 ## Feedback
 Use the [Discussions](https://github.com/audiamus/BookLibConnect/discussions) and [Issues](https://github.com/audiamus/BookLibConnect/issues) sections. 
@@ -31,7 +31,7 @@ Be cautious with uploading log files to these sections as they may contain sensi
 
 ## Dependencies
 AAX Audio Converter will run on Windows 64bit. Minimum Windows version is 7.
-The application requires .Net 5 64 bit to be installed. On Windows 10 systems this should normally be the case, if the system is kept up to date.
+The application requires .Net 5 64 bit to be installed. On Windows 10/11 systems this should normally be the case, if the system is kept up to date.
 If not, the app will prompt you for downloading .Net 5 and open the link in your default web browser. From the many options, pick 
 **.Net 5 Runtime x64 for Windows desktop**.
 

@@ -21,7 +21,7 @@ namespace core.audiamus.connect {
       { ERegion.it, new (ERegion.it, "it", "A2N7FU2W2BU2ZC") },
       { ERegion.au, new (ERegion.au, "com.au", "AN7EY7DTAW63G") },
       { ERegion.@in, new (ERegion.@in, "in", "AJO3FBRUE6J4S") },
-      { ERegion.jp, new (ERegion.jp, "jp", "A1QAP3MOU4173J") },
+      { ERegion.jp, new (ERegion.jp, "co.jp", "A1QAP3MOU4173J") },
       { ERegion.es, new (ERegion.es, "es", "ALMIKO4SZCSAR") },
     };
 
