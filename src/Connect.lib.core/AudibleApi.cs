@@ -294,11 +294,14 @@ namespace core.audiamus.connect {
       AaxFile aaxFile = null;
       var rg = new ResourceGuard (() => aaxFile?.Dispose ());
 
-      bool succ = false;
-      try {
-        string inputFile = (conversion.DownloadFileName + R.EncryptedFileExt).AsUncIfLong ();
-        string outputFile = (conversion.DownloadFileName + R.DecryptedFileExt).AsUncIfLong ();
 
+      bool succ = false;
+      int numChannels = 0;
+      string inputFile = (conversion.DownloadFileName + R.EncryptedFileExt).AsUncIfLong ();
+      string outputFile = (conversion.DownloadFileName + R.DecryptedFileExt).AsUncIfLong ();
+
+      
+      try {
         if (!File.Exists (inputFile))
           return false;
 
@@ -307,6 +310,8 @@ namespace core.audiamus.connect {
           aaxFile = new AaxFile (ifStream);
           aaxFile.ConversionProgressUpdate += aaxFile_ConversionProgressUpdate;
           aaxFile.SetDecryptionKey (conversion.BookCommon.LicenseKey, conversion.BookCommon.LicenseIv);
+
+          numChannels = aaxFile.AudioChannels;
 
           ConversionResult result;
           using (var fileStream = File.OpenWrite (outputFile))
@@ -326,7 +331,6 @@ namespace core.audiamus.connect {
           conversion.State = EConversionState.unlocking_failed;
 
         Log (3, this, () => $"{conversion}; decryption finished, succ={succ}.");
-        return succ;
 
       } catch (Exception exc) {
         conversion.State = EConversionState.unlocking_failed;
@@ -334,6 +338,27 @@ namespace core.audiamus.connect {
         return false;
       }
 
+      if (succ && numChannels > 0) {
+        try {
+          string suffix = numChannels == 1 ? "_Mono" : "_Stereo";
+          rename (inputFile, suffix);
+          rename (outputFile, suffix);
+          BookLibrary.SaveFileNameSuffix (conversion, suffix);
+        } catch (Exception exc) {
+          Log (1, this, () => $"{conversion}; {exc.Summary ()}");
+        }
+      }
+
+      return succ;
+
+
+      void rename (string file, string suffix) {
+        string dir = Path.GetDirectoryName (file);
+        string stub = Path.GetFileNameWithoutExtension (file);
+        string ext = Path.GetExtension (file);
+        string sfxfile = Path.Combine (dir, stub + suffix + ext);
+        File.Move (file, sfxfile, true);
+      }
 
       void aaxFile_ConversionProgressUpdate (object sender, ConversionProgressEventArgs e) {
         if (cancToken.IsCancellationRequested)

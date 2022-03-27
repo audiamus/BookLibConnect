@@ -21,6 +21,8 @@ namespace core.audiamus.connect {
 
     private IExportSettings ExportSettings { get; }
     private IMultiPartSettings MultipartSettings { get; }
+    private List<List<ChapterExtract>> AccuChapters { get; } = new List<List<ChapterExtract>> ();
+
     public IBookLibrary BookLibrary { private get; set; }
 
     public AaxExporter (IExportSettings exportSettings, IMultiPartSettings multipartSettings) {
@@ -29,6 +31,7 @@ namespace core.audiamus.connect {
     }
 
     public void Export (Book book, SimpleConversionContext context, Action<Conversion> onNewStateCallback) {
+      AccuChapters.Clear ();
       using var _ = new LogGuard (3, this, () => book.ToString ());
       if (book.Components.Count == 0 || !MultipartSettings.MultiPartDownload)
         exportSinglePart (book, context, onNewStateCallback);
@@ -132,11 +135,16 @@ namespace core.audiamus.connect {
       ci.runtime_length_ms = chapterInfo.RuntimeLengthMs;
       ci.runtime_length_sec = chapterInfo.RuntimeLengthMs / 1000;
 
-      var flattenedChapters = BookLibrary?.GetChaptersFlattened (book);
+      var accuChapters = new List<List<ChapterExtract>> ();
+      var flattenedChapters = BookLibrary?.GetChaptersFlattened (book, accuChapters);
 
+     
       if (!flattenedChapters.IsNullOrEmpty()) {
         var chapters = new List<adb.json.Chapter> ();
         foreach (var chapter in flattenedChapters) {
+          if (chapters.Count == 0 && skipChapter (chapter))
+            continue;
+
           var ch = new adb.json.Chapter {
             length_ms = chapter.LengthMs,
             start_offset_ms = chapter.StartOffsetMs,
@@ -156,7 +164,32 @@ namespace core.audiamus.connect {
 
       File.WriteAllText (outpath, json);
 
+      updateAccuChapters (accuChapters);
+
       return outpath;
+    }
+
+    private bool skipChapter (Chapter ch) {
+      if (AccuChapters.Count < 2)
+        return false;
+
+      for (int i = 0; i < AccuChapters.Count - 1; i++) {
+        var chextr = AccuChapters[i].FirstOrDefault (ce =>
+          string.Equals (ce.Title, ch.Title) &&
+          Math.Abs (ce.Length - ch.LengthMs) < 1500 && ch.LengthMs < 25000);
+        if (chextr is not null)
+          return true;
+      }
+
+      return false;
+    }
+
+    private void updateAccuChapters (List<List<ChapterExtract>> accuPart) {
+      for (int i = 0; i < accuPart.Count; i++) {
+        if (AccuChapters.Count < i + 1)
+          AccuChapters.Add (new List<ChapterExtract> ());
+        AccuChapters[i].AddRange (accuPart[i]);
+      }
     }
 
     private void exportProduct (IBookCommon book) {

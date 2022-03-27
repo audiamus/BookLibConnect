@@ -43,6 +43,8 @@ namespace core.audiamus.connect {
 
   public record BookLibInteract (EBookLibInteract Kind);
 
+  public record ChapterExtract (string Title, int Length);
+
   record ProductComponentPair (adb.json.Product Product, Component Component);
 
   record ProfileBundle (IProfile Profile, IProfileKey Key, IProfileAliasKey AliasKey);

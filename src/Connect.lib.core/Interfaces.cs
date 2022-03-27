@@ -67,7 +67,7 @@ namespace core.audiamus.connect {
   public interface IBookLibrary {
     IEnumerable<Book> GetBooks (ProfileId profileId);
     void GetChapters (IBookCommon item);
-    IEnumerable<Chapter> GetChaptersFlattened (IBookCommon item);
+    IEnumerable<Chapter> GetChaptersFlattened (IBookCommon item, List<List<ChapterExtract>> accuChapters);
     EConversionState GetPersistentState (Conversion conversion);
     void SavePersistentState (Conversion conversion, EConversionState state);
   }

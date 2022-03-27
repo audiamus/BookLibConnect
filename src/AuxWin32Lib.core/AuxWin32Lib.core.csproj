@@ -5,8 +5,8 @@
     <RootNamespace>core.audiamus.aux.w32</RootNamespace>
     <AssemblyName>audiamus.aux.w32.core</AssemblyName>
     <Authors>audiamus</Authors>
-    <AssemblyVersion>2.0.0.0</AssemblyVersion>
-    <FileVersion>2.0.0.0</FileVersion>
+    <AssemblyVersion>2.1.0.0</AssemblyVersion>
+    <FileVersion>2.1.0.0</FileVersion>
     <Copyright>Copyright © 2019 - $([System.DateTime]::UtcNow.Year) audiamus ($([System.DateTime]::UtcNow.ToString("s")))</Copyright>
   </PropertyGroup>
 

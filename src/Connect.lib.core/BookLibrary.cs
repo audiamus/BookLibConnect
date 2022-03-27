@@ -31,7 +31,7 @@ namespace core.audiamus.connect {
     }
 
     public async Task AddRemBooksAsync (List<adb.json.Product> libProducts, ProfileId profileId, bool resync) {
-      using var _ = new LogGuard (3, this, () => $"#items={libProducts.Count}");
+      using var _ = new LogGuard (3, this, () => $"#items={libProducts.Count}, resync={resync}");
       await Task.Run (() => addRemBooks (libProducts, profileId, resync));
       await Task.Run (() => cleanupDuplicateAuthors ());
     }
@@ -171,6 +171,15 @@ namespace core.audiamus.connect {
       dbContext.SaveChanges ();
     }
 
+    public void SaveFileNameSuffix (Conversion conversion, string suffix) {
+      using var _ = new LogGuard (4, this);
+      using var dbContext = new BookDbContext (_dbDir);
+      dbContext.Conversions.Attach (conversion);
+
+      conversion.DownloadFileName += suffix;
+      dbContext.SaveChanges ();
+    }
+
     public void SavePersistentState (Conversion conversion, EConversionState state) {
       using var _ = new LogGuard (4, this);
       using var dbContext = new BookDbContext (_dbDir);
@@ -240,12 +249,12 @@ namespace core.audiamus.connect {
 
     }
 
-    public IEnumerable<Chapter> GetChaptersFlattened (IBookCommon item) {
+    public IEnumerable<Chapter> GetChaptersFlattened (IBookCommon item, List<List<ChapterExtract>> accuChapters) {
       GetChapters (item);
 
       var flattened = new List<Chapter> ();
 
-      getChaptersFlattened (item.ChapterInfo?.Chapters, flattened);
+      getChaptersFlattened (item.ChapterInfo?.Chapters, flattened, accuChapters, -1);
 
       return flattened;
     }
@@ -728,7 +737,7 @@ namespace core.audiamus.connect {
         foreach (var product in products) {
           try {
 
-            if (readded (bcl, product, resync))
+            if (readd (bcl, product, profileId, resync))
               continue;
 
             Book book = addBook (dbContext, product);
@@ -745,6 +754,8 @@ namespace core.audiamus.connect {
             addGenres (book, bcl.Genres, bcl.Ladders, bcl.Rungs, product.category_ladders);
 
             addCodecs (book, bcl.Codecs, product.available_codecs);
+
+            Log (3, this, () => $"added: {book}");
           } catch (Exception exc) {
             Log (1, this, () =>
               $"asin={product.asin}, \"{product.title}\", throwing{Environment.NewLine}" +
@@ -760,7 +771,7 @@ namespace core.audiamus.connect {
       }
     }
 
-    private static bool readded (BookCompositeLists bcl, adb.json.Product product, bool resync) {
+    private bool readd (BookCompositeLists bcl, adb.json.Product product, ProfileId profileId, bool resync) {
       if (bcl.BookAsins.Contains (product.asin)) {
         if (!resync)
           return true;
@@ -771,13 +782,19 @@ namespace core.audiamus.connect {
           return true;
 
         bk.Deleted = false;
+        bk.Conversion.AccountId = profileId.AccountId;
+        bk.Conversion.Region = profileId.Region;
         if (bk.Conversion.State < EConversionState.local_locked)
           updateState (bk.Conversion, EConversionState.remote);
 
         foreach (var comp in bk.Components) {
           if (comp.Conversion.State < EConversionState.local_locked)
             updateState (comp.Conversion, EConversionState.remote);
+          comp.Conversion.AccountId = profileId.AccountId;
+          comp.Conversion.Region = profileId.Region;
         }
+
+        Log (3, this, () => $"readded: {bk}");
 
         return true;
       } else
@@ -1064,13 +1081,19 @@ namespace core.audiamus.connect {
         if (!removeAsins.Any ())
           return;
 
-        Log (3, this, () => $"#remove={removeAsins.Count}");
+        Log (3, this, () => $"# to be removed={removeAsins.Count} (not yet filtered by profile)");
 
+        int nRemoved = 0;
         foreach (string asin in removeAsins) {
 
           var book = bcl.Conversions.FirstOrDefault (conv => string.Equals (conv.Book?.Asin, asin))?.Book;
           if (book is null)
             continue;
+
+          if (book.Conversion.AccountId != profileId.AccountId || book.Conversion.Region != profileId.Region) {
+            Log (3, this, () => $"different profile, ignored: {asin}");
+            continue;
+          }
 
           book.Deleted = true;
           if (book.Conversion.State < EConversionState.local_locked)
@@ -1079,9 +1102,12 @@ namespace core.audiamus.connect {
             if (comp.Conversion.State < EConversionState.local_locked)
               updateState (comp.Conversion, EConversionState.unknown);
           }
+          Log (3, this, () => $"marked as removed: {book}");
+          nRemoved++;
         }
 
         dbContext.SaveChanges ();
+        Log (3, this, () => $"# actually marked as removed={nRemoved}");
       } catch (Exception exc) {
         Log (1, this, () => exc.Summary ());
         throw;
@@ -1089,13 +1115,18 @@ namespace core.audiamus.connect {
 
     }
 
-    private void getChaptersFlattened (IEnumerable<Chapter> source, List<Chapter> dest) {
+    private void getChaptersFlattened (IEnumerable<Chapter> source, List<Chapter> dest, List<List<ChapterExtract>> accuChapters, int level) {
       if (source.IsNullOrEmpty ())
         return;
 
+      using var rg = new ResourceGuard (x => { if (x) level++; else level--; });
+      if (accuChapters?.Count < level + 1)
+        accuChapters?.Add (new List<ChapterExtract> ());
+      var accu = accuChapters?[level];
       foreach (var ch in source) {
         dest.Add (new Chapter(ch));
-        getChaptersFlattened (ch.Chapters, dest);
+        accu?.Add (new ChapterExtract (ch.Title, ch.LengthMs));
+        getChaptersFlattened (ch.Chapters, dest, accuChapters, level);
       }
     }
 

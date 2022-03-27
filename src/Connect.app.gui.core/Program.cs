@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using System.Windows.Forms;
 using core.audiamus.aux;
 
@@ -12,6 +13,8 @@ namespace core.audiamus.connect.app.gui {
       Application.SetHighDpiMode (HighDpiMode.PerMonitorV2);
       Application.EnableVisualStyles ();
       Application.SetCompatibleTextRenderingDefault (false);
+
+      CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
 
       var appSettings = SettingsManager.GetAppSettings<AppSettings> ();
       if (appSettings?.LogLevel is not null)
