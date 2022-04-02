@@ -83,7 +83,7 @@ namespace core.audiamus.connect {
 
       authorization.CodeVerifier = CodeVerifierB64;
 
-      return new Profile (Region, authorization, Serial);
+      return new Profile (Region, authorization, Serial, WithPreAmazonUsername);
     }
 
 

@@ -285,8 +285,8 @@ namespace core.audiamus.connect.app.gui {
       Api.GetAccountAliasFunc = getAccountAlias;
 
       if (s.AutoUpdateLibrary && !_libUpdated) {
-        if (!s.AutoRefresh)
-          await Api.RefreshTokenAsyncFunc ();
+        //if (!s.AutoRefresh)
+        //  await Api.RefreshTokenAsyncFunc ();
         using (new ResourceGuard (x => {
           if (_waitForm is not null) {
             if (x)

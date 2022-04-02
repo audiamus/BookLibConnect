@@ -356,11 +356,11 @@ namespace core.audiamus.connect.ui {
       var rg = new ResourceGuard (() => Cursor.Current = cursor);
 
       if (!_initConnectionDone) {
-        var s = _downloadSettings;
-        Log (3, this, () => $"settings: auto refresh={s.AutoRefresh}, auto update={s.AutoUpdateLibrary}");
-        if (!s.AutoRefresh) {
-          await AudibleApi.RefreshTokenAsyncFunc ();
-        }
+        //var s = _downloadSettings;
+        //Log (3, this, () => $"settings: auto refresh={s.AutoRefresh}, auto update={s.AutoUpdateLibrary}");
+        //if (!s.AutoRefresh) {
+        //  await AudibleApi.RefreshTokenAsyncFunc ();
+        //}
 
         _initConnectionDone = true;
       }

@@ -120,6 +120,7 @@ namespace core.audiamus.connect {
 
   class Profile : IProfile {
     public uint Id { get; set; }
+    public bool PreAmazon { get; set; }
     public ERegion Region { get; set; }
     public Authorization Authorization { get; set; }
     public TokenBearer Token { get; set; }
@@ -147,12 +148,13 @@ namespace core.audiamus.connect {
       };
     }
 
-    public Profile (ERegion region, Authorization authorization, string serial) {
+    public Profile (ERegion region, Authorization authorization, string serial, bool preAmazonAccount) {
       Region = region;
       Authorization = authorization;
       DeviceInfo = new DeviceInfo {
         Serial = serial
       };
+      PreAmazon = preAmazonAccount;
     }
 
     public void Update (

@@ -53,7 +53,7 @@ namespace core.audiamus.connect {
 
   public class DownloadSettings : SettingsBase, IDownloadSettings {
 
-    public bool AutoRefresh { get; set; } = true;
+    public bool AutoRefresh { get; set; }
     public bool AutoUpdateLibrary { get; set; } = true;
     public bool AutoOpenDownloadDialog { get; set; }
     public bool IncludeAdultProducts { get; set; }

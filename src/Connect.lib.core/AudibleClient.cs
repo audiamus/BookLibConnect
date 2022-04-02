@@ -38,6 +38,7 @@ namespace core.audiamus.connect {
           _audibleApi = new AudibleApi (
             Profile.Profile, 
             Authorize.HttpClientAmazon, 
+            Authorize.HttpClientAudible, 
             BookLibrary,
             Authorize.RefreshTokenAsync);
         }
@@ -192,7 +193,7 @@ namespace core.audiamus.connect {
 
       setProfile (profile, null);
 
-      await Authorize.RefreshTokenAsync (profile);
+      await Authorize.RefreshTokenAsync (profile, true);
 
       return true;
     }
@@ -267,7 +268,7 @@ namespace core.audiamus.connect {
 
       var profile = profiles.First ();
 
-      await Authorize.RefreshTokenAsync (profile);
+      await Authorize.RefreshTokenAsync (profile, true);
 
       var resultKey = setProfile (profile, getAccountAliasFunc);
       return resultKey;

@@ -9,6 +9,7 @@ using core.audiamus.common;
 namespace core.audiamus.connect {
   interface IProfile {
     uint Id { get; }
+    bool PreAmazon { get; }
     ERegion Region { get; }
     IAuthorization Authorization { get; }
     ICustomerInfo CustomerInfo { get; }

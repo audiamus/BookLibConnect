@@ -20,14 +20,14 @@ namespace core.audiamus.connect {
   class AudibleApi : IAudibleApi {
     const string USER_AGENT = "Audible/671 CFNetwork/1240.0.4 Darwin/20.6.0";
 
-    const string HTTP_AUTHORITY_AUDIBLE = @"https://api.audible.";
+    //const string HTTP_AUTHORITY_AUDIBLE = @"https://api.audible.";
     const string CONTENT_PATH = "/1.0/content";
     private int _accountId;
     private string _accountAlias;
 
-    private string BaseUrlAudible { get; }
-    private Uri BaseUriAudible => HttpClientAudible?.BaseAddress;
-    private Uri BaseUriAmazon => HttpClientAmazon?.BaseAddress;
+    //private string BaseUrlAudible { get; }
+    //private Uri BaseUriAudible => HttpClientAudible?.BaseAddress;
+    //private Uri BaseUriAmazon => HttpClientAmazon?.BaseAddress;
 
     private IProfile Profile { get; }
     private HttpClientEx HttpClientAudible { get; }
@@ -40,6 +40,9 @@ namespace core.audiamus.connect {
         return _accountId;
       }
     }
+
+    private HttpClientEx HttpClient => Profile.PreAmazon ? HttpClientAudible : HttpClientAmazon;
+
 
     public string AccountAlias {
       get {
@@ -56,21 +59,23 @@ namespace core.audiamus.connect {
     public AudibleApi (
       IProfile profile,
       HttpClientEx httpClientAmazon,
+      HttpClientEx httpClientAudible,
       BookLibrary bookLibrary,
-      Func<IProfile, bool, Task> refreshTokenAsyncFunc
+      Func<IProfile, Task> refreshTokenAsyncFunc
     ) {
       BookLibrary = bookLibrary;
-      RefreshTokenAsyncFunc = () => refreshTokenAsyncFunc (Profile, true);
+      RefreshTokenAsyncFunc = () => refreshTokenAsyncFunc (Profile);
 
       if (profile is null)
         return;
 
       Profile = profile;
       HttpClientAmazon = httpClientAmazon;
+      HttpClientAudible = httpClientAudible;
 
-      ILocale locale = profile.Region.FromCountryCode ();
-      Uri baseUriAudible = new Uri (HTTP_AUTHORITY_AUDIBLE + locale.Domain);
-      HttpClientAudible = HttpClientEx.Create (baseUriAudible);
+      //ILocale locale = profile.Region.FromCountryCode ();
+      //Uri baseUriAudible = new Uri (HTTP_AUTHORITY_AUDIBLE + locale.Domain);
+      //HttpClientAudible = HttpClientEx.Create (baseUriAudible);
     }
 
     internal AudibleApi (
@@ -80,11 +85,11 @@ namespace core.audiamus.connect {
     ) {
       BookLibrary = bookLibrary;
       _accountId = accountId;
-      Profile = new Profile (region, null, null);
+      Profile = new Profile (region, null, null, false);
     }
 
     public void Dispose () {
-      HttpClientAudible?.Dispose ();
+      //HttpClientAudible?.Dispose ();
     }
 
     public async Task<adb.json.LibraryResponse> GetLibraryAsync (bool resync) => await GetLibraryAsync (null, resync);
@@ -160,12 +165,15 @@ namespace core.audiamus.connect {
     public async Task<string> GetUserProfileAsync () {
       using var _ = new LogGuard (3, this);
 
+      await RefreshTokenAsyncFunc ();
+
       var url = $"/user/profile?access_token={Profile.Token.AccessToken}";
 
       var request = new HttpRequestMessage (HttpMethod.Get, url);
-      return await sendForStringAsync (request, HttpClientAmazon);
+      return await sendForStringAsync (request, HttpClient);
 
     }
+      
 
     public async Task<string> GetAccountInfoAsync () {
       using var _ = new LogGuard (3, this);

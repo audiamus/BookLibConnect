@@ -14,7 +14,8 @@ using static core.audiamus.aux.Logging;
 namespace core.audiamus.connect {
 
   class Authorize {
-    const string HTTP_AUTHORITY = @"https://api.amazon.";
+    const string HTTP_AUTHORITY_AMZN = @"https://api.amazon.";
+    const string HTTP_AUTHORITY_ADBL = @"https://api.audible.";
     const string HTTP_PATH_REGISTER = @"/auth/register";
     const string HTTP_PATH_DEREGISTER = @"/auth/deregister";
     const string HTTP_PATH_TOKEN = @"/auth/token";
@@ -26,13 +27,14 @@ namespace core.audiamus.connect {
 
     private IAuthorizeSettings Settings { get; }
 
-    private Uri BaseUri => HttpClientAmazon?.BaseAddress;
+    //private Uri BaseUri => HttpClientAmazon?.BaseAddress;
 
     private Configuration Configuration { get; set; }
 
     private ConfigTokenDelegate GetTokenFunc { get; }
 
     public HttpClientEx HttpClientAmazon { get; private set; }
+    public HttpClientEx HttpClientAudible { get; private set; }
 
     public Action WeakConfigEncryptionCallback { private get; set; }
 
@@ -52,10 +54,12 @@ namespace core.audiamus.connect {
       try {
         var request = buildRegisterRequest (profile);
 
-        await request.LogAsync (4, this, HttpClientAmazon.DefaultRequestHeaders, HttpClientAmazon.CookieContainer, BaseUri);
+        var http = httpClient (profile);
 
-        var response = await HttpClientAmazon.SendAsync (request);
-        await response.LogAsync (4, this, HttpClientAmazon.CookieContainer, BaseUri);
+        await request.LogAsync (4, this, http.DefaultRequestHeaders, http.CookieContainer, http.BaseAddress);
+
+        var response = await http.SendAsync (request);
+        await response.LogAsync (4, this, http.CookieContainer, http.BaseAddress);
 
         response.EnsureSuccessStatusCode ();
         string content = await response.Content.ReadAsStringAsync ();
@@ -89,10 +93,12 @@ namespace core.audiamus.connect {
 
         var request = buildDeregisterRequest (profile);
 
-        await request.LogAsync (4, this, HttpClientAmazon.DefaultRequestHeaders, HttpClientAmazon.CookieContainer, BaseUri);
+        var http = httpClient (profile);
 
-        var response = await HttpClientAmazon.SendAsync (request);
-        await response.LogAsync (4, this, HttpClientAmazon.CookieContainer, BaseUri);
+        await request.LogAsync (4, this, http.DefaultRequestHeaders, http.CookieContainer, http.BaseAddress);
+
+        var response = await http.SendAsync (request);
+        await response.LogAsync (4, this, http.CookieContainer, http.BaseAddress);
 
         response.EnsureSuccessStatusCode ();
         string content = await response.Content.ReadAsStringAsync ();
@@ -124,40 +130,51 @@ namespace core.audiamus.connect {
 
       if (Configuration is null)
         return;
-      (string token, bool weak) = GetTokenFunc?.Invoke ();
+      var result = GetTokenFunc?.Invoke ();
 
       bool existed = Configuration.Existed;
-      await Configuration.WriteAsync (token);
+      await Configuration.WriteAsync (result?.Token);
 
-      if (!existed && weak)
+      if (!existed && (result?.Weak ?? false))
         WeakConfigEncryptionCallback?.Invoke ();
 
     }
 
-    private void ensureHttpClient (IProfile profile) {
-      string domain = Locale.FromCountryCode (profile.Region).Domain; 
-      Uri baseUri = new Uri (HTTP_AUTHORITY + domain);
+    private HttpClientEx httpClient (IProfile profile) => profile.PreAmazon ? HttpClientAudible : HttpClientAmazon;
 
-      if (HttpClientAmazon is not null) { 
-        if (BaseUri == baseUri)
-          return;
-        else
-          HttpClientAmazon.Dispose ();
-      }
+    private void ensureHttpClient (IProfile profile) {
+      string domain = Locale.FromCountryCode (profile.Region).Domain;
         
-      HttpClientAmazon = HttpClientEx.Create (baseUri);
+      HttpClientAmazon = ensureHttpClient (HTTP_AUTHORITY_AMZN, HttpClientAmazon);
+      HttpClientAudible = ensureHttpClient (HTTP_AUTHORITY_ADBL, HttpClientAudible);
+
+      HttpClientEx ensureHttpClient (string authority, HttpClientEx httpClient) {
+
+        Uri baseUri = new Uri (authority + domain);
+
+        if (httpClient is not null) {
+          if (httpClient.BaseAddress == baseUri)
+            return httpClient;
+          else
+            httpClient.Dispose ();
+        }
+
+        return HttpClientEx.Create (baseUri);
+
+      }
+
     }
 
     public async Task RefreshTokenAsync (IProfile profile) =>
       await RefreshTokenAsync (profile, false);
 
-    internal async Task RefreshTokenAsync (IProfile profile, bool late) {
-      using var _ = new LogGuard (3, this, () => $"auto={Settings?.AutoRefresh}, late={late}");
+    internal async Task RefreshTokenAsync (IProfile profile, bool onAutoRefeshOnly) {
+      using var _ = new LogGuard (3, this, () => $"auto={Settings?.AutoRefresh}, onAutoRefeshOnly={onAutoRefeshOnly}");
       ensureHttpClient (profile);
 
       await readConfigurationAsync ();
 
-      if ((Settings?.AutoRefresh ?? true) != late) {
+      if (onAutoRefeshOnly && (Settings?.AutoRefresh ?? false)) {
         if (profile is Profile prof1 && (Configuration.Profiles?.Contains (prof1) ?? false))
           await refreshTokenAsync (prof1);
         else {
@@ -183,10 +200,12 @@ namespace core.audiamus.connect {
 
         HttpRequestMessage request = buildRefreshRequest (profile);
 
-        await request.LogAsync (4, this, HttpClientAmazon.DefaultRequestHeaders, HttpClientAmazon.CookieContainer, BaseUri);
+        var http = httpClient (profile);
 
-        var response = await HttpClientAmazon.SendAsync (request);
-        await response.LogAsync (4, this, HttpClientAmazon.CookieContainer, BaseUri);
+        await request.LogAsync (4, this, http.DefaultRequestHeaders, http.CookieContainer, http.BaseAddress);
+
+        var response = await http.SendAsync (request);
+        await response.LogAsync (4, this, http.CookieContainer, http.BaseAddress);
 
         response.EnsureSuccessStatusCode ();
         string content = await response.Content.ReadAsStringAsync ();
@@ -207,6 +226,8 @@ namespace core.audiamus.connect {
         ["source_token_type"] = "refresh_token"
       };
 
+      var http = httpClient (profile);
+
       Uri uri = new Uri (HTTP_PATH_TOKEN, UriKind.Relative);
 
       var request = new HttpRequestMessage {
@@ -214,7 +235,7 @@ namespace core.audiamus.connect {
         RequestUri = uri,
         Content = new FormUrlEncodedContent (content)
       };
-      request.Headers.Add ("x-amzn-identity-auth-domain", BaseUri.Host);
+      request.Headers.Add ("x-amzn-identity-auth-domain", http.BaseAddress.Host);
       request.Headers.Add ("Accept", "application/json");
       return request;
     }
@@ -259,7 +280,7 @@ namespace core.audiamus.connect {
 
       async Task readConfigAsync (bool enforce) {
         var cfgToken = GetTokenFunc?.Invoke (enforce);
-        await Configuration.ReadAsync (cfgToken.Token);
+        await Configuration.ReadAsync (cfgToken?.Token);
       }
     }
 

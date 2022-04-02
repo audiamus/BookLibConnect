@@ -54,8 +54,8 @@ namespace core.audiamus.util {
       var tmp3 = cleanup (tmp.files, log2?.Timestamp ?? default);
       var log3 = cleanup (log.files, tmp2?.Timestamp ?? default);
 
-      int numFiles = tmp.stats.NumFiles + log.stats.NumFiles;
-      long totalSize = (tmp.stats.TotalSize + log.stats.TotalSize);
+      int numFiles = (tmp.stats?.NumFiles ?? 0) + (log.stats?.NumFiles ?? 0);
+      long totalSize = (tmp.stats?.TotalSize ?? 0) + (log.stats?.TotalSize ?? 0);
 
       int removedFiles = tmp2?.NumFiles ?? 0 + log2?.NumFiles ?? 0 + tmp3?.NumFiles ?? 0 + log3?.NumFiles ?? 0;
       long removedSize = (tmp2?.TotalSize ?? 0 + log2?.TotalSize ?? 0 + tmp3?.TotalSize ?? 0 + log3?.TotalSize ?? 0);
@@ -69,6 +69,9 @@ namespace core.audiamus.util {
     private DirectoryStatistics cleanup (List<FileInfo> fileInfos, DateTime enforceByDate) => cleanup (fileInfos, null, enforceByDate);
 
     private DirectoryStatistics cleanup (List<FileInfo> fileInfos, DirectoryStatistics stats, DateTime? enforceByDate) {
+      if (fileInfos is null)
+        return null;
+
       bool exceeds = enforceByDate.HasValue || exceedsThresholds (stats);
 
       if (!exceeds)
