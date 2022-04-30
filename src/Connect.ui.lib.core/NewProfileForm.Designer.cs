@@ -49,13 +49,17 @@ namespace core.audiamus.connect.ui {
       this.panelCreateUrl2 = new System.Windows.Forms.Panel();
       this.panelCreateUrl1 = new System.Windows.Forms.Panel();
       this.panelPasteUrl = new System.Windows.Forms.Panel();
+      this.lblLoginSuccAmzn = new System.Windows.Forms.Label();
+      this.lblPaste2 = new System.Windows.Forms.Label();
       this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
+      this.panelFinalUrl = new System.Windows.Forms.Panel();
       this.panelResult.SuspendLayout();
       this.panelRegion.SuspendLayout();
       this.panelCreateUrl.SuspendLayout();
       this.panelCreateUrl2.SuspendLayout();
       this.panelCreateUrl1.SuspendLayout();
       this.panelPasteUrl.SuspendLayout();
+      this.panelFinalUrl.SuspendLayout();
       this.SuspendLayout();
       // 
       // lblRegion1
@@ -113,15 +117,15 @@ namespace core.audiamus.connect.ui {
       this.lblPaste.AutoSize = true;
       this.lblPaste.Location = new System.Drawing.Point(39, 13);
       this.lblPaste.Name = "lblPaste";
-      this.lblPaste.Size = new System.Drawing.Size(321, 13);
+      this.lblPaste.Size = new System.Drawing.Size(325, 13);
       this.lblPaste.TabIndex = 5;
-      this.lblPaste.Text = "Copy/paste final URL \"Cannot find page\" into the text box below.";
+      this.lblPaste.Text = "Successful log-in is shown by a page like this, with misleading text:";
       // 
       // textBox2
       // 
       this.textBox2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-      this.textBox2.Location = new System.Drawing.Point(39, 39);
+      this.textBox2.Location = new System.Drawing.Point(39, 135);
       this.textBox2.Multiline = true;
       this.textBox2.Name = "textBox2";
       this.textBox2.Size = new System.Drawing.Size(720, 88);
@@ -137,7 +141,7 @@ namespace core.audiamus.connect.ui {
       this.panelResult.Controls.Add(this.lblAccount);
       this.panelResult.Controls.Add(this.lblProfile);
       this.panelResult.Dock = System.Windows.Forms.DockStyle.Top;
-      this.panelResult.Location = new System.Drawing.Point(0, 362);
+      this.panelResult.Location = new System.Drawing.Point(0, 454);
       this.panelResult.Name = "panelResult";
       this.panelResult.Size = new System.Drawing.Size(800, 76);
       this.panelResult.TabIndex = 8;
@@ -204,7 +208,7 @@ namespace core.audiamus.connect.ui {
       // 
       this.btnOK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
       this.btnOK.Enabled = false;
-      this.btnOK.Location = new System.Drawing.Point(37, 462);
+      this.btnOK.Location = new System.Drawing.Point(37, 547);
       this.btnOK.Name = "btnOK";
       this.btnOK.Size = new System.Drawing.Size(75, 23);
       this.btnOK.TabIndex = 10;
@@ -291,14 +295,36 @@ namespace core.audiamus.connect.ui {
       // 
       // panelPasteUrl
       // 
-      this.panelPasteUrl.Controls.Add(this.lblPaste);
+      this.panelPasteUrl.Controls.Add(this.panelFinalUrl);
       this.panelPasteUrl.Controls.Add(this.textBox2);
       this.panelPasteUrl.Dock = System.Windows.Forms.DockStyle.Top;
       this.panelPasteUrl.Enabled = false;
       this.panelPasteUrl.Location = new System.Drawing.Point(0, 217);
       this.panelPasteUrl.Name = "panelPasteUrl";
-      this.panelPasteUrl.Size = new System.Drawing.Size(800, 145);
+      this.panelPasteUrl.Size = new System.Drawing.Size(800, 237);
       this.panelPasteUrl.TabIndex = 15;
+      // 
+      // lblLoginSuccAmzn
+      // 
+      this.lblLoginSuccAmzn.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+      this.lblLoginSuccAmzn.Font = new System.Drawing.Font("Verdana", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+      this.lblLoginSuccAmzn.Location = new System.Drawing.Point(39, 33);
+      this.lblLoginSuccAmzn.Name = "lblLoginSuccAmzn";
+      this.lblLoginSuccAmzn.Padding = new System.Windows.Forms.Padding(100, 0, 100, 0);
+      this.lblLoginSuccAmzn.Size = new System.Drawing.Size(720, 75);
+      this.lblLoginSuccAmzn.TabIndex = 7;
+      this.lblLoginSuccAmzn.Text = "Looking for Something? We\'re sorry. The Web address you entered is not a function" +
+    "ing page on our site.\r\nGo to Amazon.com\'s Home Page";
+      this.lblLoginSuccAmzn.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+      // 
+      // lblPaste2
+      // 
+      this.lblPaste2.AutoSize = true;
+      this.lblPaste2.Location = new System.Drawing.Point(39, 113);
+      this.lblPaste2.Name = "lblPaste2";
+      this.lblPaste2.Size = new System.Drawing.Size(279, 13);
+      this.lblPaste2.TabIndex = 5;
+      this.lblPaste2.Text = "Copy/paste URL from that page into the text box below.";
       // 
       // toolTip1
       // 
@@ -307,11 +333,22 @@ namespace core.audiamus.connect.ui {
       this.toolTip1.ReshowDelay = 100;
       this.toolTip1.ToolTipIcon = System.Windows.Forms.ToolTipIcon.Info;
       // 
+      // panelFinalUrl
+      // 
+      this.panelFinalUrl.Controls.Add(this.lblLoginSuccAmzn);
+      this.panelFinalUrl.Controls.Add(this.lblPaste2);
+      this.panelFinalUrl.Controls.Add(this.lblPaste);
+      this.panelFinalUrl.Location = new System.Drawing.Point(3, 3);
+      this.panelFinalUrl.Name = "panelFinalUrl";
+      this.panelFinalUrl.Size = new System.Drawing.Size(794, 130);
+      this.panelFinalUrl.TabIndex = 8;
+      this.panelFinalUrl.Visible = false;
+      // 
       // NewProfileForm
       // 
       this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-      this.ClientSize = new System.Drawing.Size(800, 497);
+      this.ClientSize = new System.Drawing.Size(800, 582);
       this.Controls.Add(this.panelResult);
       this.Controls.Add(this.panelPasteUrl);
       this.Controls.Add(this.panelCreateUrl);
@@ -333,6 +370,8 @@ namespace core.audiamus.connect.ui {
       this.panelCreateUrl1.ResumeLayout(false);
       this.panelPasteUrl.ResumeLayout(false);
       this.panelPasteUrl.PerformLayout();
+      this.panelFinalUrl.ResumeLayout(false);
+      this.panelFinalUrl.PerformLayout();
       this.ResumeLayout(false);
 
     }
@@ -363,5 +402,8 @@ namespace core.audiamus.connect.ui {
     private System.Windows.Forms.Panel panelCreateUrl1;
     private System.Windows.Forms.Panel panelPasteUrl;
     private System.Windows.Forms.ToolTip toolTip1;
+    private System.Windows.Forms.Label lblLoginSuccAmzn;
+    private System.Windows.Forms.Label lblPaste2;
+    private System.Windows.Forms.Panel panelFinalUrl;
   }
 }

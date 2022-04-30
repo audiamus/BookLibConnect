@@ -21,9 +21,9 @@ _**Note:** Books downloaded with Book Lib Connect and exported for [AAX Audio Co
 
 
 ## Download
-Windows setup package version 0.7, English, with manual:
+Windows setup package version 0.8, English, with manual:
 
-**[BookLibConnect-0.7-Setup.exe](https://github.com/audiamus/BookLibConnect/releases/download/v0.7/BookLibConnect-0.7-Setup.exe)**
+**[BookLibConnect-0.8-Setup.exe](https://github.com/audiamus/BookLibConnect/releases/download/v0.8/BookLibConnect-0.8-Setup.exe)**
 
 ## Feedback
 Use the [Discussions](https://github.com/audiamus/BookLibConnect/discussions) and [Issues](https://github.com/audiamus/BookLibConnect/issues) sections. 

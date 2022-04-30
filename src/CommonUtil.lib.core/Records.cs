@@ -17,7 +17,7 @@ namespace core.audiamus.util {
     string Desc { get; }
   }
 
-  public record UpdateInteractionMessage (EUpdateInteract Kind, IPackageInfo pckInfo);
+  public record UpdateInteractionMessage (EUpdateInteract Kind, IPackageInfo PckInfo);
 
   public record PackageInfo {
     public string Url { get; init; }

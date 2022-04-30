@@ -92,13 +92,18 @@ namespace core.audiamus.connect {
       string filename = Path.GetFileNameWithoutExtension (conv.DownloadFileName);
       string destfile = Path.Combine (ExportSettings.ExportDirectory, filename + R.ExportedFileExt).AsUncIfLong();
 
-      lock (__lockable) {
-        bool succ = FileEx.Copy (sourcefile, destfile, true,
-          pm => context.Progress?.Report (pm),
-          () => context.CancellationToken.IsCancellationRequested
-        );
-        return succ;
+      try {
+        lock (__lockable) {
+          bool succ = FileEx.Copy (sourcefile, destfile, true,
+            pm => context.Progress?.Report (pm),
+            () => context.CancellationToken.IsCancellationRequested
+          );
+          return succ;
+        }
+      } catch (Exception exc) {
+        Log (1, this, () => exc.Summary ());
       }
+      return false;
     }
 
     // internal instead of private for testing only

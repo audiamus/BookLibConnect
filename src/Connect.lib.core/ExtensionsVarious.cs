@@ -43,6 +43,90 @@ namespace core.audiamus.connect.ex {
     }
   }
 
+  public static class JsonExtractor {
+    private static JsonWriterOptions WriterOptions { get; } = new JsonWriterOptions {
+      Indented = true,
+      Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+    };
+
+    public static string ExtractJsonStructure (this string json) {
+      try {
+        JsonDocument jDoc = JsonDocument.Parse (json);
+        JsonElement jElem = jDoc.RootElement;
+
+        using (MemoryStream msm = new MemoryStream ()) {
+          using (Utf8JsonWriter wr = new Utf8JsonWriter (msm, WriterOptions)) {
+            parseElem (null, jElem, wr);
+            wr.Flush ();
+            string extracted = Encoding.UTF8.GetString (msm.ToArray ());
+            return extracted;
+          }
+        }
+      } catch (Exception exc) {
+        Logging.Log (1, typeof (JsonExtractor), () => exc.Summary ());
+        return null;
+      }
+    }
+
+    private static void parseElem (string key, JsonElement jElem, Utf8JsonWriter wr) {
+      switch (jElem.ValueKind) {
+        case JsonValueKind.Object:
+          parseObject (key, jElem, wr);
+          break;
+        case JsonValueKind.Array:
+          parseArray (key, jElem, wr);
+          break;
+        case JsonValueKind.String:
+          parseString (key, jElem, wr);
+          break;
+        case JsonValueKind.Null:
+          wr.WriteNull (key);
+          break;
+        case JsonValueKind.Number: {
+            double val = jElem.GetDouble ();
+            wr.WriteNumber (key, val);
+            break;
+          }
+        case JsonValueKind.False:
+        case JsonValueKind.True: {
+            bool val = jElem.GetBoolean ();
+            wr.WriteBoolean (key, val);
+            break;
+          }
+      }
+    }
+
+    private static void parseObject (string key, JsonElement jElem, Utf8JsonWriter wr) {
+      IEnumerable<JsonProperty> props = jElem.EnumerateObject ();
+      if (key is null)
+        wr.WriteStartObject ();
+      else
+        wr.WriteStartObject (key);
+      foreach (var prop in props)
+        parseElem (prop.Name, prop.Value, wr);
+      wr.WriteEndObject ();
+    }
+
+    private static void parseArray (string key, JsonElement jElem, Utf8JsonWriter wr) {
+      IEnumerable<JsonElement> elems = jElem.EnumerateArray ();
+      if (key is null)
+        wr.WriteStartArray ();
+      else
+        wr.WriteStartArray (key);
+      foreach (var elem in elems)
+        parseElem (null, elem, wr);
+      wr.WriteEndArray ();
+    }
+
+    private static void parseString (string key, JsonElement jElem, Utf8JsonWriter wr) {
+      string value = jElem.GetString ();
+      string newValue = $"string {value.Length} chars";
+      wr.WriteString (key, newValue);
+    }
+
+
+  }
+
   public static class FileExtensions {
     const string JSON = ".json";
     const string HTML = ".html";

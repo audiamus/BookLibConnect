@@ -365,6 +365,14 @@ namespace core.audiamus.connect {
     // internal instead of private for testing only
     internal bool updateProfile (Profile profile, string json) {
       try {
+        if (Logging.Level >= 3) {
+          const string REGISTRATION = "RegistrationResponse";
+          if (Logging.Level >= 4)
+            json.WriteTempJsonFile (REGISTRATION);
+          string jsonCleaned = json.ExtractJsonStructure ();
+          if (jsonCleaned is not null)
+          jsonCleaned.WriteTempJsonFile (REGISTRATION + "(cleared)");
+        }
         var root = adb.json.RegistrationResponse.Deserialize (json);
 
         var response = root.response;
@@ -422,7 +430,8 @@ namespace core.audiamus.connect {
           storeAuthentCookie);
 
       } catch (Exception exc) {
-        Log (1, this, () => exc.Summary ());
+        //Log (1, this, () => exc.Summary ());
+        Log (1, this, () => exc.ToString());
         return false;
       }
       return true;

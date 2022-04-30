@@ -45,7 +45,10 @@ namespace core.audiamus.aux {
         var processOutputStringBuilder = new StringBuilder ();
 
         p.Start ();
-        p.PriorityClass = ProcessPriorityClass.BelowNormal;
+        try {
+          p.PriorityClass = ProcessPriorityClass.BelowNormal;
+        } catch (Exception) {
+        }
 
         Singleton<ProcessList>.Instance.Add (p);
         Process = p;

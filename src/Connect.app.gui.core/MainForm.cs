@@ -335,6 +335,10 @@ namespace core.audiamus.connect.app.gui {
 
     }
 
+    private void logTmpFileMaintenance () {
+      Task task = LogTmpFileMaintenance.Instance.CleanupAsync ();
+    } 
+
     private OnlineUpdate newOnlineUpdate () => 
       new OnlineUpdate (UserSettings.UpdateSettings, ApplEnv.ApplName, null, AppSettings.DbgOnlineUpdate);
 
@@ -346,10 +350,6 @@ namespace core.audiamus.connect.app.gui {
       
       await update.UpdateAsync (interact, () => Application.Exit (), isBusyForUpdate);
     }
-
-    private void logTmpFileMaintenance () {
-      Task task = LogTmpFileMaintenance.Instance.CleanupAsync ();
-    } 
 
     private async void handleDeferredUpdateAsync () {
       var update = newOnlineUpdate ();
@@ -369,13 +369,13 @@ namespace core.audiamus.connect.app.gui {
 
     private string updateInteractMessage (UpdateInteractionMessage uim) {
       string msg = null;
-      var pi = uim.pckInfo;
+      var pi = uim.PckInfo;
       if (!pi.DefaultApp)
         return null;
       switch (uim.Kind) {
         case EUpdateInteract.newVersAvail:
           msg = string.Format (R.MsgOnlineUpdateDownload, 
-            pi.Version, prev(pi.Preview), pi.AppName, desc (pi.Desc));
+            pi.Version, prev(pi.Preview), pi.AppName, desc (null));
           break;
         case EUpdateInteract.installNow:
           msg = string.Format (

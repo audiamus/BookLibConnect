@@ -63,6 +63,7 @@ namespace core.audiamus.connect.ui {
       panelCreateUrl.Enabled = comBoxRegion.SelectedIndex >= 0 && noProfile;
       panelCreateUrl1.Enabled = LoginUrl.IsNullOrWhiteSpace();
       panelCreateUrl2.Enabled = !LoginUrl.IsNullOrWhiteSpace();
+      panelFinalUrl.Visible = !LoginUrl.IsNullOrWhiteSpace ();
       panelPasteUrl.Enabled = _loginUrlUsed && noProfile;
       panelResult.Visible = !noProfile;
       btnOK.Enabled = !noProfile;
