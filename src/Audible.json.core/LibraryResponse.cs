@@ -65,7 +65,7 @@ namespace core.audiamus.adb.json {
     public string origin_marketplace { get; set; }
     public string origin_type { get; set; }
     public string pdf_url { get; set; }
-    public float percent_complete { get; set; }
+    public float? percent_complete { get; set; }
     public Plan[] plans { get; set; }
     public Product_Images product_images { get; set; }
     public string publication_name { get; set; }

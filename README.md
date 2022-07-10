@@ -21,9 +21,9 @@ _**Note:** Books downloaded with Book Lib Connect and exported for [AAX Audio Co
 
 
 ## Download
-Windows setup package version 0.8, English, with manual:
+Windows setup package version 0.9, English, with manual:
 
-**[BookLibConnect-0.8-Setup.exe](https://github.com/audiamus/BookLibConnect/releases/download/v0.8/BookLibConnect-0.8-Setup.exe)**
+**[BookLibConnect-0.9-Setup.exe](https://github.com/audiamus/BookLibConnect/releases/download/v0.9/BookLibConnect-0.9-Setup.exe)**
 
 ## Feedback
 Use the [Discussions](https://github.com/audiamus/BookLibConnect/discussions) and [Issues](https://github.com/audiamus/BookLibConnect/issues) sections. 
@@ -31,9 +31,9 @@ Be cautious with uploading log files to these sections as they may contain sensi
 
 ## Dependencies
 AAX Audio Converter will run on Windows 64bit. Minimum Windows version is 7.
-The application requires .Net 5 64 bit to be installed. On Windows 10/11 systems this should normally be the case, if the system is kept up to date.
-If not, the app will prompt you for downloading .Net 5 and open the link in your default web browser. From the many options, pick 
-**.Net 5 Runtime x64 for Windows desktop**.
+The application requires .Net 6 64 bit to be installed. On Windows 10/11 systems this should normally be the case, if the system is kept up to date.
+If not, the app will prompt you for downloading .Net 6 and open the link in your default web browser. From the many options, pick 
+**.Net 6 Runtime x64 for _Windows desktop_**.
 
 ## Acknowledgments
 - [mkb79](https://github.com/mkb79/Audible) for his Python library which served as the reference implementation of the Audible API to me, straightforward and easy to follow. 

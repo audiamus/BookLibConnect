@@ -18,7 +18,7 @@
     public string license_response { get; set; }
     public string message { get; set; }
     public string request_id { get; set; }
-    public bool requires_ad_supported_playback { get; set; }
+    public bool? requires_ad_supported_playback { get; set; }
     public string status_code { get; set; }
     public string voucher_id { get; set; }
 
@@ -33,18 +33,18 @@
   }
 
   public class ChapterInfo {
-    public int brandIntroDurationMs { get; set; }
-    public int brandOutroDurationMs { get; set; }
+    public int? brandIntroDurationMs { get; set; }
+    public int? brandOutroDurationMs { get; set; }
     public Chapter[] chapters { get; set; }
-    public bool is_accurate { get; set; }
-    public int runtime_length_ms { get; set; }
-    public int runtime_length_sec { get; set; }
+    public bool? is_accurate { get; set; }
+    public int? runtime_length_ms { get; set; }
+    public int? runtime_length_sec { get; set; }
   }
 
   public class Chapter {
-    public int length_ms { get; set; }
-    public int start_offset_ms { get; set; }
-    public int start_offset_sec { get; set; }
+    public int? length_ms { get; set; }
+    public int? start_offset_ms { get; set; }
+    public int? start_offset_sec { get; set; }
     public string title { get; set; }
     public Chapter[] chapters { get; set; }
   }
@@ -67,7 +67,7 @@
 
   public class LastPositionHeard {
     public string last_updated { get; set; }
-    public int position_ms { get; set; }
+    public int? position_ms { get; set; }
     public string status { get; set; }
   }
 }

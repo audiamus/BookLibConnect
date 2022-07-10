@@ -601,10 +601,10 @@ namespace core.audiamus.connect {
         comp.ChapterInfo = chapterInfo;
       }
 
-      chapterInfo.BrandIntroDurationMs = source.brandIntroDurationMs;
-      chapterInfo.BrandOutroDurationMs = source.brandOutroDurationMs;
+      chapterInfo.BrandIntroDurationMs = source.brandIntroDurationMs ?? 0;
+      chapterInfo.BrandOutroDurationMs = source.brandOutroDurationMs ?? 0;
       chapterInfo.IsAccurate = source.is_accurate;
-      chapterInfo.RuntimeLengthMs = source.runtime_length_ms;
+      chapterInfo.RuntimeLengthMs = source.runtime_length_ms ?? 0;
 
       if (source.chapters.IsNullOrEmpty ())
         return;
@@ -622,8 +622,8 @@ namespace core.audiamus.connect {
     }
 
     private static void setChapter (adb.json.Chapter src, Chapter chapter) {
-      chapter.LengthMs = src.length_ms;
-      chapter.StartOffsetMs = src.start_offset_ms;
+      chapter.LengthMs = src.length_ms ?? 0;
+      chapter.StartOffsetMs = src.start_offset_ms ?? 0;
       chapter.Title = src.title;
     }
 

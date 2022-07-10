@@ -374,6 +374,8 @@ namespace core.audiamus.connect {
           jsonCleaned.WriteTempJsonFile (REGISTRATION + "(cleared)");
         }
         var root = adb.json.RegistrationResponse.Deserialize (json);
+        if (root is null)
+          return false;
 
         var response = root.response;
         var success = response.success;

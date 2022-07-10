@@ -124,17 +124,20 @@ namespace core.audiamus.connect {
           if (pageResult is null)
             return null;
 
+          if (Logging.Level >= 3) {
+            string file = pageResult.WriteTempJsonFile ("LibraryResponse");
+            Log (3, this, () => $"page={page}, file=\"{Path.GetFileName (file)}\"");
+          }
 
           adb.json.LibraryResponse libraryResponse = adb.json.LibraryResponse.Deserialize (pageResult);
+          if (libraryResponse is null)
+            return null;
+
           if (!(libraryResponse?.items.Any () ?? false))
             break;
 
           var pageProducts = libraryResponse.items;
           Log (3, this, () => $"#items/page={pageProducts.Length}");
-          if (Logging.Level >= 3) {
-            string file = pageResult.WriteTempJsonFile ("LibraryResponse");
-            Log (3, this, () => $"page={page}, file=\"{Path.GetFileName (file)}\"");
-          }
           libProducts.AddRange (pageProducts);
         }
       } else {
@@ -206,7 +209,7 @@ namespace core.audiamus.connect {
 
       adb.json.LicenseResponse license = adb.json.LicenseResponse.Deserialize (response);
 
-      decryptLicense (license.content_license);
+      decryptLicense (license?.content_license);
 
       return license;
     }
@@ -224,7 +227,7 @@ namespace core.audiamus.connect {
         return false;
       }
 
-      var lic = licresp.content_license;
+      var lic = licresp?.content_license;
       if (lic?.voucher is null) {
         conversion.State = EConversionState.license_denied;
         Log (3, this, () => $"{conversion}; license decryption failed.");
@@ -368,9 +371,9 @@ namespace core.audiamus.connect {
         File.Move (file, sfxfile, true);
       }
 
-      void aaxFile_ConversionProgressUpdate (object sender, ConversionProgressEventArgs e) {
+      async void aaxFile_ConversionProgressUpdate (object sender, ConversionProgressEventArgs e) {
         if (cancToken.IsCancellationRequested)
-          aaxFile?.Cancel ();
+          await aaxFile?.CancelAsync ();
         progressAction.Invoke (conversion, e.ProcessPosition);
       }
     }
@@ -478,6 +481,9 @@ namespace core.audiamus.connect {
     private void decryptLicense (adb.json.ContentLicense license) {
       // See also
       //https://patchwork.ffmpeg.org/project/ffmpeg/patch/17559601585196510@sas2-2fa759678732.qloud-c.yandex.net/
+
+      if (license is null)
+        return;
 
       string hashable = Profile.DeviceInfo.Type + Profile.DeviceInfo.Serial + Profile.CustomerInfo.AccountId +
         license.asin;
