@@ -20,15 +20,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="AAXClean" Version="0.4.6" />
     <PackageReference Include="HtmlAgilityPack" Version="1.11.37" />
     <PackageReference Include="System.Drawing.Common" Version="5.0.2" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\git-clone\Mbucari\AAXClean\AAXClean.csproj" />
-    <ProjectReference Include="..\..\AaxAudioConverter\Audible.json.core\Audible.json.core.csproj" />
-    <ProjectReference Include="..\..\AaxAudioConverter\AuxLib.core\AuxLib.core.csproj" />
-    <ProjectReference Include="..\..\AaxAudioConverter\BooksDatabase.core\BooksDatabase.core.csproj" />
+    <ProjectReference Include="..\Audible.json.core\Audible.json.core.csproj" />
+    <ProjectReference Include="..\AuxLib.core\AuxLib.core.csproj" />
+    <ProjectReference Include="..\BooksDatabase.core\BooksDatabase.core.csproj" />
     <ProjectReference Include="..\CommonTypes.lib.core\CommonTypes.lib.core.csproj" />
     <ProjectReference Include="..\CommonUtil.lib.core\CommonUtil.lib.core.csproj" />
     <ProjectReference Include="..\SystemMgmt.core\SystemMgmt.core.csproj" />
