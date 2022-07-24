@@ -1,4 +1,6 @@
-﻿using System;
+﻿//#define TEST_UNAVAIL
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -137,8 +139,13 @@ namespace core.audiamus.connect {
             break;
 
           var pageProducts = libraryResponse.items;
+#if TEST_UNAVAIL
+          pageProducts = pageProducts.ToList().Take(pageProducts.Length - 1).ToArray();
+#endif
           Log (3, this, () => $"#items/page={pageProducts.Length}");
           libProducts.AddRange (pageProducts);
+
+
         }
       } else {
         adb.json.LibraryResponse libraryResponse = adb.json.LibraryResponse.Deserialize (json);

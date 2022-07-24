@@ -22,6 +22,7 @@ namespace core.audiamus.connect {
     bool AutoUpdateLibrary { get; }
     bool AutoOpenDownloadDialog { get; }
     bool IncludeAdultProducts { get; }
+    bool HideUnavailableProducts { get; }
     bool KeepEncryptedFiles { get; }
     EDownloadQuality DownloadQuality { get; }
     string DownloadDirectory { get; }
@@ -52,14 +53,19 @@ namespace core.audiamus.connect {
   }
 
   public class DownloadSettings : SettingsBase, IDownloadSettings {
+    private EDownloadQualityReducedChoices _downloadQuality = EDownloadQualityReducedChoices.High;
 
     public bool AutoRefresh { get; set; }
     public bool AutoUpdateLibrary { get; set; } = true;
     public bool AutoOpenDownloadDialog { get; set; }
     public bool IncludeAdultProducts { get; set; }
+    public bool HideUnavailableProducts { get; set; }
     public bool MultiPartDownload { get; set; }
     public bool KeepEncryptedFiles { get; set; }
-    public EDownloadQuality DownloadQuality { get; set; } = EDownloadQuality.Extreme;
+    public EDownloadQuality DownloadQuality {
+      get => _downloadQuality.ToFullChoices ();
+      set => _downloadQuality = value.ToReducedChoices ();
+    } 
     public string DownloadDirectory { get; set; }
     public EInitialSorting InitialSorting { get; set; }
     public ProfileAliasKey Profile { get; set; }

@@ -92,6 +92,9 @@ namespace core.audiamus.connect.ui {
 
       if (!Settings.IncludeAdultProducts)
         books = books.Where (b => !(b.AdultProduct ?? false));
+     
+      if (Settings.HideUnavailableProducts)
+        books = books.Where (b => b.ApplicableState (Settings.MultiPartDownload) != EConversionState.unknown);
 
       Log (3, this, () => $"#books={allBooks.Count ()} (filtered)");
 

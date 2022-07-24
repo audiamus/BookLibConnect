@@ -73,6 +73,7 @@ namespace core.audiamus.connect.app.gui {
         ckBoxOpenDlg.Checked = UserSettings.DownloadSettings.AutoOpenDownloadDialog;
         ckBoxMultiPart.Checked = UserSettings.DownloadSettings.MultiPartDownload;
         ckBoxAdult.Checked = UserSettings.DownloadSettings.IncludeAdultProducts;
+        ckBoxUnavail.Checked = UserSettings.DownloadSettings.HideUnavailableProducts;
         ckBoxKeepEncrypted.Checked = UserSettings.DownloadSettings.KeepEncryptedFiles;
      
         comBoxSort.DataSource = Enum.GetValues<EInitialSorting> ()
@@ -80,8 +81,8 @@ namespace core.audiamus.connect.app.gui {
           .ToArray();
         comBoxSort.SelectedIndex = (int)UserSettings.DownloadSettings.InitialSorting;
 
-        comBoxDnldQual.DataSource = Enum.GetValues<EDownloadQuality> ();
-        comBoxDnldQual.SelectedIndex = (int)UserSettings.DownloadSettings.DownloadQuality;
+        comBoxDnldQual.DataSource = Enum.GetValues<EDownloadQualityReducedChoices> ();
+        comBoxDnldQual.SelectedIndex = (int)UserSettings.DownloadSettings.DownloadQuality.ToReducedChoices();
 
         ckBoxExport.Checked = UserSettings.ExportSettings.ExportToAax ?? false;
       }
@@ -459,6 +460,9 @@ namespace core.audiamus.connect.app.gui {
     private void ckBoxAdult_CheckedChanged (object sender, EventArgs e) =>
       checkedChanged (sender, s => UserSettings.DownloadSettings.IncludeAdultProducts = s);
 
+    private void ckBoxUnavail_CheckedChanged (object sender, EventArgs e) =>
+      checkedChanged (sender, s => UserSettings.DownloadSettings.HideUnavailableProducts = s);
+
     private void ckBoxKeepEncrypted_CheckedChanged (object sender, EventArgs e) =>
       checkedChanged (sender, s => UserSettings.DownloadSettings.KeepEncryptedFiles = s);
 
@@ -479,7 +483,8 @@ namespace core.audiamus.connect.app.gui {
     private void comBoxDnldQual_SelectedIndexChanged (object sender, EventArgs e) {
       if (_ignoreFlag)
         return;
-      UserSettings.DownloadSettings.DownloadQuality = (EDownloadQuality)comBoxDnldQual.SelectedIndex;
+      UserSettings.DownloadSettings.DownloadQuality = 
+        ((EDownloadQualityReducedChoices)comBoxDnldQual.SelectedIndex).ToFullChoices();
       onChangedSettings ();
     }
 
