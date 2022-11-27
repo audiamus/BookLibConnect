@@ -19,6 +19,8 @@ using core.audiamus.booksdb;
 using HtmlAgilityPack;
 using static core.audiamus.aux.ApplEnv;
 
+using R = core.audiamus.connect.Properties.Resources;
+
 namespace core.audiamus.connect.ex {
   public static class AnonExtensions {
     public static string ToAnonString (this Credentials creds) {
@@ -614,6 +616,20 @@ namespace core.audiamus.connect.ex {
         DownloadFileName = other.DownloadFileName,
         DestDirectory = other.DestDirectory
       };
+    }
+  }
+
+  internal static class DownloadFilenameExtensions {
+    static readonly string[] __knownExtensions = new string[] {
+      R.EncryptedFileExt, R.DecryptedFileExt, R.ExportedFileExt
+    };
+
+    public static string GetDownloadFileNameWithoutExtension (this string downloadFileName) { 
+      string ext = Path.GetExtension (downloadFileName).ToLower();
+      if (__knownExtensions.Contains (ext))
+        return Path.GetFileNameWithoutExtension (downloadFileName);
+      else
+        return Path.GetFileName (downloadFileName);
     }
   }
 }

@@ -2,18 +2,23 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Resources;
 using System.Windows.Forms;
+
 using core.audiamus.aux;
+using core.audiamus.aux.ex;
 using core.audiamus.aux.win;
 using core.audiamus.booksdb;
 using core.audiamus.booksdb.ex;
-using R = core.audiamus.connect.ui.Properties.Resources;
+
 using static core.audiamus.aux.Logging;
-using core.audiamus.aux.ex;
+
+using R = core.audiamus.connect.ui.Properties.Resources;
 
 namespace core.audiamus.connect.ui {
 
   public partial class BookLibDGVControl : UserControl {
+    private ResourceManager RM { get; } 
 
     private SortableBindingList<BookDataSource> DataSource { get; set; }
     private List<BookDataSource> CurrentlySelectedBooks { get; } = new List<BookDataSource> ();
@@ -55,6 +60,8 @@ namespace core.audiamus.connect.ui {
 
     public BookLibDGVControl () {
       InitializeComponent ();
+
+      RM = this.GetDefaultResourceManager ();
     }
 
     private void settings_ChangedSettings (object sender, EventArgs e) {
@@ -92,7 +99,7 @@ namespace core.audiamus.connect.ui {
 
       if (!Settings.IncludeAdultProducts)
         books = books.Where (b => !(b.AdultProduct ?? false));
-     
+
       if (Settings.HideUnavailableProducts)
         books = books.Where (b => b.ApplicableState (Settings.MultiPartDownload) != EConversionState.unknown);
 
@@ -366,6 +373,16 @@ namespace core.audiamus.connect.ui {
 
     private void btnResync_Click (object sender, EventArgs e) {
       Resync?.Invoke (this, EventArgs.Empty);
+    }
+
+    private void dataGridView1_CellToolTipTextNeeded (object sender, DataGridViewCellToolTipTextNeededEventArgs e) {
+      if (e.ColumnIndex != 0 || e.RowIndex < 0)
+        return;
+
+      var row = DataSource[e.RowIndex];
+      var state = row.StateBacking;
+      string ttt = RM.GetStringEx (state.ToString ());
+      e.ToolTipText = ttt;
     }
   }
 }

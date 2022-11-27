@@ -60,14 +60,16 @@ namespace core.audiamus.connect.ui {
       dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
       this.dataGridView1.DefaultCellStyle = dataGridViewCellStyle2;
       this.dataGridView1.Dock = System.Windows.Forms.DockStyle.Fill;
-      this.dataGridView1.Location = new System.Drawing.Point(0, 37);
+      this.dataGridView1.Location = new System.Drawing.Point(0, 43);
+      this.dataGridView1.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
       this.dataGridView1.Name = "dataGridView1";
       this.dataGridView1.ReadOnly = true;
       this.dataGridView1.RowHeadersVisible = false;
       this.dataGridView1.RowTemplate.Height = 23;
       this.dataGridView1.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-      this.dataGridView1.Size = new System.Drawing.Size(642, 113);
+      this.dataGridView1.Size = new System.Drawing.Size(749, 130);
       this.dataGridView1.TabIndex = 2;
+      this.dataGridView1.CellToolTipTextNeeded += new System.Windows.Forms.DataGridViewCellToolTipTextNeededEventHandler(this.dataGridView1_CellToolTipTextNeeded);
       this.dataGridView1.DataBindingComplete += new System.Windows.Forms.DataGridViewBindingCompleteEventHandler(this.dataGridView1_DataBindingComplete);
       this.dataGridView1.SelectionChanged += new System.EventHandler(this.dataGridView1_SelectionChanged);
       // 
@@ -78,16 +80,18 @@ namespace core.audiamus.connect.ui {
       this.panel1.Controls.Add(this.btnAdd);
       this.panel1.Dock = System.Windows.Forms.DockStyle.Top;
       this.panel1.Location = new System.Drawing.Point(0, 0);
+      this.panel1.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
       this.panel1.Name = "panel1";
-      this.panel1.Size = new System.Drawing.Size(642, 37);
+      this.panel1.Size = new System.Drawing.Size(749, 43);
       this.panel1.TabIndex = 1;
       // 
       // btnDnload
       // 
       this.btnDnload.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-      this.btnDnload.Location = new System.Drawing.Point(559, 8);
+      this.btnDnload.Location = new System.Drawing.Point(652, 9);
+      this.btnDnload.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
       this.btnDnload.Name = "btnDnload";
-      this.btnDnload.Size = new System.Drawing.Size(80, 23);
+      this.btnDnload.Size = new System.Drawing.Size(93, 27);
       this.btnDnload.TabIndex = 3;
       this.btnDnload.Text = "Download …";
       this.btnDnload.UseVisualStyleBackColor = true;
@@ -96,9 +100,10 @@ namespace core.audiamus.connect.ui {
       // btnRem
       // 
       this.btnRem.ForeColor = System.Drawing.SystemColors.ControlText;
-      this.btnRem.Location = new System.Drawing.Point(95, 8);
+      this.btnRem.Location = new System.Drawing.Point(111, 9);
+      this.btnRem.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
       this.btnRem.Name = "btnRem";
-      this.btnRem.Size = new System.Drawing.Size(80, 23);
+      this.btnRem.Size = new System.Drawing.Size(93, 27);
       this.btnRem.TabIndex = 2;
       this.btnRem.Text = "Remove";
       this.btnRem.UseVisualStyleBackColor = true;
@@ -106,9 +111,10 @@ namespace core.audiamus.connect.ui {
       // 
       // btnAdd
       // 
-      this.btnAdd.Location = new System.Drawing.Point(3, 8);
+      this.btnAdd.Location = new System.Drawing.Point(4, 9);
+      this.btnAdd.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
       this.btnAdd.Name = "btnAdd";
-      this.btnAdd.Size = new System.Drawing.Size(80, 23);
+      this.btnAdd.Size = new System.Drawing.Size(93, 27);
       this.btnAdd.TabIndex = 1;
       this.btnAdd.Text = "Add …";
       this.btnAdd.UseVisualStyleBackColor = true;
@@ -121,12 +127,13 @@ namespace core.audiamus.connect.ui {
       // 
       // ConvertDGVControl
       // 
-      this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+      this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
       this.Controls.Add(this.dataGridView1);
       this.Controls.Add(this.panel1);
+      this.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
       this.Name = "ConvertDGVControl";
-      this.Size = new System.Drawing.Size(642, 150);
+      this.Size = new System.Drawing.Size(749, 173);
       ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
       this.panel1.ResumeLayout(false);
       this.ResumeLayout(false);

@@ -4,18 +4,24 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
+using System.Resources;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+
 using core.audiamus.aux;
 using core.audiamus.aux.ex;
 using core.audiamus.aux.win;
 using core.audiamus.aux.win.ex;
 using core.audiamus.booksdb;
-using abl = core.audiamus.booksdb;
+
 using static core.audiamus.aux.Logging;
+
+using abl = core.audiamus.booksdb;
 
 namespace core.audiamus.connect.ui {
   public partial class ConvertDGVControl : UserControl {
+    private ResourceManager RM { get; }
+
     private bool _ignoreFlag;
     private bool _snapshotFlag;
     private bool _wasIdle;
@@ -95,6 +101,7 @@ namespace core.audiamus.connect.ui {
 
     public ConvertDGVControl () {
       InitializeComponent ();
+      RM = this.GetDefaultResourceManager ();
 
       _sync = new ();
 
@@ -344,7 +351,7 @@ namespace core.audiamus.connect.ui {
       snapshotSelection (false);
     }
 
-    private async void btnDnload_Click (object sender, EventArgs e) {
+    private void btnDnload_Click (object sender, EventArgs e) {
       Log (3, this);
       if (BookLibForm is not null)
         return;
@@ -455,6 +462,19 @@ namespace core.audiamus.connect.ui {
 
       _snapshotFlag = false;
       snapshotSelection (false);
+    }
+
+    private void dataGridView1_CellToolTipTextNeeded (object sender, DataGridViewCellToolTipTextNeededEventArgs e) {
+      if (e.ColumnIndex != 0 || e.RowIndex < 0)
+        return;
+
+      if (DataSourceDownload is null)
+        return;
+
+      var row = DataSourceDownload[e.RowIndex];
+      var state = row.StateBacking;
+      string ttt = RM.GetStringEx (state.ToString ());
+      e.ToolTipText = ttt;
     }
   }
 }

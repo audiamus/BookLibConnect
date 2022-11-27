@@ -399,12 +399,13 @@ namespace core.audiamus.connect {
         var website_cookies = tokens.website_cookies;
 
         var cookies = new List<KeyValuePair<string, string>> ();
-        foreach (var cookie in website_cookies) {
-          cookies.Add (new KeyValuePair<string, string> (
-            cookie.Name,
-            cookie.Value.Replace ("\"", "")
-          ));
-        }
+        if (website_cookies is not null)
+          foreach (var cookie in website_cookies) {
+            cookies.Add (new KeyValuePair<string, string> (
+              cookie.Name,
+              cookie.Value.Replace ("\"", "")
+            ));
+          }
 
         var store_authentication_cookie = tokens.store_authentication_cookie;
         string storeAuthentCookie = store_authentication_cookie.cookie;

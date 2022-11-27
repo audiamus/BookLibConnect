@@ -465,7 +465,7 @@ namespace core.audiamus.connect {
       if (exists)
         return true;
       else {
-        Log (3, this, () => $"not found: \"{Path.GetFileNameWithoutExtension (conv.DownloadFileName)}\"");
+        Log (3, this, () => $"not found: \"{conv.DownloadFileName.GetDownloadFileNameWithoutExtension()}\"");
         conv.State = EConversionState.converted_unknown;
         callback?.Invoke (conv);
         return false;
@@ -490,7 +490,7 @@ namespace core.audiamus.connect {
           return true;
 
         if (conv.DownloadFileName is not null) {
-          string filename = Path.GetFileNameWithoutExtension (conv.DownloadFileName);
+          string filename = conv.DownloadFileName.GetDownloadFileNameWithoutExtension();
           string pathStub = Path.Combine (downloadDirectory, filename);
           path = (pathStub + ext).AsUncIfLong ();
 
@@ -500,14 +500,14 @@ namespace core.audiamus.connect {
           }
         }
       } else {
-        string filename = Path.GetFileNameWithoutExtension (conv.DownloadFileName);
+        string filename = conv.DownloadFileName.GetDownloadFileNameWithoutExtension ();
         string pathStub = Path.Combine (downloadDirectory, filename);
         string path = (pathStub + ext).AsUncIfLong ();
         if (File.Exists (path))
           return true;
       }
 
-      Log (3, this, () => $"not found \"{ext}\": \"{Path.GetFileNameWithoutExtension(conv.DownloadFileName)}\"");
+      Log (3, this, () => $"not found \"{ext}\": \"{conv.DownloadFileName.GetDownloadFileNameWithoutExtension ()}\"");
 
       if (flags.HasFlag (ECheckFile.deleteIfMissing))
         conv.DownloadFileName = null;
@@ -765,6 +765,9 @@ namespace core.audiamus.connect {
         }
 
         dbContext.SaveChanges ();
+      } catch (DbUpdateException exc) {
+        Log (1, this, () => exc.ToString());
+        throw;
       } catch (Exception exc) {
         Log (1, this, () => exc.Summary ());
         throw;

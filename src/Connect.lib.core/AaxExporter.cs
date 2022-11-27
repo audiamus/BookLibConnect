@@ -89,7 +89,7 @@ namespace core.audiamus.connect {
       if (!File.Exists (sourcefile))
         return false;
 
-      string filename = Path.GetFileNameWithoutExtension (conv.DownloadFileName);
+      string filename = conv.DownloadFileName.GetDownloadFileNameWithoutExtension ();
       string destfile = Path.Combine (ExportSettings.ExportDirectory, filename + R.ExportedFileExt).AsUncIfLong();
 
       try {

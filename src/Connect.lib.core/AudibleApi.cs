@@ -1,7 +1,9 @@
 ﻿//#define TEST_UNAVAIL
+//#define TEST_INVAL_CHAR
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -26,6 +28,11 @@ namespace core.audiamus.connect {
     const string CONTENT_PATH = "/1.0/content";
     private int _accountId;
     private string _accountAlias;
+
+#if TEST_INVAL_CHAR
+    const char ORIG = '\''; 
+    const char SUBS = '.'; 
+#endif
 
     //private string BaseUrlAudible { get; }
     //private Uri BaseUriAudible => HttpClientAudible?.BaseAddress;
@@ -152,7 +159,18 @@ namespace core.audiamus.connect {
         libProducts.AddRange (libraryResponse.items);
       }
 
+      libProducts = libProducts.DistinctBy (p => p.asin).ToList ();
+
       libProducts.Sort ((x, y) => DateTime.Compare (x.purchase_date, y.purchase_date));
+
+#if TEST_INVAL_CHAR
+      libProducts = libProducts
+        .Select (p => {
+          p.title = p.title.Replace (ORIG, SUBS);
+          return p;
+        })
+        .ToList ();
+#endif
 
       await BookLibrary.AddRemBooksAsync (libProducts, new ProfileId (AccountId, Region), resync);
 
@@ -424,7 +442,15 @@ namespace core.audiamus.connect {
       }
 
       adb.json.ProductResponse productResponse = adb.json.ProductResponse.Deserialize (result);
-      return productResponse?.product;
+
+      adb.json.Product product = productResponse?.product;
+#if TEST_INVAL_CHAR
+      if (product is not null) {
+        product.title = product.title.Replace (ORIG, SUBS);
+      }
+#endif
+
+      return product;
 
     }
 
