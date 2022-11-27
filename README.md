@@ -1,6 +1,8 @@
 # Book Lib Connect
 A standalone Audible downloader and decrypter
 
+[![GitHub All Releases](https://img.shields.io/github/downloads/audiamus/BookLibConnect/total)](https://github.com/audiamus/BookLibConnect/releases) [![GitHub](https://img.shields.io/github/license/audiamus/BookLibConnect)](https://github.com/audiamus/BookLibConnect/blob/main/LICENSE) [![](https://img.shields.io/badge/platform-Windows-blue)](http://microsoft.com/windows) [![](https://img.shields.io/badge/language-C%23-blue)](http://csharp.net/) [![GitHub release (latest by date)](https://img.shields.io/github/v/release/audiamus/BookLibConnect)](https://github.com/audiamus/BookLibConnect/releases/latest)
+
 ![](res/mainwnd.png?raw=true)
 
 ![](res/libwnd.png?raw=true)
