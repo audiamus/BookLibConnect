@@ -530,19 +530,21 @@ namespace core.audiamus.connect.ex {
     internal static string GetAccountAlias (
       this IProfile profile,
       BookLibrary bookLibrary,
-      Func<AccountAliasContext, bool> getAccountAliasFunc
+      Func<AccountAliasContext, bool> getAccountAliasFunc,
+      bool newAlias = false
     ) {
-      var ctxt = profile.GetAccountAliasContext (bookLibrary, getAccountAliasFunc);
+      var ctxt = profile.GetAccountAliasContext (bookLibrary, getAccountAliasFunc, newAlias);
       return ctxt.Alias ?? ctxt.CustomerName;
     }
 
     internal static AccountAliasContext GetAccountAliasContext (
       this IProfile profile,
       BookLibrary bookLibrary,
-      Func<AccountAliasContext, bool> getAccountAliasFunc
+      Func<AccountAliasContext, bool> getAccountAliasFunc,
+      bool newAlias
     ) {
-      var ctxt = bookLibrary.GetAccountId (profile);
-      if (ctxt.Alias.IsNullOrWhiteSpace () && getAccountAliasFunc is not null) {
+      var ctxt = bookLibrary.GetAccountId (profile, newAlias);
+      if ((ctxt.Alias.IsNullOrWhiteSpace () || newAlias) && getAccountAliasFunc is not null) {
         getAccountAliasFunc.Invoke (ctxt);
         bookLibrary.SetAccountAlias (ctxt);
       }

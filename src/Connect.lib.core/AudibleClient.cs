@@ -140,8 +140,12 @@ namespace core.audiamus.connect {
     public IEnumerable<AccountAlias> GetAccountAliases () => 
       BookLibrary.GetAccountAliases ();
 
+    public void SetAccountAlias (IProfileKey key, string alias) =>
+      BookLibrary.SetAccountAlias (key, alias);
+  
+
     public async Task<string> GetProfileAliasAsync (
-      IProfileKey key, Func<AccountAliasContext, bool> getAccountAliasFunc
+      IProfileKey key, Func<AccountAliasContext, bool> getAccountAliasFunc, bool newAlias
     ) {
       var profiles = await Authorize.GetRegisteredProfilesAsync ();
       if (profiles is null)
@@ -150,7 +154,7 @@ namespace core.audiamus.connect {
       var profile = profiles.FirstOrDefault (p => p.Region == key.Region && string.Equals (p.CustomerInfo.AccountId, key.AccountId));
       if (profile is null)
         return null;
-      string alias = profile.GetAccountAlias (BookLibrary, getAccountAliasFunc);
+      string alias = profile.GetAccountAlias (BookLibrary, getAccountAliasFunc, newAlias);
       return alias;
     }
 
@@ -169,15 +173,18 @@ namespace core.audiamus.connect {
     public async Task<EAuthorizeResult> RemoveProfileAsync (IProfileKey key) {
       Log (3, this, () => key.ToString());
       var result = await Authorize.RemoveProfileAsync (key);
-      if (result >= EAuthorizeResult.succ)
+      if (result >= EAuthorizeResult.succ) {
+        BookLibrary.RemoveAccountId (key);
         setProfile (null, null);
+      }
       return result;
     }
 
-    public async Task<bool?> ChangeProfileAsync (IProfileKey key) {
+    public async Task<bool?> ChangeProfileAsync (IProfileKey key, bool aliasChanged) {
       Log (3, this, () => key.ToString());
       //Key may be the same but profile could still be different, check Id instead
-      if (Profile.MatchesId (key))
+      bool profileChanged = !Profile.MatchesId (key); 
+      if (!profileChanged && !aliasChanged)
         return false;
 
       Log (3, this, () => Authorize?.GetProfile (key)?.CreateAliasKey(BookLibrary, null)?.ToString());
@@ -193,7 +200,8 @@ namespace core.audiamus.connect {
 
       setProfile (profile, null);
 
-      await Authorize.RefreshTokenAsync (profile, true);
+      if (profileChanged)
+        await Authorize.RefreshTokenAsync (profile, true);
 
       return true;
     }

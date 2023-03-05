@@ -9,6 +9,8 @@ using core.audiamus.aux.win;
 using core.audiamus.connect.ex;
 using R = core.audiamus.connect.ui.Properties.Resources;
 using static core.audiamus.aux.Logging;
+using core.audiamus.aux.ex;
+using System.ComponentModel;
 
 namespace core.audiamus.connect.ui {
   public partial class ManageProfilesForm : Form {
@@ -17,6 +19,7 @@ namespace core.audiamus.connect.ui {
     private readonly AffineSynchronizationContext _sync;
     private List<ProfileDesc> _profiles;
     private bool _ignoreFlag;
+    private bool _aliasChanged;
 
     private AudibleClient Client { get; }
 
@@ -49,8 +52,8 @@ namespace core.audiamus.connect.ui {
         foreach (var key in profileKeys) {
           string alias = accountAliases.FirstOrDefault (n => n.AccountId == key.AccountId)?.Alias;
           if (alias is null)
-            alias = await Client.GetProfileAliasAsync (key, getAccountAlias);
-          string tag = $"{alias}; {key.Region}";
+            alias = await Client.GetProfileAliasAsync (key, getAccountAlias, false);
+          string tag = createTag (key, alias);
           var p = new ProfileDesc (tag, key, alias);
           _profiles.Add (p);
         }
@@ -70,6 +73,7 @@ namespace core.audiamus.connect.ui {
 
     private void enable () {
       btnRemove.Enabled = comBoxProfiles.SelectedIndex >= 0;
+      btnRename.Enabled = btnRemove.Enabled;
       panelOK.Enabled = btnRemove.Enabled;
     }
 
@@ -147,13 +151,20 @@ namespace core.audiamus.connect.ui {
 
         // make the currently selected profile the default one 
         var profileKey = _profiles[idx].Key;
-        bool? changed = await Client.ChangeProfileAsync (profileKey);
+        bool? changed = await Client.ChangeProfileAsync (profileKey, _aliasChanged);
 
-        if (changed ?? false)
+        if ((changed ?? false) || _aliasChanged)
           DialogResult = DialogResult.OK;
       }
 
       Close ();
+    }
+
+    protected override void OnClosing (CancelEventArgs e) {
+      if (DialogResult != DialogResult.OK && _aliasChanged)
+        btnOK_Click(this, e);
+      else
+        base.OnClosing (e);
     }
 
     private void ckBoxEncrypt_CheckedChanged (object sender, EventArgs e) {
@@ -171,6 +182,33 @@ namespace core.audiamus.connect.ui {
       }
 
     }
+
+    private async void btnRename_Click (object sender, EventArgs e) {
+      int idx = comBoxProfiles.SelectedIndex;
+      if (idx < 0 || idx > _profiles.Count - 1)
+        return;
+
+      var profile = _profiles[idx];
+      var key = profile.Key;
+      string alias = await Client.GetProfileAliasAsync (key, getAccountAlias, true);
+      Log (3, this, () => $"id {key.Id}, new alias \"{alias}\"");
+
+      if (string.Equals (alias, profile.Alias))
+        return;
+
+      string tag = createTag (key, alias);
+      _profiles[idx] = profile with { Tag = tag, Alias = alias };
+      comBoxProfiles.Items[idx] = tag;
+
+      // we can't undo it now
+      _aliasChanged = true;
+
+      // already done
+      //Client.SetAccountAlias (key, alias);
+
+    }
+
+    private static string createTag (IProfileKeyEx key, string alias) => $"{alias}; {key.Region}";
 
     private bool getAccountAlias (AccountAliasContext ctxt) {
       return _sync.Send(getAccountAliasSync, ctxt);

@@ -126,7 +126,7 @@ namespace core.audiamus.connect {
       return contexts;
     }
 
-    public AccountAliasContext GetAccountId (IProfile profile) {
+    public AccountAliasContext GetAccountId (IProfile profile, bool newAlias) {
       using var _ = new LogGuard (3, this);
       using var dbContext = new BookDbContextLazyLoad (_dbDir);
 
@@ -141,9 +141,14 @@ namespace core.audiamus.connect {
         dbContext.SaveChanges ();
         return new AccountAliasContext (account.Id, profile.CustomerInfo.Name, hashes);
       } else {
-        if (account.Alias.IsNullOrWhiteSpace ())
-          return new AccountAliasContext (account.Id, profile.CustomerInfo.Name, getAliasHashes ());
-        else
+        if (account.Alias.IsNullOrWhiteSpace () || newAlias) {
+          if (newAlias)
+            return new AccountAliasContext (account.Id, profile.CustomerInfo.Name, getAliasHashes ()) {
+              Alias = account.Alias
+            };
+          else
+            return new AccountAliasContext (account.Id, profile.CustomerInfo.Name, getAliasHashes ());
+        } else
           return new AccountAliasContext (account.Id, null, null) {
             Alias = account.Alias
           };
@@ -158,16 +163,35 @@ namespace core.audiamus.connect {
       }
     }
 
+    public bool RemoveAccountId (IProfileKey key) {
+      using var _ = new LogGuard (3, this, () => $"id = {key.Id}");
+      using var dbContext = new BookDbContextLazyLoad (_dbDir);
+      string accountId = key.AccountId;
+      var account = dbContext.Accounts.FirstOrDefault (a => a.AudibleId == accountId);
+      if (account == null)
+        return false;
+      dbContext.Accounts.Remove (account);
+      dbContext.SaveChanges ();
+      return true;
+    }
 
-    public void SetAccountAlias (AccountAliasContext ctxt) {
-      using var _ = new LogGuard (3, this);
-      if (ctxt.Alias.IsNullOrWhiteSpace ())
+
+    public void SetAccountAlias (IProfileKey key, string alias) =>
+      setAccountAlias ((int)key.Id, alias);
+
+    public void SetAccountAlias (AccountAliasContext ctxt) =>
+      setAccountAlias (ctxt.LocalId, ctxt.Alias);
+    
+
+    private void setAccountAlias (int id, string alias) {
+      using var _ = new LogGuard (3, this, () => $"id = {id}, alias = \"{alias}\"" );
+      if (alias.IsNullOrWhiteSpace ())
         return;
       using var dbContext = new BookDbContextLazyLoad (_dbDir);
-      var account = dbContext.Accounts.FirstOrDefault (a => a.Id == ctxt.LocalId);
+      var account = dbContext.Accounts.FirstOrDefault (a => a.Id == id);
       if (account is null)
         return;
-      account.Alias = ctxt.Alias;
+      account.Alias = alias;
       dbContext.SaveChanges ();
     }
 

@@ -1,5 +1,5 @@
 #define MyAppSetupName 'Book Lib Connect'
-#define MyAppVersion '0.11'
+#define MyAppVersion '0.12'
 #define MyProgramExe = 'BookLibConnect.exe'
 #define MyCompany = 'audiamus'
 #define MyAppName = 'BookLibConnect'
@@ -8,7 +8,7 @@
 AppName={#MyAppSetupName}
 AppVersion={#MyAppVersion}
 AppVerName={#MyAppSetupName} {#MyAppVersion}
-AppCopyright=Copyright © 2022 {#MyCompany}
+AppCopyright=Copyright © 2023 {#MyCompany}
 VersionInfoVersion={#MyAppVersion}
 VersionInfoCompany={#MyCompany}
 AppPublisher={#MyCompany}

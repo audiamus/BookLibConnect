@@ -183,7 +183,7 @@ namespace core.audiamus.connect {
       if (_accountId > 0)
         return;
 
-      var ctxt = Profile.GetAccountAliasContext (BookLibrary, GetAccountAliasFunc);
+      var ctxt = Profile.GetAccountAliasContext (BookLibrary, GetAccountAliasFunc, false);
 
       _accountId = ctxt.LocalId;
       _accountAlias = ctxt.Alias;

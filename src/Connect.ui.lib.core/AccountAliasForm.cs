@@ -16,10 +16,17 @@ namespace core.audiamus.connect.ui {
 
       Context = ctxt;
 
+      bool newAlias = !ctxt.Alias.IsNullOrWhiteSpace ();
+
+      btnCancel.Visible = newAlias;
+
       //this.SetStartPositionCentered ();
 
       lblCaption.Text += $"\"{ctxt.CustomerName}\"";
-      comboBox1.Items.Add ($"Account {ctxt.LocalId}");
+      if (!newAlias)
+        comboBox1.Items.Add ($"Account {ctxt.LocalId}");
+      else
+        comboBox1.Items.Add (ctxt.Alias);
       comboBox1.Items.Add (ctxt.CustomerName);
       comboBox1.SelectedIndex = 0;
     }
@@ -27,6 +34,7 @@ namespace core.audiamus.connect.ui {
     private void btnOk_Click (object sender, EventArgs e) {
       if (Context is not null)
         Context.Alias = comboBox1.Text.Trim ();
+      DialogResult = DialogResult.OK;
       Close ();
     }
 
@@ -37,9 +45,14 @@ namespace core.audiamus.connect.ui {
       uint crc = text.Checksum32 ();
       if (Context?.Hashes?.Contains (crc) ?? false)
         enable = false;
+      if (!Context.Alias.IsNullOrWhiteSpace() && text == Context.Alias)
+        enable = true;
 
       btnOk.Enabled = enable;
     }
 
+    private void btnCancel_Click (object sender, EventArgs e) {
+      Close ();
+    }
   }
 }

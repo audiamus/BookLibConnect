@@ -168,13 +168,13 @@ namespace core.audiamus.connect {
     public async Task RefreshTokenAsync (IProfile profile) =>
       await RefreshTokenAsync (profile, false);
 
-    internal async Task RefreshTokenAsync (IProfile profile, bool onAutoRefeshOnly) {
-      using var _ = new LogGuard (3, this, () => $"auto={Settings?.AutoRefresh}, onAutoRefeshOnly={onAutoRefeshOnly}");
+    internal async Task RefreshTokenAsync (IProfile profile, bool onAutoRefreshOnly) {
+      using var _ = new LogGuard (3, this, () => $"auto={Settings?.AutoRefresh}, onAutoRefeshOnly={onAutoRefreshOnly}");
       ensureHttpClient (profile);
 
       await readConfigurationAsync ();
 
-      if (onAutoRefeshOnly && (Settings?.AutoRefresh ?? false)) {
+      if (onAutoRefreshOnly && (Settings?.AutoRefresh ?? false)) {
         if (profile is Profile prof1 && (Configuration.Profiles?.Contains (prof1) ?? false))
           await refreshTokenAsync (prof1);
         else {
