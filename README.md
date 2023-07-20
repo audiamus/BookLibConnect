@@ -7,7 +7,7 @@ A standalone Audible downloader and decrypter
 
 ![](res/libwnd.png?raw=true)
 
-Book Lib Connect is an Audible downloader app. It should be seen as temporary/preview project, because its features will become an integrated component in future AAX Audio Converter 2.
+Book Lib Connect is an Audible downloader app. It should be seen as temporary/preview project, because its features will become an integrated component in a future version of AAX Audio Converter.
 
 _**Note:** Books downloaded with Book Lib Connect and exported for [AAX Audio Converter](https://github.com/audiamus/AaxAudioConverter) do not need a classic activation code. If AAX Audio Converter asks or one, any dummy code will do._ 
 
@@ -18,7 +18,7 @@ _**Note:** Books downloaded with Book Lib Connect and exported for [AAX Audio Co
 - Lists your book library and lets you select titles for download.
 - Downloads your books and converts to plain .m4b files.
 - Detailed progress monitoring.
-- Optionally exports as .aax files for [AAX Audio Converter 1](https://github.com/audiamus/AaxAudioConverter) compatibility.
+- Optionally exports as .aax files for [AAX Audio Converter](https://github.com/audiamus/AaxAudioConverter) compatibility.
 - PDF user manual included.
 
 
@@ -32,7 +32,7 @@ Use the [Discussions](https://github.com/audiamus/BookLibConnect/discussions) an
 Be cautious with uploading log files to these sections as they may contain sensitive data.   
 
 ## Dependencies
-AAX Audio Converter will run on Windows 64bit. Minimum Windows version is 7.
+Book Lib Connect will run on Windows 64bit. Minimum Windows version is 7.
 The application requires .Net 6 64 bit to be installed. On Windows 10/11 systems this should normally be the case, if the system is kept up to date.
 If not, the app will prompt you for downloading .Net 6 and open the link in your default web browser. From the many options, pick 
 **.Net 6 Runtime x64 for _Windows desktop_**.
