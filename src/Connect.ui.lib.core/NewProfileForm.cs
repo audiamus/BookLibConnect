@@ -24,6 +24,7 @@ namespace core.audiamus.connect.ui {
        { ERegion.@in, R.in_ },
        { ERegion.jp, R.jp },
        { ERegion.es, R.es },
+       { ERegion.br, R.br },
      };
 
     private string LoginUrl => textBox1.Text;

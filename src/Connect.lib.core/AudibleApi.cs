@@ -105,7 +105,7 @@ namespace core.audiamus.connect {
 
 
     internal async Task<adb.json.LibraryResponse> GetLibraryAsync (string json, bool resync) {
-      using var _ = new LogGuard (3, this);
+      using var _ = new LogGuard (3, this, () => $"resync={resync}");
 
       const int PAGE_SIZE = 100;
       int page = 0;

@@ -1,10 +1,10 @@
 [
   {
-    "Url": "https://github.com/audiamus/BookLibConnect/releases/download/v0.12/BookLibConnect-0.12-Setup.exe",
+    "Url": "https://github.com/audiamus/BookLibConnect/releases/download/v0.13/BookLibConnect-0.13-Setup.exe",
     "AppName": "BookLibConnect",
-    "Version": "0.12",
+    "Version": "0.13",
     "Preview": false,
     "Descript": "Standalone Audible downloader and decrypter, companion to AAX Audio Converter",
-    "Md5": "9508d03e1b4e7881cb6cb081ed60ffc3"
+    "Md5": "28bc6ab96b05bfa65c6d6bec104126f0"
   }
 ]

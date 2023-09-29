@@ -81,15 +81,18 @@ namespace core.audiamus.connect.ui {
       using var rgc = new ResourceGuard (() => Cursor = Cursors.Default);
       using var rge = new ResourceGuard (x => bookLibdgvControl1.DownloadSelectEnabled = !x);
 
+      DialogResult result = DialogResult.None;
       bool resync = true;
       if (DownloadSettings.AutoUpdateLibrary) {
-        var result = MsgBox.Show (this, R.MsgFullResync, this.Text, 
+        result = MsgBox.Show (this, R.MsgFullResync, this.Text, 
           MessageBoxButtons.OKCancel, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2);
       } else { 
-        var result = MsgBox.Show (this, R.MsgFullResyncOrElse, this.Text, 
-          MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2);
+        result = MsgBox.Show (this, R.MsgFullResyncOrElse, this.Text, 
+          MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2);
         resync = result == DialogResult.Yes;
       }
+      if (result == DialogResult.Cancel)
+        return;
 
       await Api.GetLibraryAsync (resync);
       await Api.DownloadCoverImagesAsync ();

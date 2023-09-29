@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
+
+using core.audiamus.aux.ex;
 using core.audiamus.booksdb;
 using core.audiamus.common;
 using core.audiamus.util;
@@ -28,9 +30,15 @@ namespace core.audiamus.connect {
     string PrevDeviceName
   );
 
-  public record ProfileKey (uint Id, ERegion Region, string AccountId) : IProfileKey;
+  public record ProfileKey (uint Id, ERegion Region, string AccountId) : IProfileKey {
+    public override string ToString () => 
+      $"{GetType().Name} {nameof (Id)}={Id}, {nameof (Region)}={Region}, {nameof (AccountId)}=#<{AccountId.Checksum32 ()}>";
+  }
   public record ProfileKeyEx (uint Id, ERegion Region, string AccountName, string AccountId, string DeviceName) :  
-    ProfileKey (Id, Region, AccountId), IProfileKeyEx;
+    ProfileKey (Id, Region, AccountId), IProfileKeyEx {
+    public override string ToString () => 
+      $"{base.ToString()}, {nameof (AccountName)}=#<{AccountName.Checksum32}>, {nameof (DeviceName)}=#<{DeviceName.Checksum32 ()}>";
+  }
 
   public record ProfileId (int AccountId, ERegion Region);
 

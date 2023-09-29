@@ -19,7 +19,7 @@ namespace core.audiamus.connect.ui.Properties {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class Resources {
@@ -120,6 +120,15 @@ namespace core.audiamus.connect.ui.Properties {
         internal static string bookseries {
             get {
                 return ResourceManager.GetString("bookseries", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Brazil.
+        /// </summary>
+        internal static string br {
+            get {
+                return ResourceManager.GetString("br", resourceCulture);
             }
         }
         
@@ -579,8 +588,9 @@ namespace core.audiamus.connect.ui.Properties {
         /// <summary>
         ///   Looks up a localized string similar to Full library resynchronization:
         ///
-        ///[ Yes ] : Add and remove books
-        ///[ No ] : Only add new books since last purchase.
+        ///[ Yes ] : Full library resynchronization, add and remove books
+        ///[ No ] : Only add new books since last purchase
+        ///[ Cancel ] : Do nothing.
         /// </summary>
         internal static string MsgFullResyncOrElse {
             get {

@@ -592,9 +592,20 @@ namespace core.audiamus.connect.app.gui {
 
     private static string setDirDialog (string olddir, string defaultSubPath, string caption) {
       string dir = olddir;
-      if (dir.IsNullOrWhiteSpace () ||
-         !Directory.Exists (dir)) {
+      // from settings
+      if (dir.IsNullOrWhiteSpace () || !Directory.Exists (dir)) {
+        // default is user music folder
         string defdir = Environment.GetFolderPath (Environment.SpecialFolder.MyMusic);
+
+        if (defdir.IsNullOrWhiteSpace () || !Directory.Exists (defdir)) {
+          // fallback 1: user profile = user root folder 
+          defdir = Environment.GetFolderPath (Environment.SpecialFolder.UserProfile);
+          if (defdir.IsNullOrWhiteSpace () || !Directory.Exists (defdir)) {
+            // fallback 2: ...\AppData\Local\audiamus\BookLibConnect
+            defdir = LocalApplDirectory;
+          }
+          defdir = Path.Combine (defdir, "Audio");
+        }
 
         dir = Path.Combine (defdir, defaultSubPath);
         Directory.CreateDirectory (dir);

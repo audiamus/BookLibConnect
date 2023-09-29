@@ -23,6 +23,7 @@ namespace core.audiamus.connect {
       { ERegion.@in, new (ERegion.@in, "in", "AJO3FBRUE6J4S") },
       { ERegion.jp, new (ERegion.jp, "co.jp", "A1QAP3MOU4173J") },
       { ERegion.es, new (ERegion.es, "es", "ALMIKO4SZCSAR") },
+      { ERegion.br, new (ERegion.br, "com.br", "A10J1VAYUDTYRN") },
     };
 
     public static ILocale FromCountryCode (this ERegion countryCode) {

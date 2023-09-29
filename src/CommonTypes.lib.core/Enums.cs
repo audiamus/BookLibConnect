@@ -15,6 +15,7 @@ namespace core.audiamus.common {
     au,
     @in,
     jp,
-    es
+    es,
+    br
   }
 }
