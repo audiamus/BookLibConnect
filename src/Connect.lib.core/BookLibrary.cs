@@ -4,15 +4,20 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
+
 using core.audiamus.aux;
 using core.audiamus.aux.ex;
 using core.audiamus.booksdb;
 using core.audiamus.booksdb.ex;
 using core.audiamus.connect.ex;
+
 using Microsoft.EntityFrameworkCore;
-using R = core.audiamus.connect.Properties.Resources;
+
 using static core.audiamus.aux.Logging;
+
+using R = core.audiamus.connect.Properties.Resources;
 
 namespace core.audiamus.connect {
   class BookLibrary : IBookLibrary {
@@ -24,7 +29,12 @@ namespace core.audiamus.connect {
     public readonly Dictionary<ProfileId, IEnumerable<Book>> _bookCache = 
       new Dictionary<ProfileId, IEnumerable<Book>> ();
 
-    public BookLibrary (string dbDir = null) => _dbDir = dbDir;
+    private SynchronizationContext _syncContext;
+
+    public BookLibrary (string dbDir = null) {
+      _dbDir = dbDir;
+      _syncContext = SynchronizationContext.Current;
+    }
 
     public async Task<DateTime> SinceLatestPurchaseDateAsync (ProfileId profileId, bool resync) {
       return await Task.Run (() => sinceLatestPurchaseDate (profileId, resync));
@@ -196,22 +206,32 @@ namespace core.audiamus.connect {
     }
 
     public void SaveFileNameSuffix (Conversion conversion, string suffix) {
-      using var _ = new LogGuard (4, this);
-      using var dbContext = new BookDbContext (_dbDir);
-      dbContext.Conversions.Attach (conversion);
+      // run in main thread, to channel DbContext.SaveChanges() invocations
+      _syncContext.Send (saveFileNameSuffix, conversion, suffix);
 
-      conversion.DownloadFileName += suffix;
-      dbContext.SaveChanges ();
+      void saveFileNameSuffix (Conversion conversion, string suffix) {
+        using var _ = new LogGuard (4, this);
+        using var dbContext = new BookDbContext (_dbDir);
+        dbContext.Conversions.Attach (conversion);
+
+        conversion.DownloadFileName += suffix;
+        dbContext.SaveChanges ();
+      }
     }
 
     public void SavePersistentState (Conversion conversion, EConversionState state) {
-      using var _ = new LogGuard (4, this);
-      using var dbContext = new BookDbContext (_dbDir);
-      var conv = dbContext.Conversions.FirstOrDefault (c => conversion.Id == c.Id);
-      if (conv is null)
-        return;
-      updateState (conv, state, conversion);
-      dbContext.SaveChanges ();
+      // run in main thread, to channel DbContext.SaveChanges() invocations
+      _syncContext.Send (savePersistentState, conversion, state);
+
+      void savePersistentState (Conversion conversion, EConversionState state) {
+        using var _ = new LogGuard (4, this);
+        using var dbContext = new BookDbContext (_dbDir);
+        var conv = dbContext.Conversions.FirstOrDefault (c => conversion.Id == c.Id);
+        if (conv is null)
+          return;
+        updateState (conv, state, conversion);
+        dbContext.SaveChanges ();
+      }
     }
 
     public void RestorePersistentState (Conversion conversion) {

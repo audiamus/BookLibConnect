@@ -9,8 +9,8 @@
     <AssemblyTitle>Book Lib Connect</AssemblyTitle>
     <RootNamespace>core.audiamus.connect.app.gui</RootNamespace>
     <Copyright>Copyright © 2021 - $([System.DateTime]::UtcNow.Year) audiamus ($([System.DateTime]::UtcNow.ToString("s")))</Copyright>
-    <AssemblyVersion>0.13.0.0</AssemblyVersion>
-    <FileVersion>0.13.0.0</FileVersion>
+    <AssemblyVersion>0.13.1.0</AssemblyVersion>
+    <FileVersion>0.13.1.0</FileVersion>
     <ApplicationIcon>Resources\audio.ico</ApplicationIcon>
   </PropertyGroup>
 
@@ -44,6 +44,11 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Update="Properties\Settings.Designer.cs">
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
     <Compile Update="WizStepHelp.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -59,6 +64,10 @@
   <ItemGroup>
     <None Update="appsettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
     <None Update="x appsettings.json">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
