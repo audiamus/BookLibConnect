@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <Authors>audiamus</Authors>
     <RootNamespace>core.audiamus.connect</RootNamespace>
     <AssemblyName>audiamus.connect.core</AssemblyName>
