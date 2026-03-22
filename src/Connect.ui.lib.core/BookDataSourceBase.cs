@@ -32,7 +32,7 @@ namespace core.audiamus.connect.ui {
 
     protected bool MultiState {
       get {
-        if (!Settings.MultiPartDownload || Book.Components.Count == 0)
+        if (!useComponentDownloads ())
           return false;
         return Book.Components
           .Select (c => c.Conversion.State)
@@ -42,7 +42,7 @@ namespace core.audiamus.connect.ui {
     }
 
     protected EConversionState getState () {
-      if (Settings.MultiPartDownload && Book.Components.Count > 0) {
+      if (useComponentDownloads ()) {
         var state = Book.Components
           .Select (c => c.Conversion.State)
           .Distinct ()
@@ -50,6 +50,14 @@ namespace core.audiamus.connect.ui {
         return state;
       } else
         return Book.Conversion.State;
+    }
+
+    private bool useComponentDownloads () {
+      if (Book.Components.Count == 0)
+        return false;
+      if (Settings.MultiPartDownload)
+        return true;
+      return Book.DeliveryType == EDeliveryType.Periodical;
     }
 
 

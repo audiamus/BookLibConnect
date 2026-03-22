@@ -262,7 +262,9 @@ namespace core.audiamus.connect.ui {
     private IEnumerable<ConversionDataSource> getDownloadConversions (IEnumerable<Book> books) {
       var convDS = new List<ConversionDataSource> ();
       foreach (var book in books) {
-        if (DownloadSettings.MultiPartDownload && book.DeliveryType == EDeliveryType.MultiPartBook && book.Components.Any ()) {
+        bool useComponents = book.Components.Any ()
+          && (DownloadSettings.MultiPartDownload || book.DeliveryType == EDeliveryType.Periodical);
+        if (useComponents) {
           var convDSMultiPart = new List<ConversionDataSource> ();
           foreach (var comp in book.Components)
             convDSMultiPart.Add (new ConversionDataSource (comp.Conversion));

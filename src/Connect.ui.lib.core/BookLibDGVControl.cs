@@ -139,9 +139,8 @@ namespace core.audiamus.connect.ui {
       if (allBooks is null)
         return;
 
-      // HACK currently exclude podcasts
       allBooks = allBooks
-        .Where (b => b.DeliveryType == EDeliveryType.SinglePartBook || b.DeliveryType == EDeliveryType.MultiPartBook)
+        .Where (isSupportedLibraryBook)
         .ToList ();
 
       Log (3, this, () => $"#books={allBooks.Count ()} (deliv type filtered)");
@@ -156,6 +155,14 @@ namespace core.audiamus.connect.ui {
       _allConversions = allConversions;
 
     }
+
+    private static bool isSupportedLibraryBook (Book book) => book?.DeliveryType switch {
+      EDeliveryType.SinglePartBook => true,
+      EDeliveryType.MultiPartBook => true,
+      EDeliveryType.AudioPart => true,
+      EDeliveryType.Periodical => true,
+      _ => false
+    };
 
     private void onUpdatedSettings () {
       var clm = dataGridView1.Columns[nameof (BookDataSource.Adult)];

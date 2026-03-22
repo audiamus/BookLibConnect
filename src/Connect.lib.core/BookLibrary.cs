@@ -314,9 +314,18 @@ namespace core.audiamus.connect {
         using var dbContext = new BookDbContext (_dbDir);
         dbContext.Conversions.Attach (conversion);
 
+        // Ensure conversion navigation properties are loaded when invoked with
+        // detached conversion entities from UI/download queues.
+        dbContext.Entry (conversion).Reference (c => c.Book).Load ();
+        dbContext.Entry (conversion).Reference (c => c.Component).Load ();
+        if (conversion.Component is not null)
+          dbContext.Entry (conversion.Component).Reference (c => c.Book).Load ();
+
         conversion.DownloadUrl = license.content_metadata.content_url.offline_url;
 
         var product = conversion.BookCommon;
+        if (product is null)
+          throw new InvalidOperationException ($"missing book/component navigation for conversion {conversion.Id}");
 
         if (product is Component comp)
           dbContext.Components.Attach (comp);
@@ -585,20 +594,32 @@ namespace core.audiamus.connect {
       EDownloadQuality downloadQuality
     ) {
       var product = conversion.BookCommon;
+      if (product is null)
+        throw new InvalidOperationException ($"missing book/component navigation for conversion {conversion?.Id}");
 
       product.DownloadQuality = downloadQuality;
 
       // download destination
       string dir = conversion.DownloadFileName;
+      if (dir.IsNullOrWhiteSpace ())
+        dir = ApplEnv.LocalApplDirectory;
 
       var sb = new StringBuilder ();
 
       // title plus asin plus codec.aaxc.m4b 
-      string title = product.Title.Prune ();
+      string title = product.Title
+        ?? conversion.Title
+        ?? conversion.ParentBook?.Title
+        ?? product.Asin
+        ?? conversion.Asin
+        ?? "untitled";
+      title = title.Prune ();
+      if (title.IsNullOrWhiteSpace ())
+        title = "untitled";
       title = title.Substring (0, Math.Min (20, title.Length));
       sb.Append (title);
 
-      string asin = product.Asin;
+      string asin = product.Asin ?? conversion.Asin ?? "unknown";
       sb.Append ($"_{asin}_LC");
 
       AudioQuality aq = null;
@@ -788,6 +809,8 @@ namespace core.audiamus.connect {
 
             addComponents (book, bcl.Components, product.relationships);
 
+            logInterestingProduct (product, book);
+
             addConversions (book, bcl.Conversions, profileId);
 
             addSeries (book, bcl.Series, bcl.SeriesBooks, product.relationships);
@@ -820,11 +843,27 @@ namespace core.audiamus.connect {
 
     private bool readd (BookCompositeLists bcl, adb.json.Product product, ProfileId profileId, bool resync) {
       if (bcl.BookAsins.Contains (product.asin)) {
-        if (!resync)
-          return true;
-
         var bk = bcl.Conversions
           .FirstOrDefault (conv => string.Equals (conv.Book?.Asin, product.asin))?.Book;
+
+        if (bk is not null) {
+          syncBookOwnership (bk, profileId);
+
+          if (!bk.DeliveryType.HasValue
+              && tryMapDeliveryType (product.content_delivery_type, out var mappedType)) {
+            bk.DeliveryType = mappedType;
+            Log (3, this, () => $"updated delivery type: {bk.Asin} => {mappedType}");
+          }
+
+          // Keep existing rows in sync with newly returned child relations
+          // (e.g. podcast episodes), even when the parent book already exists.
+          syncExistingBookComponents (bk, bcl, product.relationships, profileId);
+        }
+
+        if (!resync) {
+          return true;
+        }
+
         if (!(bk?.Deleted ?? false))
           return true;
 
@@ -867,8 +906,7 @@ namespace core.audiamus.connect {
         SkuLite = product.sku_lite
       };
 
-      bool succ = Enum.TryParse<EDeliveryType> (product.content_delivery_type, out var deltype);
-      if (succ)
+      if (tryMapDeliveryType (product.content_delivery_type, out var deltype))
         book.DeliveryType = deltype;
 
       if (!product.format_type.IsNullOrEmpty ())
@@ -880,25 +918,173 @@ namespace core.audiamus.connect {
 
     private static void addComponents (Book book, ICollection<Component> components, IEnumerable<adb.json.Relationship> itmRelations) {
       var relations = itmRelations?
-        .Where (r => r.relationship_to_product == "child" && r.relationship_type == "component")
+        .Where (isChildComponentRelation)
         .ToList ();
 
       if (relations.IsNullOrEmpty ())
         return;
 
+      int idx = 0;
       foreach (var rel in relations) {
-        int.TryParse (rel.sort, out int partNum);
+        idx++;
+
+        var existingBookComponent = book.Components.FirstOrDefault (c => c.Asin == rel.asin);
+        if (existingBookComponent is not null) {
+          existingBookComponent.PartNumber = getRelationPartNumber (rel, idx);
+          if (existingBookComponent.Title.IsNullOrWhiteSpace ())
+            existingBookComponent.Title = rel.title;
+          if (existingBookComponent.Sku.IsNullOrWhiteSpace ())
+            existingBookComponent.Sku = rel.sku;
+          if (existingBookComponent.SkuLite.IsNullOrWhiteSpace ())
+            existingBookComponent.SkuLite = rel.sku_lite;
+          continue;
+        }
+
+        var existingComponent = components.FirstOrDefault (c => c.Asin == rel.asin);
+        if (existingComponent is not null) {
+          if (existingComponent.Book is null || existingComponent.Book == book) {
+            existingComponent.PartNumber = getRelationPartNumber (rel, idx);
+            if (existingComponent.Title.IsNullOrWhiteSpace ())
+              existingComponent.Title = rel.title;
+            if (existingComponent.Sku.IsNullOrWhiteSpace ())
+              existingComponent.Sku = rel.sku;
+            if (existingComponent.SkuLite.IsNullOrWhiteSpace ())
+              existingComponent.SkuLite = rel.sku_lite;
+            book.Components.Add (existingComponent);
+          }
+          continue;
+        }
+
         var component = new Component {
           Asin = rel.asin,
           Title = rel.title,
           Sku = rel.sku,
           SkuLite = rel.sku_lite,
-          PartNumber = partNum
+          PartNumber = getRelationPartNumber (rel, idx)
         };
 
         components.Add (component);
         book.Components.Add (component);
       }
+    }
+
+    private static void syncExistingBookComponents (
+      Book book,
+      BookCompositeLists bcl,
+      IEnumerable<adb.json.Relationship> relationships,
+      ProfileId profileId
+    ) {
+      if (book is null)
+        return;
+
+      addComponents (book, bcl.Components, relationships);
+
+      foreach (var component in book.Components) {
+        if (component.Conversion is not null) {
+          component.Conversion.AccountId = profileId.AccountId;
+          component.Conversion.Region = profileId.Region;
+          continue;
+        }
+
+        var conversion = new Conversion {
+          State = EConversionState.remote,
+          AccountId = profileId.AccountId,
+          Region = profileId.Region
+        };
+        component.Conversion = conversion;
+        bcl.Conversions.Add (conversion);
+      }
+    }
+
+    private static void syncBookOwnership (Book book, ProfileId profileId) {
+      if (book?.Conversion is null)
+        return;
+
+      book.Conversion.AccountId = profileId.AccountId;
+      book.Conversion.Region = profileId.Region;
+
+      foreach (var component in book.Components) {
+        if (component.Conversion is null)
+          continue;
+        component.Conversion.AccountId = profileId.AccountId;
+        component.Conversion.Region = profileId.Region;
+      }
+    }
+
+    private static bool tryMapDeliveryType (string contentDeliveryType, out EDeliveryType deliveryType) {
+      deliveryType = default;
+      if (contentDeliveryType.IsNullOrWhiteSpace ())
+        return false;
+
+      if (Enum.TryParse<EDeliveryType> (contentDeliveryType, ignoreCase: true, out deliveryType))
+        return true;
+
+      if (string.Equals (contentDeliveryType, "PodcastParent", StringComparison.OrdinalIgnoreCase)) {
+        deliveryType = EDeliveryType.Periodical;
+        return true;
+      }
+
+      if (string.Equals (contentDeliveryType, "PodcastEpisode", StringComparison.OrdinalIgnoreCase)) {
+        deliveryType = EDeliveryType.AudioPart;
+        return true;
+      }
+
+      return false;
+    }
+
+    private static bool isChildComponentRelation (adb.json.Relationship relation) {
+      if (relation is null)
+        return false;
+      if (!string.Equals (relation.relationship_to_product, "child", StringComparison.OrdinalIgnoreCase))
+        return false;
+      if (relation.asin.IsNullOrWhiteSpace ())
+        return false;
+
+      return string.Equals (relation.relationship_type, "component", StringComparison.OrdinalIgnoreCase)
+        || string.Equals (relation.relationship_type, "episode", StringComparison.OrdinalIgnoreCase)
+        || string.Equals (relation.content_delivery_type, nameof (EDeliveryType.AudioPart), StringComparison.OrdinalIgnoreCase)
+        || string.Equals (relation.content_delivery_type, "PodcastEpisode", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static int getRelationPartNumber (adb.json.Relationship relation, int fallbackPartNumber) {
+      if (relation is null)
+        return fallbackPartNumber;
+
+      if (int.TryParse (relation.sort, out int partNum) && partNum > 0)
+        return partNum;
+
+      if (int.TryParse (relation.sequence, out partNum) && partNum > 0)
+        return partNum;
+
+      if (!relation.sequence.IsNullOrWhiteSpace ()) {
+        string firstSequencePart = relation.sequence.Split ('.').FirstOrDefault ();
+        if (int.TryParse (firstSequencePart, out partNum) && partNum > 0)
+          return partNum;
+      }
+
+      return fallbackPartNumber;
+    }
+
+    private void logInterestingProduct (adb.json.Product product, Book book) {
+      if (product is null)
+        return;
+
+      bool isPodcastLike = book?.DeliveryType == EDeliveryType.Periodical
+        || book?.DeliveryType == EDeliveryType.AudioPart
+        || string.Equals (product.content_delivery_type, "PodcastParent", StringComparison.OrdinalIgnoreCase)
+        || string.Equals (product.content_delivery_type, "PodcastEpisode", StringComparison.OrdinalIgnoreCase);
+      bool hasChildren = product.has_children ?? false;
+      bool unmappedDeliveryType = !product.content_delivery_type.IsNullOrWhiteSpace () && book?.DeliveryType is null;
+      if (!isPodcastLike && !hasChildren && !unmappedDeliveryType)
+        return;
+
+      Log (3, this, () => {
+        string childSummary = product.relationships?
+          .Where (r => string.Equals (r.relationship_to_product, "child", StringComparison.OrdinalIgnoreCase))
+          .Select (r => $"{r.relationship_type}/{r.content_delivery_type}/{r.sort}/{r.sequence}")
+          .Combine () ?? "none";
+        return $"library item asin={product.asin}, delivery=\"{product.content_delivery_type}\", mapped={book?.DeliveryType?.ToString () ?? "null"}, has_children={product.has_children}, child_relations={childSummary}";
+      });
     }
 
     const string REGEX_SERIES = @"(\d+)(\.(\d+))?";

@@ -41,6 +41,10 @@ namespace core.audiamus.connect.ui {
     }
 
     public DataGridViewEx () {
+      // Work around sporadic WinForms native tooltip crashes (ToolTip.Hide/DataGridViewToolTip).
+      // State hints remain available in-grid; disabling cell tooltips avoids the unsafe native path.
+      ShowCellToolTips = false;
+
       _timer1.Interval = 100;
       _timer1.Tick += timer1_Tick;
       _timer2.Interval = 10;

@@ -380,11 +380,17 @@ The device can also be deregistered via Amazon account management.</value>
   <data name="multipartbook" xml:space="preserve">
     <value>Multi part book</value>
   </data>
+  <data name="audiopart" xml:space="preserve">
+    <value>Podcast episode</value>
+  </data>
   <data name="Part" xml:space="preserve">
     <value>Part</value>
   </data>
   <data name="Parts" xml:space="preserve">
     <value>Parts</value>
+  </data>
+  <data name="periodical" xml:space="preserve">
+    <value>Podcast</value>
   </data>
   <data name="PurchaseDate" xml:space="preserve">
     <value>Purchase date</value>

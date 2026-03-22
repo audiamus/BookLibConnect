@@ -18,7 +18,9 @@ _**Note:** Books downloaded with Book Lib Connect and exported for [AAX Audio Co
 - Direct download from the Audible server.
 - Sign-in via standard web browser to register a _device_, app will not see user’s credentials.
 - Lists your book library and lets you select titles for download.
+- Includes podcasts and their episodes. Use a full library resync to discover older podcast episodes.
 - Downloads your books and converts to plain .m4b files.
+- Spaces license requests and retries throttled license denials with backoff.
 - Detailed progress monitoring.
 - Optionally exports as .aax files for [AAX Audio Converter](https://github.com/audiamus/AaxAudioConverter) compatibility.
 - PDF user manual included.
