@@ -1,5 +1,5 @@
 #define MyAppSetupName 'Book Lib Connect'
-#define MyAppVersion '0.13.1'
+#define MyAppVersion '0.14.0'
 #define MyProgramExe = 'BookLibConnect.exe'
 #define MyCompany = 'audiamus'
 #define MyAppName = 'BookLibConnect'
@@ -8,7 +8,7 @@
 AppName={#MyAppSetupName}
 AppVersion={#MyAppVersion}
 AppVerName={#MyAppSetupName} {#MyAppVersion}
-AppCopyright=Copyright © 2023 {#MyCompany}
+AppCopyright=Copyright © 2026 {#MyCompany}
 VersionInfoVersion={#MyAppVersion}
 VersionInfoCompany={#MyCompany}
 AppPublisher={#MyCompany}
@@ -18,7 +18,7 @@ OutputBaseFilename={#MyAppName}-{#MyAppVersion}-Setup
 DefaultGroupName={#MyCompany}
 DefaultDirName={autopf}\{#MyCompany}\{#MyAppSetupName}
 UninstallDisplayIcon={app}\{#MyProgramExe}
-SourceDir=..\Connect.app.gui.core\bin\Release\net6.0-windows\publish
+SourceDir=..\Connect.app.gui.core\bin\Release\net8.0-windows\publish
 OutputDir=..\..\..\Setup
 SolidCompression=yes
 

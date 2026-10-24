@@ -14,16 +14,26 @@ using static core.audiamus.aux.Logging;
 namespace core.audiamus.connect {
 
   class Authorize {
+    const string APP_NAME = "Audible";
+
     const string HTTP_AUTHORITY_AMZN = @"https://api.amazon.";
     const string HTTP_AUTHORITY_ADBL = @"https://api.audible.";
     const string HTTP_PATH_REGISTER = @"/auth/register";
     const string HTTP_PATH_DEREGISTER = @"/auth/deregister";
     const string HTTP_PATH_TOKEN = @"/auth/token";
 
-    const string IOS_VERSION = "15.0.0";
-    const string APP_VERSION = "3.56.2";
-    const string SOFTWARE_VERSION = "35602678";
-    const string APP_NAME = "Audible";
+    // The following fix was suggested by https://github.com/mkb79 to address the "throttling issue"
+    // https://github.com/audiamus/BookLibConnect/issues/211#issuecomment-6374898186
+    // All version consancts are set to higher values
+
+    //const string IOS_VERSION = "15.0.0";
+    //const string APP_VERSION = "3.56.2";
+    //const string SOFTWARE_VERSION = "35602678";
+
+    const string IOS_VERSION = "26.2";
+    const string APP_VERSION = "4.60";
+    const string SOFTWARE_VERSION = "46000856";
+
 
     private IAuthorizeSettings Settings { get; }
 

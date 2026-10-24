@@ -76,9 +76,15 @@ namespace core.audiamus.aux.propgrid {
     /// <param name="propertyGrid">The property grid.</param>
     /// <returns>The PropertyGridView instance.</returns>
     private static object getPropertyGridView (this PropertyGrid propertyGrid) {
-      MethodInfo mi = typeof (PropertyGrid).GetMethod (
-        "GetPropertyGridView", BindingFlags.NonPublic | BindingFlags.Instance);
-      return mi.Invoke (propertyGrid, Array.Empty<object> ());
+      //MethodInfo mi = typeof (PropertyGrid).GetMethod (
+      //  "GetPropertyGridView", BindingFlags.NonPublic | BindingFlags.Instance);
+      //return mi.Invoke (propertyGrid, Array.Empty<object> ());
+
+      FieldInfo fi = typeof (PropertyGrid).GetField ("_gridView",
+                  BindingFlags.Instance | BindingFlags.NonPublic);
+      object propertyGridView = fi?.GetValue (propertyGrid);
+
+      return propertyGridView;
     }
 
   }

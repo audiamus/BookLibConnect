@@ -89,9 +89,21 @@ namespace core.audiamus.connect {
 
     // internal instead of private for testing only
     internal static string buildDeviceSerial () {
-      var guid = Guid.NewGuid ().ToString ("N").ToUpper ();
-      Log (3, typeof (AudibleLogin), () => guid);
-      return guid;
+      // The following fix was suggested by https://github.com/mkb79 to address the "throttling issue"
+      // https://github.com/audiamus/BookLibConnect/issues/211#issuecomment-6374898186
+      // Instead of a GUID, a random string of 40 alpanumeric characters is used as the serial.
+
+      //var guid = Guid.NewGuid ().ToString ("N").ToUpper ();
+      //Log (3, typeof (AudibleLogin), () => guid);
+      //return guid;
+
+      const string alphabet =
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+      
+      var serial = RandomNumberGenerator.GetString (alphabet, 40);
+      Log (3, typeof (AudibleLogin), () => serial);
+
+      return serial;
     }
 
     // internal instead of private for testing only

@@ -328,6 +328,7 @@ namespace core.audiamus.connect {
       using var _ = new LogGuard (3, this, () => conversion.ToString ());
 
       AaxFile aaxFile = null;
+      Mp4Operation mp4Operation = null;
       var rg = new ResourceGuard (() => aaxFile?.Dispose ());
 
 
@@ -344,21 +345,19 @@ namespace core.audiamus.connect {
         using (var ifStream = File.OpenRead (inputFile)) {
 
           aaxFile = new AaxFile (ifStream);
-          aaxFile.ConversionProgressUpdate += aaxFile_ConversionProgressUpdate;
           aaxFile.SetDecryptionKey (conversion.BookCommon.LicenseKey, conversion.BookCommon.LicenseIv);
 
           numChannels = aaxFile.AudioChannels;
 
-          ConversionResult result;
-          using (var fileStream = File.OpenWrite (outputFile))
-            result = await Task.Run (() => {
-              var result = aaxFile.ConvertToMp4a (fileStream);
-              if (result == ConversionResult.NoErrorsDetected)
-                progressAction.Invoke (conversion, TimeSpan.FromSeconds (conversion.BookMeta.RunTimeLengthSeconds ?? 0));
-              return result;
-            });
+          using var fileStream = File.OpenWrite (outputFile);
 
-          succ = result == ConversionResult.NoErrorsDetected;
+          mp4Operation = aaxFile.ConvertToMp4aAsync (fileStream);
+          mp4Operation.ConversionProgressUpdate += aaxFile_ConversionProgressUpdate;
+          mp4Operation.Start ();
+          await mp4Operation.OperationTask;
+          succ = mp4Operation.IsCompletedSuccessfully;
+          if (succ)
+            progressAction.Invoke (conversion, TimeSpan.FromSeconds (conversion.BookMeta.RunTimeLengthSeconds ?? 0));
         }
 
         if (succ)
@@ -398,7 +397,7 @@ namespace core.audiamus.connect {
 
       async void aaxFile_ConversionProgressUpdate (object sender, ConversionProgressEventArgs e) {
         if (cancToken.IsCancellationRequested)
-          await aaxFile?.CancelAsync ();
+          await mp4Operation?.CancelAsync ();
         progressAction.Invoke (conversion, e.ProcessPosition);
       }
     }
