@@ -262,7 +262,9 @@ namespace core.audiamus.connect.ui {
     private IEnumerable<ConversionDataSource> getDownloadConversions (IEnumerable<Book> books) {
       var convDS = new List<ConversionDataSource> ();
       foreach (var book in books) {
-        if (DownloadSettings.MultiPartDownload && book.DeliveryType == EDeliveryType.MultiPartBook && book.Components.Any ()) {
+        bool useComponents = book.Components.Any ()
+          && (DownloadSettings.MultiPartDownload || book.DeliveryType == EDeliveryType.Periodical);
+        if (useComponents) {
           var convDSMultiPart = new List<ConversionDataSource> ();
           foreach (var comp in book.Components)
             convDSMultiPart.Add (new ConversionDataSource (comp.Conversion));
@@ -273,6 +275,14 @@ namespace core.audiamus.connect.ui {
           convDS.Add (new ConversionDataSource (book.Conversion));
       }
       return convDS;
+    }
+
+    private IEnumerable<ConversionDataSource> getSelectedDownloadConversions (IEnumerable<Conversion> selectedConversions) {
+      var selected = selectedConversions.ToHashSet ();
+      var books = selected.Select (c => c.ParentBook).Distinct ();
+      return getDownloadConversions (books)
+        .Where (c => c.Conversion.ParentBook.DeliveryType != EDeliveryType.Periodical
+          || selected.Contains (c.Conversion));
     }
 
     private void dataGridView1_DataBindingComplete (object sender, DataGridViewBindingCompleteEventArgs e) {
@@ -327,15 +337,8 @@ namespace core.audiamus.connect.ui {
         if (DataSourceDownload?.Any () ?? false) {
           var selectedConversions = new List<ConversionDataSource> ();
           addSortedByIndex (selectedConversions);
-          foreach (DataGridViewRow row in dataGridView1.SelectedRows) {
-            int idx = row.Index;
-            ConversionDataSource convDS = DataSourceDownload[idx];
-            selectedConversions.Add (convDS);
-          }
-
-          var booksToBeRemoved = selectedConversions.Select (c => c.Conversion.ParentBook).Distinct ();
-
-          var conversionsToBeRemoved = getDownloadConversions (booksToBeRemoved);
+          var conversionsToBeRemoved = getSelectedDownloadConversions (
+            selectedConversions.Select (c => c.Conversion));
 
           removeConversions (conversionsToBeRemoved);
 
@@ -421,8 +424,7 @@ namespace core.audiamus.connect.ui {
       var selectedConversions = new List<Conversion> ();
       addSortedByIndex (selectedConversions);
 
-      var books = selectedConversions.Select (c => c.ParentBook).Distinct ();
-      var conversionsDS = getDownloadConversions (books);
+      var conversionsDS = getSelectedDownloadConversions (selectedConversions);
       var conversions = conversionsDS.Select (c => c.Conversion);
 
       if (updateSelectedRows) {

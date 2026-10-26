@@ -14,13 +14,13 @@
     public string asin { get; set; }
     public ContentMetadata content_metadata { get; set; }
     public string drm_type { get; set; }
+    public LicenseDenialReason[] license_denial_reasons { get; set; }
     public string license_id { get; set; }
     public string license_response { get; set; }
     public string message { get; set; }
     public string request_id { get; set; }
     public bool? requires_ad_supported_playback { get; set; }
     public string status_code { get; set; }
-    public LicenseDenialReason[] license_denial_reasons { get; set; }
     public string voucher_id { get; set; }
 
     public Voucher voucher { get; set; }
@@ -29,6 +29,7 @@
   public partial class LicenseDenialReason {
     public string message { get; set; }
     public string rejectionReason { get; set; }
+    public string rejectionReasonCode { get; set; }
     public string validationType { get; set; }
   }
 

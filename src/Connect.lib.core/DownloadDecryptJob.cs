@@ -44,7 +44,8 @@ namespace core.audiamus.connect {
       T context,
       ConvertDelegate<T> convertAction
     ) {
-      using var lg = new LogGuard (3, this, () => $"#conv={selectedConversions.Count ()}");
+      var convs = selectedConversions.ToList ();
+      using var lg = new LogGuard (3, this, () => $"#conv={convs.Count}");
 
       using var rg = new ResourceGuard (() => {
         _runningTasks.Clear ();
@@ -53,8 +54,7 @@ namespace core.audiamus.connect {
       });
 
 
-      progress.Report (new (selectedConversions.Count (), null, null, null));
-      var convs = selectedConversions.ToList ();
+      progress.Report (new (convs.Count, null, null, null));
       foreach (var conv in convs) {
         if (context.CancellationToken.IsCancellationRequested)
           return;
@@ -93,7 +93,9 @@ namespace core.audiamus.connect {
       bool doDownload = savedState < EConversionState.local_locked || !hasLockedFile;
       bool doDecrypt = savedState < EConversionState.local_unlocked || !hasUnlockedFile;
 
-      var previousQuality = conversion.ParentBook.ApplicableDownloadQuality (Settings.MultiPartDownload);
+      var previousQuality = conversion.Component is not null && conversion.ParentBook.DeliveryType == EDeliveryType.Periodical
+        ? conversion.BookCommon.ApplicableDownloadQuality ()
+        : conversion.ParentBook.ApplicableDownloadQuality (Settings.MultiPartDownload);
       var quality = Settings.DownloadQuality;
       bool higherQual = quality > previousQuality;
       if (higherQual)
@@ -105,12 +107,14 @@ namespace core.audiamus.connect {
 
         conversion.DownloadFileName = Settings.DownloadDirectory;
 
-        var licTask = AudibleApi.GetDownloadLicenseAndSaveAsync (conversion, quality);
+        var licTask = AudibleApi.GetDownloadLicenseAndSaveAsync (conversion, quality, context.CancellationToken);
         OnNewStateCallback (conversion);
         succ = await licTask;
         OnNewStateCallback (conversion);
 
         if (!succ) {
+          if (context.CancellationToken.IsCancellationRequested)
+            return;
           AudibleApi.SavePersistentState (conversion, EConversionState.license_denied);
           return;
         }
@@ -190,9 +194,19 @@ namespace core.audiamus.connect {
 
       if (succ && convertAction is not null) {
         Book book = conversion.ParentBook;
-        if (book.ApplicableState (Settings.MultiPartDownload) >= EConversionState.local_unlocked) {
+        if (book.DeliveryType == EDeliveryType.Periodical && conversion.Component is not null) {
+          if (File.Exists ((conversion.DownloadFileName + R.DecryptedFileExt).AsUncIfLong ())) {
+            Log (3, this, () => $"{conversion}; submit episode for conversion.");
+            var convertTask = Task.Run (() => convertAction (conversion.Component, context, OnNewStateCallback));
+            _runningTasks.Add (convertTask);
+          }
+          return;
+        }
+
+        bool useComponents = shouldUseComponentDownloads (book);
+        if (book.ApplicableState (Settings.MultiPartDownload || useComponents) >= EConversionState.local_unlocked) {
           bool filesExist = true;
-          if (Settings.MultiPartDownload && !book.Components.IsNullOrEmpty ()) {
+          if (useComponents && !book.Components.IsNullOrEmpty ()) {
             foreach (var comp in book.Components) {
               hasUnlockedFile = File.Exists ((comp.Conversion.DownloadFileName + R.DecryptedFileExt).AsUncIfLong());
               filesExist &= hasUnlockedFile;
@@ -208,6 +222,10 @@ namespace core.audiamus.connect {
           }
         }
       }
+
+      bool shouldUseComponentDownloads (Book bk) =>
+        bk?.Components?.Any () == true
+        && (Settings.MultiPartDownload || bk.DeliveryType == EDeliveryType.Periodical);
 
       void onProgressTime (Conversion conversion, TimeSpan progPos) {
         if (_threadProgress.TryGetValue ((conversion, TP_KEY), out var tp)) {

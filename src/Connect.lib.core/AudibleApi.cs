@@ -25,6 +25,13 @@ using R = core.audiamus.connect.Properties.Resources;
 namespace core.audiamus.connect {
   class AudibleApi : IAudibleApi {
     const string USER_AGENT = "Audible/671 CFNetwork/1240.0.4 Darwin/20.6.0";
+    const int LICENSE_MAX_THROTTLE_RETRIES = 4;
+    static readonly TimeSpan __minLicenseRequestSpacing = TimeSpan.FromSeconds (3.0);
+    static readonly TimeSpan __mediumLicenseRequestSpacing = TimeSpan.FromSeconds (3.75);
+    static readonly TimeSpan __highLicenseRequestSpacing = TimeSpan.FromSeconds (5.0);
+    static readonly SemaphoreSlim __licenseThrottleGate = new (1, 1);
+    static DateTime __nextLicenseRequestUtc = DateTime.MinValue;
+    static int __licenseRequestCount;
 
     //const string HTTP_AUTHORITY_AUDIBLE = @"https://api.audible.";
     const string CONTENT_PATH = "/1.0/content";
@@ -110,51 +117,30 @@ namespace core.audiamus.connect {
       using var _ = new LogGuard (3, this, () => $"resync={resync}");
 
       const int PAGE_SIZE = 100;
-      int page = 0;
+      const string GROUPS
+        = "response_groups=badge_types,category_ladders,claim_code_url,contributors,is_downloaded,is_returnable,media,"
+        + "origin_asin,pdf_url,percent_complete,price,product_attrs,product_desc,product_extended_attrs,product_plan_details,"
+        + "product_plans,provided_review,rating,relationships,review_attrs,reviews,sample,series,sku";
       var libProducts = new List<adb.json.Product> ();
 
       if (json is null) {
-
-        const string GROUPS
-          = "response_groups=badge_types,category_ladders,claim_code_url,contributors,is_downloaded,is_returnable,media,"
-          + "origin_asin,pdf_url,percent_complete,price,product_attrs,product_desc,product_extended_attrs,product_plan_details,"
-          + "product_plans,provided_review,rating,relationships,review_attrs,reviews,sample,series,sku";
-
         DateTime dt = await BookLibrary.SinceLatestPurchaseDateAsync (new ProfileId (AccountId, Region), resync);
 
-        while (true) {
-          page++;
-          string url = "/1.0/library"
-            + $"?purchased_after={dt.ToXmlTime ()}"
-            + $"&num_results={PAGE_SIZE}"
-            + $"&page={page}"
-            + "&"
-            + GROUPS;
+        string purchasedAfterParam = $"purchased_after={dt.ToXmlTime ()}";
+        var deltaProducts = await getLibraryProductsAsync (purchasedAfterParam, "library-delta");
+        if (deltaProducts is null)
+          return null;
+        libProducts.AddRange (deltaProducts);
 
-          string pageResult = await callAudibleApiSignedForStringAsync (url);
-          if (pageResult is null)
+        // Podcast back catalogs often include older seasons/episodes with historical
+        // purchase dates that can be earlier than the latest audiobook watermark.
+        // Only perform a full podcast scan on resync to avoid extra API calls on
+        // every incremental sync.
+        if (resync) {
+          var podcastProducts = await getLibraryProductsAsync ("content_type=Podcast", "podcast-full");
+          if (podcastProducts is null)
             return null;
-
-          if (Logging.Level >= 3) {
-            string file = pageResult.WriteTempJsonFile ("LibraryResponse");
-            Log (3, this, () => $"page={page}, file=\"{Path.GetFileName (file)}\"");
-          }
-
-          adb.json.LibraryResponse libraryResponse = adb.json.LibraryResponse.Deserialize (pageResult);
-          if (libraryResponse is null)
-            return null;
-
-          if (!(libraryResponse?.items.Any () ?? false))
-            break;
-
-          var pageProducts = libraryResponse.items;
-#if TEST_UNAVAIL
-          pageProducts = pageProducts.ToList().Take(pageProducts.Length - 1).ToArray();
-#endif
-          Log (3, this, () => $"#items/page={pageProducts.Length}");
-          libProducts.AddRange (pageProducts);
-
-
+          libProducts.AddRange (podcastProducts);
         }
       } else {
         adb.json.LibraryResponse libraryResponse = adb.json.LibraryResponse.Deserialize (json);
@@ -179,6 +165,47 @@ namespace core.audiamus.connect {
       var allPagesResponse = new adb.json.LibraryResponse ();
       allPagesResponse.items = libProducts.ToArray ();
       return allPagesResponse;
+
+
+      async Task<List<adb.json.Product>> getLibraryProductsAsync (string query, string label) {
+        int page = 0;
+        var products = new List<adb.json.Product> ();
+
+        while (true) {
+          page++;
+          string url = "/1.0/library"
+            + $"?{query}"
+            + $"&num_results={PAGE_SIZE}"
+            + $"&page={page}"
+            + "&"
+            + GROUPS;
+
+          string pageResult = await callAudibleApiSignedForStringAsync (url);
+          if (pageResult is null)
+            return null;
+
+          if (Logging.Level >= 3) {
+            string file = pageResult.WriteTempJsonFile ("LibraryResponse");
+            Log (3, this, () => $"{label}; page={page}, file=\"{Path.GetFileName (file)}\"");
+          }
+
+          adb.json.LibraryResponse libraryResponse = adb.json.LibraryResponse.Deserialize (pageResult);
+          if (libraryResponse is null)
+            return null;
+
+          if (!(libraryResponse?.items.Any () ?? false))
+            break;
+
+          var pageProducts = libraryResponse.items;
+#if TEST_UNAVAIL
+          pageProducts = pageProducts.ToList().Take(pageProducts.Length - 1).ToArray();
+#endif
+          Log (3, this, () => $"{label}; #items/page={pageProducts.Length}");
+          products.AddRange (pageProducts);
+        }
+
+        return products;
+      }
     }
 
     private void ensureAccountId () {
@@ -236,46 +263,144 @@ namespace core.audiamus.connect {
 
       adb.json.LicenseResponse license = adb.json.LicenseResponse.Deserialize (response);
 
-      decryptLicense (license?.content_license);
+      try {
+        decryptLicense (license?.content_license);
+      } catch (Exception exc) {
+        Log (3, this, () => $"asin={asin}; license decryption skipped: {exc.Summary ()}");
+      }
 
       return license;
     }
 
-    public async Task<bool> GetDownloadLicenseAndSaveAsync (Conversion conversion, EDownloadQuality quality) {
+    public async Task<bool> GetDownloadLicenseAndSaveAsync (Conversion conversion, EDownloadQuality quality, CancellationToken cancToken = default) {
       using var _ = new LogGuard (3, this, () => $"{conversion}");
       Log (3, this, () => $"{conversion}; desired quality: {quality}");
-      adb.json.LicenseResponse licresp;
-      // get license
+      adb.json.ContentLicense lic = null;
+      bool granted = false;
+
       try {
-        licresp = await GetDownloadLicenseAsync (conversion.Asin, quality);
-      } catch (Exception exc) {
-        conversion.State = EConversionState.license_denied;
-        Log (3, this, () => $"{conversion}; {exc.Summary ()}");
+        for (int attempt = 0; attempt <= LICENSE_MAX_THROTTLE_RETRIES; attempt++) {
+          await waitForLicenseRequestWindowAsync (cancToken);
+
+          adb.json.LicenseResponse licresp;
+          try {
+            licresp = await GetDownloadLicenseAsync (conversion.Asin, quality);
+          } catch (Exception exc) {
+            conversion.State = EConversionState.license_denied;
+            Log (3, this, () => $"{conversion}; {exc.Summary ()}");
+            return false;
+          }
+
+          lic = licresp?.content_license;
+          bool succ = Enum.TryParse<ELicenseStatusCode> (lic?.status_code, out var status);
+          granted = succ && status == ELicenseStatusCode.Granted;
+          if (granted)
+            break;
+
+          string reasons = lic?.license_denial_reasons?
+            .Select (r => $"{r.validationType}:{r.rejectionReason}:{r.message}")
+            .Combine (" | ");
+          if (reasons.IsNullOrWhiteSpace ())
+            reasons = "none";
+
+          bool throttled = isThrottledDenial (lic, reasons);
+          if (throttled && attempt < LICENSE_MAX_THROTTLE_RETRIES) {
+            var delay = getThrottleBackoff (attempt);
+            Log (2, this, () => $"{conversion}; license throttled. retry {attempt + 1}/{LICENSE_MAX_THROTTLE_RETRIES} in {delay.TotalSeconds:N1}s. reasons={reasons}");
+            await applyThrottleCooldownAsync (delay, cancToken);
+            continue;
+          }
+
+          conversion.State = EConversionState.license_denied;
+          Log (3, this, () => $"{conversion}; license not granted. status={lic?.status_code ?? "null"}; reasons={reasons}");
+          return false;
+        }
+      } catch (OperationCanceledException) when (cancToken.IsCancellationRequested) {
+        Log (3, this, () => $"{conversion}; license request canceled by user.");
         return false;
       }
 
-      var lic = licresp?.content_license;
-
-      bool succ = Enum.TryParse<ELicenseStatusCode> (lic.status_code, out var status);
-      if (!succ || status != ELicenseStatusCode.Granted) {
+      if (!granted) {
         conversion.State = EConversionState.license_denied;
-        Log (3, this, () => $"{conversion}; license not granted.");
+        Log (3, this, () => $"{conversion}; license not granted after retry budget.");
         return false;
       }
 
       if (lic?.voucher is null) {
         conversion.State = EConversionState.license_denied;
-        Log (3, this, () => $"{conversion}; license decryption failed.");
+        Log (3, this, () => $"{conversion}; license payload missing voucher for granted status.");
         return false;
       }
 
-
       // save license to DB, including chapters
       // update state
-      var aq = BookLibrary.UpdateLicenseAndChapters (lic, conversion, quality);
-      Log (3, this, () => $"{conversion}; done, {aq}");
+      try {
+        var aq = BookLibrary.UpdateLicenseAndChapters (lic, conversion, quality);
+        Log (3, this, () => $"{conversion}; done, {aq}");
+      } catch (Exception exc) {
+        conversion.State = EConversionState.license_denied;
+        Log (1, this, () => $"{conversion}; failed to persist license: {exc.Summary ()}");
+        return false;
+      }
 
       return true;
+    }
+
+    private static bool isThrottledDenial (adb.json.ContentLicense lic, string reasons) {
+      if (lic?.license_denial_reasons?.Any (r =>
+            r?.rejectionReason?.IndexOf ("throttl", StringComparison.OrdinalIgnoreCase) >= 0
+            || r?.message?.IndexOf ("throttl", StringComparison.OrdinalIgnoreCase) >= 0) == true)
+        return true;
+
+      return reasons?.IndexOf ("throttl", StringComparison.OrdinalIgnoreCase) >= 0;
+    }
+
+    private static TimeSpan getThrottleBackoff (int attempt) {
+      double[] baseSecs = new[] { 10d, 20d, 40d, 80d, 120d };
+      int idx = Math.Min (attempt, baseSecs.Length - 1);
+      int jitterMs = Random.Shared.Next (250, 1250);
+      return TimeSpan.FromSeconds (baseSecs[idx]) + TimeSpan.FromMilliseconds (jitterMs);
+    }
+
+    private static async Task waitForLicenseRequestWindowAsync (CancellationToken cancToken = default) {
+      await __licenseThrottleGate.WaitAsync (cancToken);
+      try {
+        var now = DateTime.UtcNow;
+        if (__nextLicenseRequestUtc < now - TimeSpan.FromMinutes (10))
+          __licenseRequestCount = 0;
+
+        if (now < __nextLicenseRequestUtc) {
+          var wait = __nextLicenseRequestUtc - now;
+          await Task.Delay (wait, cancToken);
+        }
+
+        __licenseRequestCount++;
+        var spacing = getAdaptiveLicenseSpacing (__licenseRequestCount);
+        __nextLicenseRequestUtc = DateTime.UtcNow + spacing;
+      } finally {
+        __licenseThrottleGate.Release ();
+      }
+    }
+
+    private static TimeSpan getAdaptiveLicenseSpacing (int requestCount) {
+      if (requestCount > 80)
+        return __highLicenseRequestSpacing;
+      if (requestCount > 40)
+        return __mediumLicenseRequestSpacing;
+      return __minLicenseRequestSpacing;
+    }
+
+    private static async Task applyThrottleCooldownAsync (TimeSpan delay, CancellationToken cancToken = default) {
+      await __licenseThrottleGate.WaitAsync (cancToken);
+      try {
+        var target = DateTime.UtcNow + delay;
+        if (target > __nextLicenseRequestUtc)
+          __nextLicenseRequestUtc = target;
+      } finally {
+        __licenseThrottleGate.Release ();
+      }
+
+      await Task.Delay (delay, cancToken);
     }
 
 
@@ -418,6 +543,7 @@ namespace core.audiamus.connect {
         var prod = await GetProductInfoAsync (comp.Asin);
         if (prod is null)
           continue;
+        Log (3, this, () => $"component asin={comp.Asin}, delivery=\"{prod.content_delivery_type}\", title=\"{prod.title}\", has_children={prod.has_children}, is_listenable={prod.is_listenable}");
         pairs.Add (new (prod, comp));
       }
       BookLibrary.UpdateComponentProduct (pairs);
@@ -520,6 +646,13 @@ namespace core.audiamus.connect {
 
       bool validated = validateLicenseResponse (license);
       if (!validated)
+        return;
+
+      // For denied/unlicensed items Audible may omit encrypted payload.
+      // In that case leave voucher null and let status_code handling decide.
+      if (license.voucher is not null)
+        return;
+      if (license.license_response.IsNullOrWhiteSpace ())
         return;
 
       string hashable = Profile.DeviceInfo.Type + Profile.DeviceInfo.Serial + Profile.CustomerInfo.AccountId +

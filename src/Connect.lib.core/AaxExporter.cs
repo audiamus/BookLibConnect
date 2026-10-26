@@ -21,7 +21,6 @@ namespace core.audiamus.connect {
 
     private IExportSettings ExportSettings { get; }
     private IMultiPartSettings MultipartSettings { get; }
-    private List<List<ChapterExtract>> AccuChapters { get; } = new List<List<ChapterExtract>> ();
 
     public IBookLibrary BookLibrary { private get; set; }
 
@@ -30,19 +29,28 @@ namespace core.audiamus.connect {
       MultipartSettings = multipartSettings;
     }
 
-    public void Export (Book book, SimpleConversionContext context, Action<Conversion> onNewStateCallback) {
-      AccuChapters.Clear ();
-      using var _ = new LogGuard (3, this, () => book.ToString ());
-      if (book.Components.Count == 0 || !MultipartSettings.MultiPartDownload)
-        exportSinglePart (book, context, onNewStateCallback);
+    public void Export (IBookCommon item, SimpleConversionContext context, Action<Conversion> onNewStateCallback) {
+      using var _ = new LogGuard (3, this, () => item.ToString ());
+      var accuChapters = new List<List<ChapterExtract>> ();
+      if (item is not Book book) {
+        exportSinglePart (item, context, onNewStateCallback, accuChapters);
+        return;
+      }
+
+      bool useComponentExport = book.Components.Count > 0
+        && (MultipartSettings.MultiPartDownload || book.DeliveryType == EDeliveryType.Periodical);
+
+      if (!useComponentExport)
+        exportSinglePart (book, context, onNewStateCallback, accuChapters);
       else
-        exportMultiPart (book, context, onNewStateCallback);
+        exportMultiPart (book, context, onNewStateCallback, accuChapters);
     }
 
     private void exportSinglePart (
       IBookCommon book, 
       SimpleConversionContext context, 
       Action<Conversion> onNewStateCallback, 
+      List<List<ChapterExtract>> accuChapters,
       bool skipSeries = false
     ) {
       Log (3, this, () => book.ToString ());
@@ -56,7 +64,7 @@ namespace core.audiamus.connect {
         onNewStateCallback?.Invoke (book.Conversion);
         return;
       }
-      exportChapters (book);
+      exportChapters (book, accuChapters);
 
       exportProduct (book);
 
@@ -71,13 +79,14 @@ namespace core.audiamus.connect {
     private void exportMultiPart (
       Book book, 
       SimpleConversionContext context, 
-      Action<Conversion> onNewStateCallback
+      Action<Conversion> onNewStateCallback,
+      List<List<ChapterExtract>> accuChapters
     ) {
       Log (3, this, () => book.ToString ());
 
       bool skipSeries = false;
       foreach (var comp in book.Components) {
-        exportSinglePart (comp, context, onNewStateCallback, skipSeries);
+        exportSinglePart (comp, context, onNewStateCallback, accuChapters, skipSeries);
         skipSeries = true;
       }
     }
@@ -107,7 +116,7 @@ namespace core.audiamus.connect {
     }
 
     // internal instead of private for testing only
-    internal string exportChapters (IBookCommon book) {
+    internal string exportChapters (IBookCommon book, List<List<ChapterExtract>> accuChapters) {
       if (book.ChapterInfo is null)
         BookLibrary?.GetChapters (book);
 
@@ -140,14 +149,14 @@ namespace core.audiamus.connect {
       ci.runtime_length_ms = chapterInfo.RuntimeLengthMs;
       ci.runtime_length_sec = chapterInfo.RuntimeLengthMs / 1000;
 
-      var accuChapters = new List<List<ChapterExtract>> ();
-      var flattenedChapters = BookLibrary?.GetChaptersFlattened (book, accuChapters);
+      var partAccuChapters = new List<List<ChapterExtract>> ();
+      var flattenedChapters = BookLibrary?.GetChaptersFlattened (book, partAccuChapters);
 
      
       if (!flattenedChapters.IsNullOrEmpty()) {
         var chapters = new List<adb.json.Chapter> ();
         foreach (var chapter in flattenedChapters) {
-          if (chapters.Count == 0 && skipChapter (chapter))
+          if (chapters.Count == 0 && skipChapter (chapter, accuChapters))
             continue;
 
           var ch = new adb.json.Chapter {
@@ -169,17 +178,17 @@ namespace core.audiamus.connect {
 
       File.WriteAllText (outpath, json);
 
-      updateAccuChapters (accuChapters);
+      updateAccuChapters (accuChapters, partAccuChapters);
 
       return outpath;
     }
 
-    private bool skipChapter (Chapter ch) {
-      if (AccuChapters.Count < 2)
+    private bool skipChapter (Chapter ch, List<List<ChapterExtract>> accuChapters) {
+      if (accuChapters.Count < 2)
         return false;
 
-      for (int i = 0; i < AccuChapters.Count - 1; i++) {
-        var chextr = AccuChapters[i].FirstOrDefault (ce =>
+      for (int i = 0; i < accuChapters.Count - 1; i++) {
+        var chextr = accuChapters[i].FirstOrDefault (ce =>
           string.Equals (ce.Title, ch.Title) &&
           Math.Abs (ce.Length - ch.LengthMs) < 1500 && ch.LengthMs < 25000);
         if (chextr is not null)
@@ -189,11 +198,16 @@ namespace core.audiamus.connect {
       return false;
     }
 
-    private void updateAccuChapters (List<List<ChapterExtract>> accuPart) {
+    private void updateAccuChapters (List<List<ChapterExtract>> accuChapters, List<List<ChapterExtract>> accuPart) {
+      if (accuPart.IsNullOrEmpty ())
+        return;
+
       for (int i = 0; i < accuPart.Count; i++) {
-        if (AccuChapters.Count < i + 1)
-          AccuChapters.Add (new List<ChapterExtract> ());
-        AccuChapters[i].AddRange (accuPart[i]);
+        if (accuChapters.Count < i + 1)
+          accuChapters.Add (new List<ChapterExtract> ());
+
+        if (!accuPart[i].IsNullOrEmpty ())
+          accuChapters[i].AddRange (accuPart[i]);
       }
     }
 
@@ -251,7 +265,9 @@ namespace core.audiamus.connect {
         string filename = SERIES_TITLES + asin + JSON;
         string outpath = Path.Combine (ExportSettings.ExportDirectory, filename).AsUncIfLong();
 
-        File.WriteAllText (outpath, json);
+        lock (__lockable) {
+          File.WriteAllText (outpath, json);
+        }
       }
     }
 
@@ -301,6 +317,15 @@ namespace core.audiamus.connect {
           series.Add (s);
         }
         product.series = series.ToArray ();
+      } else if (prod is Component comp && !book.Title.IsNullOrWhiteSpace ()) {
+        // Some podcast episodes arrive without explicit series links. Keep season grouping stable.
+        product.series = new[] {
+          new adb.json.Series {
+            asin = book.Asin,
+            title = book.Title,
+            sequence = comp.PartNumber > 0 ? comp.PartNumber.ToString () : null
+          }
+        };
       }
 
       return product;

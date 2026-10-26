@@ -1,0 +1,9 @@
+# Build output
+[Bb]in/
+[Oo]bj/
+
+# VS Code workspace settings: keep shareable debug/task configs
+.vscode/*
+!.vscode/launch.json
+!.vscode/tasks.json
+*.cache

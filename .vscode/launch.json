@@ -1,0 +1,27 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "BookLibConnect (Development)",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build-booklibconnect-debug",
+      "program": "${workspaceFolder}/src/Connect.app.gui.core/bin/Debug/net8.0-windows7.0/BookLibConnect.exe",
+      "cwd": "${workspaceFolder}/src/Connect.app.gui.core",
+      "console": "internalConsole",
+      "stopAtEntry": false,
+      "justMyCode": true
+    },
+    {
+      "name": "BookLibConnect (Production)",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build-booklibconnect-release",
+      "program": "${workspaceFolder}/src/Connect.app.gui.core/bin/Release/net8.0-windows7.0/BookLibConnect.exe",
+      "cwd": "${workspaceFolder}/src/Connect.app.gui.core",
+      "console": "internalConsole",
+      "stopAtEntry": false,
+      "justMyCode": false
+    }
+  ]
+}

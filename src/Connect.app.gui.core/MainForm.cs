@@ -511,7 +511,7 @@ namespace core.audiamus.connect.app.gui {
         UserSettings.Dump (EDumpFlags.byInterface | EDumpFlags.inherInterfaceAttribs | EDumpFlags.inclNullVals));
     }
 
-    private void convertAction (Book book, ConversionContext context, Action<Conversion> onNewStateCallback ) {
+    private void convertAction (IBookCommon book, ConversionContext context, Action<Conversion> onNewStateCallback ) {
       if (!(UserSettings.ExportSettings.ExportToAax ?? false))
         return;
       using var _ = new LogGuard (3, this, () => book.ToString ());

@@ -91,7 +91,7 @@ namespace core.audiamus.connect {
     );
     Task DownloadCoverImagesAsync ();
     Task UpdateMetaInfo (IEnumerable<Component> components, Action<IEnumerable<Component>> onDone);
-    Task<bool> GetDownloadLicenseAndSaveAsync (Conversion conversion, EDownloadQuality quality);
+    Task<bool> GetDownloadLicenseAndSaveAsync (Conversion conversion, EDownloadQuality quality, CancellationToken cancToken = default);
     IEnumerable<Book> GetBooks ();
     void SavePersistentState (Conversion conversion, EConversionState state);
     void RestorePersistentState (Conversion conversion);

@@ -3,7 +3,7 @@
 namespace core.audiamus.booksdb.ex {
   public static class EntityExtensions {
     public static EConversionState ApplicableState (this Book book, bool multipart) {
-      if (multipart && book.Components.Count > 0) {
+      if (useComponentDownloads (book, multipart)) {
         var state = book.Components
           .Select (c => c.Conversion.ApplicableState())
           .Distinct ()
@@ -23,7 +23,7 @@ namespace core.audiamus.booksdb.ex {
     }
 
     public static EDownloadQuality ApplicableDownloadQuality (this Book book, bool multipart) {
-      if (multipart && book.Components.Count > 0) {
+      if (useComponentDownloads (book, multipart)) {
         var dnldqual = book.Components
           .Select (c => c.ApplicableDownloadQuality())
           .Distinct ()
@@ -43,6 +43,16 @@ namespace core.audiamus.booksdb.ex {
         Conversion conv => conv.ParentBook,
         _ => null,
       };
+    }
+
+    private static bool useComponentDownloads (Book book, bool multipart) {
+      if (book is null || book.Components.Count == 0)
+        return false;
+
+      if (multipart)
+        return true;
+
+      return book.DeliveryType == EDeliveryType.Periodical;
     }
   }
 }

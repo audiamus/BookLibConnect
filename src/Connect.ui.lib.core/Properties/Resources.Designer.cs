@@ -751,6 +751,24 @@ namespace core.audiamus.connect.ui.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Podcast episode.
+        /// </summary>
+        internal static string audiopart {
+            get {
+                return ResourceManager.GetString("audiopart", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Podcast.
+        /// </summary>
+        internal static string periodical {
+            get {
+                return ResourceManager.GetString("periodical", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Part.
         /// </summary>
         internal static string Part {
