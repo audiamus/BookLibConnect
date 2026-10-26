@@ -19,6 +19,7 @@ _**Note:** Books downloaded with Book Lib Connect and exported for [AAX Audio Co
 - Sign-in via standard web browser to register a _device_, app will not see user’s credentials.
 - Lists your book library and lets you select titles for download.
 - Includes podcasts and their episodes. Use a full library resync to discover older podcast episodes.
+- Select individual podcast episodes in the download list to download and export them independently of the rest of the season.
 - Downloads your books and converts to plain .m4b files.
 - Spaces license requests and retries throttled license denials with backoff.
 - Detailed progress monitoring.

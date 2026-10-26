@@ -277,6 +277,14 @@ namespace core.audiamus.connect.ui {
       return convDS;
     }
 
+    private IEnumerable<ConversionDataSource> getSelectedDownloadConversions (IEnumerable<Conversion> selectedConversions) {
+      var selected = selectedConversions.ToHashSet ();
+      var books = selected.Select (c => c.ParentBook).Distinct ();
+      return getDownloadConversions (books)
+        .Where (c => c.Conversion.ParentBook.DeliveryType != EDeliveryType.Periodical
+          || selected.Contains (c.Conversion));
+    }
+
     private void dataGridView1_DataBindingComplete (object sender, DataGridViewBindingCompleteEventArgs e) {
       foreach (DataGridViewColumn clm in dataGridView1.Columns) {
         if (clm.ValueType == typeof (Image))
@@ -329,15 +337,8 @@ namespace core.audiamus.connect.ui {
         if (DataSourceDownload?.Any () ?? false) {
           var selectedConversions = new List<ConversionDataSource> ();
           addSortedByIndex (selectedConversions);
-          foreach (DataGridViewRow row in dataGridView1.SelectedRows) {
-            int idx = row.Index;
-            ConversionDataSource convDS = DataSourceDownload[idx];
-            selectedConversions.Add (convDS);
-          }
-
-          var booksToBeRemoved = selectedConversions.Select (c => c.Conversion.ParentBook).Distinct ();
-
-          var conversionsToBeRemoved = getDownloadConversions (booksToBeRemoved);
+          var conversionsToBeRemoved = getSelectedDownloadConversions (
+            selectedConversions.Select (c => c.Conversion));
 
           removeConversions (conversionsToBeRemoved);
 
@@ -423,8 +424,7 @@ namespace core.audiamus.connect.ui {
       var selectedConversions = new List<Conversion> ();
       addSortedByIndex (selectedConversions);
 
-      var books = selectedConversions.Select (c => c.ParentBook).Distinct ();
-      var conversionsDS = getDownloadConversions (books);
+      var conversionsDS = getSelectedDownloadConversions (selectedConversions);
       var conversions = conversionsDS.Select (c => c.Conversion);
 
       if (updateSelectedRows) {

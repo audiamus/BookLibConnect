@@ -29,9 +29,14 @@ namespace core.audiamus.connect {
       MultipartSettings = multipartSettings;
     }
 
-    public void Export (Book book, SimpleConversionContext context, Action<Conversion> onNewStateCallback) {
-      using var _ = new LogGuard (3, this, () => book.ToString ());
+    public void Export (IBookCommon item, SimpleConversionContext context, Action<Conversion> onNewStateCallback) {
+      using var _ = new LogGuard (3, this, () => item.ToString ());
       var accuChapters = new List<List<ChapterExtract>> ();
+      if (item is not Book book) {
+        exportSinglePart (item, context, onNewStateCallback, accuChapters);
+        return;
+      }
+
       bool useComponentExport = book.Components.Count > 0
         && (MultipartSettings.MultiPartDownload || book.DeliveryType == EDeliveryType.Periodical);
 
@@ -260,7 +265,9 @@ namespace core.audiamus.connect {
         string filename = SERIES_TITLES + asin + JSON;
         string outpath = Path.Combine (ExportSettings.ExportDirectory, filename).AsUncIfLong();
 
-        File.WriteAllText (outpath, json);
+        lock (__lockable) {
+          File.WriteAllText (outpath, json);
+        }
       }
     }
 
