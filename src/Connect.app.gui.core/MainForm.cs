@@ -349,7 +349,17 @@ namespace core.audiamus.connect.app.gui {
       var interact =
         new InteractionCallback<InteractionMessage<UpdateInteractionMessage>, bool?> (_interactionHandler.Interact);
       
-      await update.UpdateAsync (interact, () => Application.Exit (), isBusyForUpdate);
+      await update.UpdateAsync (interact, Application.Exit, isBusyForUpdate, updateNodeCallback);
+    }
+
+    private void updateNodeCallback (Version version, string note) {
+      bool added = UserSettings.UpdateSettings.UpdateNotes.Add (version);
+      if (!added)
+        return;
+      UserSettings.Save ();
+      string LF = Environment.NewLine;
+      string msg = $"Update note for new version {version}{LF}{LF}{note}";
+      MsgBox.Show (this, msg, this.Text, MessageBoxButtons.OK, MessageBoxIcon.Information);
     }
 
     private async void handleDeferredUpdateAsync () {

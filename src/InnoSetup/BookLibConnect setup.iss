@@ -1,5 +1,5 @@
 #define MyAppSetupName 'Book Lib Connect'
-#define MyAppVersion '0.14.0'
+#define MyAppVersion '0.14.1'
 #define MyProgramExe = 'BookLibConnect.exe'
 #define MyCompany = 'audiamus'
 #define MyAppName = 'BookLibConnect'

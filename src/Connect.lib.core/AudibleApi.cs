@@ -12,6 +12,8 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using AAXClean;
+
+using core.audiamus.adb.json;
 using core.audiamus.aux;
 using core.audiamus.aux.ex;
 using core.audiamus.booksdb;
@@ -253,16 +255,17 @@ namespace core.audiamus.connect {
       }
 
       var lic = licresp?.content_license;
-      if (lic?.voucher is null) {
-        conversion.State = EConversionState.license_denied;
-        Log (3, this, () => $"{conversion}; license decryption failed.");
-        return false;
-      }
 
       bool succ = Enum.TryParse<ELicenseStatusCode> (lic.status_code, out var status);
       if (!succ || status != ELicenseStatusCode.Granted) {
         conversion.State = EConversionState.license_denied;
         Log (3, this, () => $"{conversion}; license not granted.");
+        return false;
+      }
+
+      if (lic?.voucher is null) {
+        conversion.State = EConversionState.license_denied;
+        Log (3, this, () => $"{conversion}; license decryption failed.");
         return false;
       }
 
@@ -514,7 +517,9 @@ namespace core.audiamus.connect {
       // See also
       //https://patchwork.ffmpeg.org/project/ffmpeg/patch/17559601585196510@sas2-2fa759678732.qloud-c.yandex.net/
 
-      if (license is null)
+
+      bool validated = validateLicenseResponse (license);
+      if (!validated)
         return;
 
       string hashable = Profile.DeviceInfo.Type + Profile.DeviceInfo.Serial + Profile.CustomerInfo.AccountId +
@@ -546,6 +551,29 @@ namespace core.audiamus.connect {
       adb.json.Voucher voucher = adb.json.Voucher.Deserialize (plainText);
 
       license.voucher = voucher;
+    }
+
+    private bool validateLicenseResponse (ContentLicense lic) {
+      if (lic is null)
+        return false;
+
+      bool succ = Enum.TryParse<ELicenseStatusCode> (lic.status_code, out var status);
+
+      if (succ && status == ELicenseStatusCode.Granted)
+        return true;
+
+      if (succ && status == ELicenseStatusCode.Denied && lic.license_denial_reasons is not null) {
+        string LF = Environment.NewLine;
+        string LF2 = LF + "  ";
+        Log (3, this, () => 
+          $"asin={lic.asin}, {EConversionState.license_denied}; reasons given:{LF2}" +
+          $"{lic.license_denial_reasons.ToItemString(LF2, false, rsn =>
+            $"msg=\"{rsn.message}\", " +
+            $"reason=\"{rsn.rejectionReason}\", type=\"{rsn.validationType}\"")}");
+      }
+
+
+      return false;
     }
 
     private async Task<string> callAudibleApiSignedForStringAsync (string relUrl, string jsonBody = null) {

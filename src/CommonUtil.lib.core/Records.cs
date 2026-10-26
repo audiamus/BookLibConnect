@@ -25,6 +25,7 @@ namespace core.audiamus.util {
     public string Version { get; init; }
     public bool Preview { get; init; }
     public string Desc { get; init; }
+    public string Note { get; init; }
     public string Md5 { get; init; }
   }
 
@@ -40,6 +41,7 @@ namespace core.audiamus.util {
       Version = tryParse (pi.Version); 
       Preview = pi.Preview;
       Desc = pi.Desc;
+      Note = pi.Note;
       Md5 = pi.Md5;
 
       static Version tryParse (string s) {

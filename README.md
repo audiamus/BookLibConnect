@@ -7,7 +7,9 @@ A standalone Audible downloader and decrypter
 
 ![](res/libwnd.png?raw=true)
 
-Book Lib Connect is an Audible downloader app. It should be seen as temporary/preview project, because its features will become an integrated component in a future version of AAX Audio Converter.
+Book Lib Connect is an Audible downloader app. 
+
+<small>Originally, it was conceived as a temporary or preview project, with its features intended to be integrated into some future AAX Audible Converter 2. However, after several years of sustained popularity, Book Lib Connect now appears set to remain an independent product for the foreseeable future.</small>
 
 _**Note:** Books downloaded with Book Lib Connect and exported for [AAX Audio Converter](https://github.com/audiamus/AaxAudioConverter) do not need a classic activation code. If AAX Audio Converter asks or one, any dummy code will do._ 
 
@@ -23,24 +25,25 @@ _**Note:** Books downloaded with Book Lib Connect and exported for [AAX Audio Co
 
 
 ## Download
-Windows setup package version 0.13.1, English, with manual:
+Windows setup package version 0.14.1, English, with manual:
 
-**[BookLibConnect-0.13.1-Setup.exe](https://github.com/audiamus/BookLibConnect/releases/download/v0.13.1/BookLibConnect-0.13.1-Setup.exe)**
+**[BookLibConnect-0.14.1-Setup.exe](https://github.com/audiamus/BookLibConnect/releases/download/v0.14.1/BookLibConnect-0.14.1-Setup.exe)**
 
 ## Feedback
 Use the [Discussions](https://github.com/audiamus/BookLibConnect/discussions) and [Issues](https://github.com/audiamus/BookLibConnect/issues) sections. 
 Be cautious with uploading log files to these sections as they may contain sensitive data.   
 
 ## Dependencies
-Book Lib Connect will run on Windows 64bit. Minimum Windows version is 7.
-The application requires .Net 6 64 bit to be installed. On Windows 10/11 systems this should normally be the case, if the system is kept up to date.
-If not, the app will prompt you for downloading .Net 6 and open the link in your default web browser. From the many options, pick 
-**.Net 6 Runtime x64 for _Windows desktop_**.
+Book Lib Connect will run on Windows 64bit. 
+
+The application requires .Net 8 64 bit to be installed. On Windows 10/11 systems this should normally be the case, if the system is kept up to date.
+If not, the app will prompt you for downloading .Net 8 and open the link in your default web browser. From the many options, pick 
+**.Net 8 Runtime x64 for _Windows desktop_**.
 
 ## Acknowledgments
 - [mkb79](https://github.com/mkb79/Audible) for his Python library which served as the reference implementation of the Audible API to me, straightforward and easy to follow. 
 - [Mbucari](https://github.com/Mbucari/AAXClean) for his Audible decryption library in C#. While recent FFmpeg releases can also do it, it is much more convenient to have an in-process solution.
-- [rmcrackan](https://github.com/rmcrackan/AudibleApi) for _the other_ C# implementation of an Audible client library, absolutely worth the occcasional side glance.
+- [rmcrackan](https://github.com/rmcrackan/AudibleApi) for _the other_ C# implementation of an Audible client library, absolutely worth the occasional side glance.
 
 
 ## Anti-Piracy Notice

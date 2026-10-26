@@ -56,6 +56,20 @@ namespace core.audiamus.aux.ex {
       foreach (T item in items)
         action (item);
     }
+
+    public static string ToItemString<T> (
+        this IEnumerable<T> items,
+        string separator = ", ",
+        bool parentheses = false,
+        Func<T, string> toString = null
+    ) {
+      var result = string.Join (separator, items.Select (
+          item => item is null
+              ? string.Empty
+              : toString is null ? item.ToString () : toString (item)));
+
+      return parentheses ? $"({result})" : result;
+    }
   }
 
   public static class ExString {

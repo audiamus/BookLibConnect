@@ -41,7 +41,8 @@
 
   public enum ELicenseStatusCode {
     Unknown,
-    Granted
+    Granted,
+    Denied
   }
 
   internal enum EPseudoAsinId {

@@ -1,4 +1,6 @@
-﻿using System;
+﻿//#define XXX
+
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -60,7 +62,8 @@ namespace core.audiamus.util {
     public async Task UpdateAsync (
       IInteractionCallback<InteractMessage, bool?> interactCallback,
       Action finalCallback,
-      Func<bool> busyCallback
+      Func<bool> busyCallback,
+      Action<Version, string> updateNodeCallback = null
   ) {
       if (Settings.OnlineUpdate == EOnlineUpdate.no)
         return;
@@ -79,8 +82,12 @@ namespace core.audiamus.util {
       bool newVersion = pi.Version > ApplEnv.AssemblyVersion;
       if (_dbg)
         newVersion = true;
-      if (!newVersion)
+      if (!newVersion) {
+        // any update note for this version?
+        if (pi.Note is not null)
+          updateNodeCallback?.Invoke (ApplEnv.AssemblyVersion, pi.Note);
         return;
+      }
           
       // do we have it downloaded already?
       bool exists = await checkDownloadAsync (pi);
@@ -186,6 +193,11 @@ namespace core.audiamus.util {
             return;
 
         var packageInfos = JsonSerialization.FromJsonString<PackageInfo[]> (result);
+#if XXX
+        packageInfos = JsonSerialization.FromJsonFile<PackageInfo[]> (
+          Path.Combine (ApplEnv.TempDirectory, "Setup.json")
+        );
+#endif
 
         _packageInfos = packageInfos.Select (pi => {
           var pil = new PackageInfoLocal (pi);

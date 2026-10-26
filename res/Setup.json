@@ -1,10 +1,11 @@
 [
   {
-    "Url": "https://github.com/audiamus/BookLibConnect/releases/download/v0.13.1/BookLibConnect-0.13.1-Setup.exe",
+    "Url": "https://github.com/audiamus/BookLibConnect/releases/download/v0.14.1/BookLibConnect-0.14.1-Setup.exe",
     "AppName": "BookLibConnect",
-    "Version": "0.13.1",
+    "Version": "0.14.1",
     "Preview": false,
     "Descript": "Standalone Audible downloader and decrypter, companion to AAX Audio Converter",
-    "Md5": "f3113ee6dfe9bb44604fb34011d45c7d"
+    "Note": "If you were affected by the \"LicenseDenied\" problem (because of \"Throttling\") in an earlier version, please create a new user profile. See issue #211 on GitHub.",
+    "Md5": "829e1db69fce96c015a5f661183213e1"
   }
 ]
