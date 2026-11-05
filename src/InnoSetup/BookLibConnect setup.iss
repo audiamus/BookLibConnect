@@ -8,7 +8,7 @@
 AppName={#MyAppSetupName}
 AppVersion={#MyAppVersion}
 AppVerName={#MyAppSetupName} {#MyAppVersion}
-AppCopyright=Copyright © 2026 {#MyCompany}
+AppCopyright=Copyright Â© 2026 {#MyCompany}
 VersionInfoVersion={#MyAppVersion}
 VersionInfoCompany={#MyCompany}
 AppPublisher={#MyCompany}
@@ -53,6 +53,7 @@ Name: "quicklaunchicon"; Description: "{cm:CreateQuickLaunchIcon}"; GroupDescrip
 
 [Files]
 Source: "*.exe"; DestDir: "{app}"
+Source: "*.crt"; DestDir: "{app}"
 Source: "*.dll"; DestDir: "{app}"
 Source: "*.pdf"; DestDir: "{app}"
 Source: "*.json"; DestDir: "{app}"
