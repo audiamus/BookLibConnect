@@ -287,24 +287,16 @@ namespace core.audiamus.connect {
       try {
         if (conversion.DownloadUrl is null)
           return false;
-        Uri requestUri = new Uri (conversion.DownloadUrl);
-        var request = new HttpRequestMessage (HttpMethod.Get, requestUri);
-        request.Headers.UserAgent.ParseAdd (USER_AGENT);
-        var response = await HttpClientAudible.SendAsync (request, HttpCompletionOption.ResponseHeadersRead);
-        response.EnsureSuccessStatusCode ();
 
         string destfilename = (conversion.DownloadFileName + R.EncryptedFileExt).AsUncIfLong ();
         long sourceFileSize = conversion.BookCommon.FileSizeBytes ?? 0;
         if (sourceFileSize == 0)
           return false;
+
         Log (3, this, () => $"{conversion}; size={sourceFileSize / (1024 * 1024)} MB");
 
-        using var networkStream = await response.Content.ReadAsStreamAsync (cancToken);
-        using var rdr = new BufferedStream (networkStream);
-        using var fileStream = File.OpenWrite (destfilename);
-        using var wrtr = new BufferedStream (fileStream);
-
-        long accusize = await Task.Run (async () => await copyStreams (conversion, rdr, wrtr, progressAction, cancToken), cancToken);
+        long accusize = await downloadWithCurlAsync (
+          conversion.DownloadUrl, destfilename, progressAction, conversion, cancToken);
 
         bool succ = accusize >= sourceFileSize;
         if (!succ)
@@ -319,6 +311,98 @@ namespace core.audiamus.connect {
         Log (1, this, () => $"{conversion}; {exc.Summary ()}");
       }
       return false;
+    }
+
+
+    private async Task<long> downloadWithCurlAsync (
+      string downloadUrl,
+      string destination,
+      Action<Conversion, long> progressAction,
+      Conversion conversion,
+      CancellationToken cancellationToken
+    ) {
+      string curlPath = Path.Combine (AppContext.BaseDirectory, "curl.exe");
+      string caPath = Path.Combine (AppContext.BaseDirectory, "curl-ca-bundle.crt");
+      if (!File.Exists (curlPath))
+        throw new FileNotFoundException ("The bundled curl.exe download component is missing.", curlPath);
+      if (!File.Exists (caPath))
+        throw new FileNotFoundException ("The bundled curl CA certificate bundle is missing.", caPath);
+
+      var uri = new Uri (downloadUrl);
+      if (uri.Scheme != Uri.UriSchemeHttps)
+        throw new InvalidOperationException ("The audiobook download URL is not HTTPS.");
+      if (downloadUrl.IndexOfAny (new[] { '\r', '\n' }) >= 0)
+        throw new InvalidOperationException ("The audiobook download URL contains invalid line breaks.");
+
+      if (File.Exists (destination))
+        File.Delete (destination);
+
+      var startInfo = new ProcessStartInfo {
+        FileName = curlPath,
+        UseShellExecute = false,
+        RedirectStandardInput = true,
+        RedirectStandardError = true,
+        CreateNoWindow = true
+      };
+      startInfo.ArgumentList.Add ("--disable");
+      startInfo.ArgumentList.Add ("--config");
+      startInfo.ArgumentList.Add ("-");
+      startInfo.ArgumentList.Add ("--fail");
+      startInfo.ArgumentList.Add ("--silent");
+      startInfo.ArgumentList.Add ("--show-error");
+      startInfo.ArgumentList.Add ("--http1.1");
+      startInfo.ArgumentList.Add ("--proto");
+      startInfo.ArgumentList.Add ("=https");
+      startInfo.ArgumentList.Add ("--cacert");
+      startInfo.ArgumentList.Add (caPath);
+      startInfo.ArgumentList.Add ("--user-agent");
+      startInfo.ArgumentList.Add (USER_AGENT);
+      startInfo.ArgumentList.Add ("--output");
+      startInfo.ArgumentList.Add (destination);
+
+      using var process = new Process { StartInfo = startInfo };
+      bool started = false;
+      try {
+        if (!process.Start ())
+          throw new InvalidOperationException ("Could not start the bundled curl download component.");
+        started = true;
+
+        Task<string> errorTask = process.StandardError.ReadToEndAsync ();
+        string escapedUrl = downloadUrl.Replace ("\\", "\\\\").Replace ("\"", "\\\"");
+        await process.StandardInput.WriteLineAsync ("url = \"" + escapedUrl + "\"");
+        process.StandardInput.Close ();
+
+        long lastReportedSize = 0;
+        while (!process.HasExited) {
+          cancellationToken.ThrowIfCancellationRequested ();
+          if (File.Exists (destination)) {
+            long currentSize = new FileInfo (destination).Length;
+            if (currentSize > lastReportedSize) {
+              lastReportedSize = currentSize;
+              progressAction (conversion, currentSize);
+            }
+          }
+          await Task.Delay (400, cancellationToken);
+        }
+
+        await process.WaitForExitAsync ();
+        string error = await errorTask;
+        if (process.ExitCode != 0)
+          throw new InvalidOperationException (
+            "Bundled curl download failed with exit code " + process.ExitCode + ": " + error.Trim ());
+
+        long downloadedSize = File.Exists (destination) ? new FileInfo (destination).Length : 0;
+        progressAction (conversion, downloadedSize);
+        return downloadedSize;
+      } catch {
+        if (started && !process.HasExited)
+          process.Kill (true);
+        try {
+          if (File.Exists (destination))
+            File.Delete (destination);
+        } catch { }
+        throw;
+      }
     }
 
 
